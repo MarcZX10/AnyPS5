@@ -843,6 +843,43 @@ void SubmitAmm(Recorder& recorder) {
     Require(sceAmprAmmWaitCommandBufferCompletion(id) == 0);
 }
 
+void TestAmmMapFailureKeepsPoolOwnership() {
+    std::uint64_t start = 0;
+    std::uint64_t end = 0;
+    std::uint64_t multimapStart = 0;
+    std::uint64_t multimapEnd = 0;
+    Require(sceAmprAmmGetVirtualAddressRanges(&start, &end, &multimapStart, &multimapEnd) == 0);
+    std::int64_t pool = -1;
+    Require(sceAmprAmmGiveDirectMemory(0, static_cast<std::int64_t>(sceKernelGetDirectMemorySize()), page, page, 1, &pool) == 0);
+    const auto original = start + 512 * page;
+    const auto fresh = start + 516 * page;
+
+    Recorder mapping;
+    Require(sceAmprAmmCommandBufferMap(&mapping.buffer, original, page, 0, cpuReadWrite) == 0);
+    SubmitAmm(mapping);
+    At(original) = 0xA1;
+    SubmitAmm(mapping);
+    Require(At(original) == 0xA1 && Protection(original) == cpuReadWrite);
+
+    Recorder oversized;
+    Require(sceAmprAmmCommandBufferMap(&oversized.buffer, original, 2 * page, 0, cpuReadWrite) == 0);
+    bool rejected = false;
+    try {
+        SubmitAmm(oversized);
+    } catch (const std::runtime_error& error) {
+        rejected = std::string(error.what()).starts_with("AMM: no free run of ");
+    }
+    Require(rejected);
+    Require(Protection(original) == 0 && Protection(original + page) == 0);
+
+    Recorder reuse;
+    Require(sceAmprAmmCommandBufferMap(&reuse.buffer, fresh, page, 0, cpuReadWrite) == 0);
+    SubmitAmm(reuse);
+    Require(At(fresh) == 0xA1);
+    At(fresh) = 0xB1;
+    Require(At(fresh) == 0xB1 && Protection(original) == 0);
+}
+
 void TestAmmRemapAndProtect() {
     std::uint64_t start = 0;
     std::uint64_t end = 0;
@@ -1056,6 +1093,7 @@ int main() {
     TestResolveFailures();
     TestGatherScatter();
     TestAmmRangesAboveHintedMaps();
+    TestAmmMapFailureKeepsPoolOwnership();
     TestAmm();
     TestAmmRemapAndProtect();
     TestAmmPrt();
