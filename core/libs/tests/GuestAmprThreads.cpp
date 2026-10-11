@@ -251,11 +251,13 @@ static void* APS5_VABI ConsumeToken(void* arg) {
 
 template<typename TPredicate>
 static void WaitUntil(SignalContext& context, TPredicate predicate) {
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
     for (;;) {
         Lock(context);
         const bool done = predicate();
         Unlock(context);
         if (done) return;
+        Require(std::chrono::steady_clock::now() < deadline);
         std::this_thread::yield();
     }
 }
