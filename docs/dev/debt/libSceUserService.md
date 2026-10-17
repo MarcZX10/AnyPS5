@@ -2,7 +2,7 @@
 
 ### Unknown function info
 
-- [sceUserServiceGetNpAccountId](../../../core/libs/prx/libSceUserService/Export.cpp) (libSceUserService) - the account id for a user with no linked PSN account is assumed to be 0 with success; libSceNpManager's `sceNpGetAccountIdA` answers the same question with `SCE_NP_ERROR_SIGNED_OUT`
+- [sceUserServiceGetNpAccountId](../../../core/libs/prx/libSceUserService/Export.cpp) (libSceUserService) - a user with no linked PSN account is assumed to have id 0; this emulator models its initial offline profile as linked using the fixed local id in `UserService.hpp` through both `sceUserServiceGetNpAccountId` and `sceNpGetAccountIdA`. The id is not loaded from persistent profile data or derived from a real PSN account; a #1794 reporter says a real PS5 returns the cached id for an offline linked profile, but the value is not measured here. NP state and reachability remain signed out/unavailable.
 - [sceUserServiceInitialize and sceUserServiceInitialize2](../../../core/libs/prx/libSceUserService/Export.cpp) (libSceUserService) - event delivery has no background service thread, so the confirmed priority and Initialize2 CPU affinity mask do not affect host scheduling.
 - [sceUserServiceGetUserColor](../../../core/libs/prx/libSceUserService/Export.cpp) (libSceUserService) - the default profile colour is assumed to be blue (0)
 - [sceUserServiceGetUserName](../../../core/libs/prx/libSceUserService/Export.cpp) (libSceUserService) - `0x80960105`, which a PS5 (firmware 13.60) returns for a user id it does not know, has no known name; it is `USER_SERVICE_ERROR_UNKNOWN_USER` here. On the console a registered user who is not logged in still gets their name; here only the initial user exists
