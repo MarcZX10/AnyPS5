@@ -1,5 +1,6 @@
 #include "prx/libSceNpManager/include/Api.hpp"
 #include "prx/libc/include/general/VabiMacros.hpp"
+#include "prx/libSceUserService/UserService.hpp"
 #include "SceTypes.hpp"
 #include <cstdint>
 #include <cstdio>
@@ -587,6 +588,15 @@ int main() {
     Require(sceNpGetOnlineId(0x10000, &onlineId) == SignedOut, "sceNpGetOnlineId must report the user as signed out");
     Require(std::memcmp(&onlineId, &untouchedOnlineId, sizeof(onlineId)) == 0, "sceNpGetOnlineId must leave the online id untouched");
     Require(sceNpGetOnlineId(0x10000, nullptr) == InvalidArgument, "sceNpGetOnlineId must reject a null online id");
+    std::uint64_t accountId = 0xdeadbeef;
+    Require(sceNpGetAccountIdA(USER_SERVICE_INITIAL_USER_ID, nullptr) == InvalidArgument, "sceNpGetAccountIdA must reject a null output");
+    Require(sceNpGetAccountIdA(USER_SERVICE_INITIAL_USER_ID, &accountId) == 0, "sceNpGetAccountIdA must return the offline profile account id");
+    Require(accountId == USER_SERVICE_INITIAL_ACCOUNT_ID, "sceNpGetAccountIdA must match the user service account id");
+    std::uint32_t npState = 0;
+    Require(sceNpGetState(USER_SERVICE_INITIAL_USER_ID, &npState) == 0 && npState == 1, "the offline account remains signed out of NP");
+    accountId = 0xdeadbeef;
+    Require(sceNpGetAccountIdA(0x1234, &accountId) == SignedOut, "sceNpGetAccountIdA must not expose the account to another user");
+    Require(accountId == 0xdeadbeef, "sceNpGetAccountIdA must leave an absent user's output untouched");
     int userId = 0x5a5a;
     Require(sceNpGetUserIdByAccountId(0, &userId) == InvalidArgument, "sceNpGetUserIdByAccountId must reject account id 0");
     Require(sceNpGetUserIdByAccountId(0x1234, nullptr) == InvalidArgument, "sceNpGetUserIdByAccountId must reject a null output");
