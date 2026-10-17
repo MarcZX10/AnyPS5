@@ -1497,14 +1497,10 @@ ColorTarget DecodeColorBuffer(const Registers& cx, std::uint32_t slot, bool allo
     Require(((attrib3 >> 24u) & 3u) != 0u || (attrib2 & 0x3fffu) == 0u, "1D color targets taller than one row are unsupported");
     if (volume) {
         color.depth = (attrib3 & 0x1fffu) + 1u;
-        if (maxMip != 0) {
-            char message[384];
-            std::snprintf(message, sizeof(message), "mipmapped 3D color targets are unsupported (slot %u, %ux%ux%u, viewMip %u, maxMip %u, slices %u..%u, CB_COLOR_INFO 0x%08x, ATTRIB2 0x%08x, ATTRIB3 0x%08x, VIEW 0x%08x)", slot, ((attrib2 >> 14u) & 0x3fffu) + 1u, (attrib2 & 0x3fffu) + 1u, color.depth, viewMip, maxMip, slice, lastSlice, info, attrib2, attrib3, view);
-            Require(false, message);
-        }
-        Require(slice < color.depth && lastSlice >= slice, "the color view slices are outside the 3D surface");
+        const auto mipDepth = std::max(color.depth >> viewMip, 1u);
+        Require(slice < mipDepth && lastSlice >= slice, "the color view slices are outside the selected 3D mip");
         color.depthSlice = slice;
-        color.layers = std::min(lastSlice + 1u, color.depth) - slice;
+        color.layers = std::min(lastSlice + 1u, mipDepth) - slice;
     } else if ((attrib3 & 0x1fffu) != 0) {
         Require(lastSlice <= (attrib3 & 0x1fffu), "the color view slice is beyond the array surface");
         color.arrayLastSlice = attrib3 & 0x1fffu;
@@ -1522,11 +1518,19 @@ ColorTarget DecodeColorBuffer(const Registers& cx, std::uint32_t slot, bool allo
     color.mip = viewMip;
     if (maxMip != 0) {
         // A mipmapped surface is addressed like a texture; the view renders into one mip of it.
-        const auto mips = ComputeElementMipLayout(ColorTextureTileMode(color.tileMode), color.elementBytes, color.extent.width, color.extent.height, maxMip + 1u);
-        const auto& mip = mips.at(viewMip);
-        mipOffset = mip.tiledOffset;
-        color.mipTail = mip.tail;
-        color.extent = {mip.width, mip.height};
+        if (volume) {
+            const auto mips = ComputeThickLayout(ColorTextureTileMode(color.tileMode), GuestFormatFor(decoded.format, decoded.elementBytes), color.extent.width, color.extent.height, color.depth, maxMip + 1u);
+            const auto& mip = mips.mips.at(viewMip);
+            mipOffset = mip.tiledOffset;
+            color.mipTail = mip.tail;
+            color.extent = {mip.width, mip.height};
+        } else {
+            const auto mips = ComputeElementMipLayout(ColorTextureTileMode(color.tileMode), color.elementBytes, color.extent.width, color.extent.height, maxMip + 1u);
+            const auto& mip = mips.at(viewMip);
+            mipOffset = mip.tiledOffset;
+            color.mipTail = mip.tail;
+            color.extent = {mip.width, mip.height};
+        }
     }
     const ColorTargetLayout colorLayout(color.extent.width, color.extent.height, color.tileMode, color.elementBytes);
     const auto high = read(cx, 0x390 + slot);
@@ -1594,9 +1598,9 @@ ColorTarget DecodeColorBuffer(const Registers& cx, std::uint32_t slot, bool allo
             }
         }
     }
-    if (volume && (color.tileMode == ColorTileMode::RenderTarget || color.tileMode == ColorTileMode::Standard4KB)) {
+    if (volume && (color.tileMode == ColorTileMode::RenderTarget || color.tileMode == ColorTileMode::Standard4KB || color.tileMode == ColorTileMode::S4KBX)) {
         color.bytes = DescribeSurface(SurfaceForTarget(color)).guestBytes;
-        GuestMemory::CheckRange(reinterpret_cast<const void*>(color.address), color.bytes, colorLayout.Alignment(), true);
+        GuestMemory::CheckRange(reinterpret_cast<const void*>(color.surfaceAddress), color.bytes, colorLayout.Alignment(), true);
     }
     return color;
 }

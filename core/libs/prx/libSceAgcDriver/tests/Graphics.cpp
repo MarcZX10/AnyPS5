@@ -1186,6 +1186,30 @@ void ColorPipeBankXorTests() {
     queue.context[0x31b] = (2u << 26u) | 1u | (1u << 13u);
     const auto mipColor = AgcDriver::Graphics::DecodeColorBuffer(queue.context, 0);
     Require(mipColor.mip == 2 && mipColor.mipCount == 5 && mipColor.extent.width == 64 && mipColor.extent.height == 32 && mipColor.surfaceAddress == mipBase + sliceBytes && mipColor.address == mipBase + sliceBytes + mips[2].tiledOffset && mipColor.mipTail == mips[2].tail && mipColor.pipeBankXor == 0x0200u, "a display XOR color view lost its array slice, mip placement or XOR");
+
+    constexpr std::uint32_t volumeWidth = 128;
+    constexpr std::uint32_t volumeHeight = 128;
+    constexpr std::uint32_t volumeDepth = 8;
+    const auto volumeLayout = AgcDriver::Graphics::ComputeThickLayout(AgcDriver::Graphics::TextureTileMode::kS4KBX, 56, volumeWidth, volumeHeight, volumeDepth, 2);
+    static std::vector<std::byte> volumeStorage(volumeLayout.guestBytes + 65535u);
+    const auto volumeBase = (reinterpret_cast<std::uintptr_t>(volumeStorage.data()) + 65535u) & ~std::uintptr_t(65535u);
+    auto volumeQueue = makeState();
+    volumeQueue.context[0x31c] = 0x00070428u;
+    volumeQueue.context[0x31b] = 0x0000e000u;
+    volumeQueue.context[0x3b0] = 0x101fc07fu;
+    volumeQueue.context[0x3b8] = 0x0ea54007u;
+    volumeQueue.context[0x318] = static_cast<std::uint32_t>(volumeBase >> 8u);
+    volumeQueue.context[0x390] = static_cast<std::uint32_t>(volumeBase >> 40u);
+    const auto volumeColor = AgcDriver::Graphics::DecodeColorBuffer(volumeQueue.context, 0);
+    Require(volumeColor.tileMode == AgcDriver::Graphics::ColorTileMode::S4KBX && volumeColor.mip == 0 && volumeColor.mipCount == 2 && volumeColor.extent.width == volumeWidth && volumeColor.extent.height == volumeHeight && volumeColor.depth == volumeDepth && volumeColor.depthSlice == 0 && volumeColor.layers == volumeDepth && volumeColor.address == volumeBase + volumeLayout.mips[0].tiledOffset && volumeColor.bytes == volumeLayout.guestBytes, "the mip-0 S4KBX volume color view lost its full mipmapped allocation");
+    volumeQueue.context[0x31b] = (1u << 26u) | (3u << 13u);
+    const auto volumeMip = AgcDriver::Graphics::DecodeColorBuffer(volumeQueue.context, 0);
+    Require(volumeMip.mip == 1 && volumeMip.extent.width == volumeWidth / 2u && volumeMip.extent.height == volumeHeight / 2u && volumeMip.depth == volumeDepth && volumeMip.depthSlice == 0 && volumeMip.layers == volumeDepth / 2u && volumeMip.address == volumeBase + volumeLayout.mips[1].tiledOffset && volumeMip.mipTail == volumeLayout.mips[1].tail && volumeMip.bytes == volumeLayout.guestBytes, "a mipmapped S4KBX volume color view lost its thick mip offset, extent or reduced depth");
+    volumeQueue.context[0x31b] = (1u << 26u) | (3u << 13u) | 3u;
+    const auto volumeSliceMip = AgcDriver::Graphics::DecodeColorBuffer(volumeQueue.context, 0);
+    Require(volumeSliceMip.depthSlice == 3 && volumeSliceMip.layers == 1, "a mipmapped S4KBX volume color view lost its selected mip slice");
+    volumeQueue.context[0x31b] = (1u << 26u) | (5u << 13u) | 5u;
+    expectFailure([&volumeQueue] { AgcDriver::Graphics::DecodeColorBuffer(volumeQueue.context, 0); }, "outside the selected 3D mip");
 }
 
 void HiddenUserWordVertexTablesTests() {
@@ -2089,10 +2113,11 @@ void DepthStencilTests() {
         auto mipmapped = queue;
         mipmapped.context[0x3b0] |= 2u << 28u;
         mipmapped.context[0x31b] = (1u << 26u) | (1u << 13u) | 1u;
-        expectFailure([&] { AgcDriver::Graphics::DecodeColorBuffer(mipmapped.context, 0); }, "slot 0, 64x4x4, viewMip 1, maxMip 2, slices 1..1, CB_COLOR_INFO 0x00028028, ATTRIB2 0x200fc003, ATTRIB3 0x0a000003, VIEW 0x04002001");
+        const auto mipView = AgcDriver::Graphics::DecodeColorBuffer(mipmapped.context, 0);
+        Require(mipView.mip == 1 && mipView.mipCount == 3 && mipView.extent.width == 32u && mipView.extent.height == 2u && mipView.depth == 4u && mipView.depthSlice == 1u && mipView.layers == 1u, "a mipmapped 3D color view lost its selected extent or depth slice");
     }
     queue.context[0x31b] = 4u | (4u << 13u);
-    expectFailure([&] { AgcDriver::Graphics::DecodeState(queue); }, "outside the 3D surface");
+    expectFailure([&] { AgcDriver::Graphics::DecodeState(queue); }, "outside the selected 3D mip");
     queue.context[0x31b] = 2u | (1u << 13u);
     expectFailure([&] { AgcDriver::Graphics::DecodeState(queue); }, "ends before its first slice");
     queue.context[0x31b] = 1u | (3u << 13u);
