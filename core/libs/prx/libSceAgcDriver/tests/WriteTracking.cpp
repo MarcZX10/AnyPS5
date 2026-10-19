@@ -409,7 +409,6 @@ void CheckRepeatedPossibleStores() {
     Require(StoredOver(neighbour + 0x5000, 0x10, settled) && StoredOver(neighbour + 0x5100, 0x10, partial), "a possible write that overlaps an earlier piece without containing it replaced it");
     Require(!StoredOver(freshBase, static_cast<std::size_t>(neighbour - freshBase), thirdStored), "a possible write that overlaps without containing evicted a newer piece instead of the oldest");
 }
-}
 
 void CheckOwnStore() {
     void* memory = AllocateWatched(2 * Block);
