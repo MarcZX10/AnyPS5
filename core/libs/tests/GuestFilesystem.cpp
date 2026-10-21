@@ -2,6 +2,7 @@
 #include "prx/libc/include/general/VabiMacros.hpp"
 #include "prx/libc/include/General.hpp"
 #include "prx/libc/include/FileStream.hpp"
+#include "prx/libc/include/RenameDot.hpp"
 #include "prx/libkernel/File/include/File.hpp"
 #include "prx/libkernel/File/include/NativeStat.hpp"
 #include "prx/libkernel/KernelErrors.hpp"
@@ -123,6 +124,16 @@ static void Check(bool value, int line) {
     }
 }
 #define Require(value) Check((value), __LINE__)
+
+#ifdef _WIN32
+static void TestTrailingSeparatorRootPreservation() {
+    const std::string driveRoot = "C:\\";
+    const std::string repeatedDriveRoot = "C:\\\\";
+    Require(TrimTrailingSeparatorsPreservingRoot_nid_no_patch(driveRoot) == driveRoot);
+    Require(TrimTrailingSeparatorsPreservingRoot_nid_no_patch(repeatedDriveRoot) == driveRoot);
+    Require(TrimTrailingSeparatorsPreservingRoot_nid_no_patch("C:\\folder\\\\") == "C:\\folder");
+}
+#endif
 
 static bool ChflagsThrows(const std::filesystem::path& path, std::uint64_t flags, const char* names) {
     try {
@@ -421,6 +432,9 @@ static void TestMissingPathListsDirectoryOnce() {
 #endif
 
 int main() {
+#ifdef _WIN32
+    TestTrailingSeparatorRootPreservation();
+#endif
     TestParentTraversal();
     TestRelinkedModuleNames();
     TestRelinkedModuleNameCase();
