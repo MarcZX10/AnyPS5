@@ -6,6 +6,7 @@ import posixpath
 import re
 import subprocess
 import sys
+import tempfile
 import tokenize
 from collections import defaultdict
 from pathlib import Path, PurePosixPath
@@ -209,7 +210,10 @@ class Check:
         if not exports:
             return
         pattern = r"(^|[^[:alnum:]_])(APS5_VABI[[:space:]]+|APS5_(SIGNAL_)?ASM_FUNCTION\([[:space:]]*\")(" + "|".join(exports) + r")([[:space:]]*\(|\")"
-        result = subprocess.run(["git", "-c", "core.quotePath=false", "grep", "-nE", "--full-name", pattern, self.head, "--", ":(top)core/libs/prx"], capture_output=True, encoding="utf-8", errors="replace")
+        with tempfile.TemporaryDirectory() as directory:
+            patterns = Path(directory) / "exports"
+            patterns.write_text(pattern + "\n", encoding="utf-8")
+            result = subprocess.run(["git", "-c", "core.quotePath=false", "grep", "-nE", "--full-name", "-f", str(patterns), self.head, "--", ":(top)core/libs/prx"], capture_output=True, encoding="utf-8", errors="replace")
         if result.returncode > 1:
             print(f"Git command failed: {result.stderr.strip() or 'unknown Git error'}", file=sys.stderr)
             raise SystemExit(2)
