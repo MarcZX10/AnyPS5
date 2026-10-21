@@ -238,6 +238,17 @@ static void TestParentTraversal() {
     checkInvalid("/parent-test-mount/present.txt/..", 20);
     FileStat status{};
     Require(sceKernelStat("/parent-test-mount/existing/../present.txt", &status) == 0 && status.st_size == 9);
+    std::filesystem::create_directory(root / "dot-victim");
+    for (const char* name : {"/parent-test-mount/dot-victim/.", "/parent-test-mount/dot-victim/..", "/parent-test-mount/dot-victim/./", "/parent-test-mount/dot-victim/../"}) {
+        Require(unlink_nid_postfix(name) == -1 && *__error_nid_postfix() == 22);
+        Require(rmdir_nid_postfix(name) == -1 && *__error_nid_postfix() == 22);
+        Require(sceKernelUnlink(name) == static_cast<int>(0x80020016u));
+        Require(sceKernelRmdir(name) == static_cast<int>(0x80020016u));
+    }
+    Require(unlink_nid_postfix("/parent-test-mount/present.txt/.") == -1 && *__error_nid_postfix() == 20);
+    Require(rmdir_nid_postfix("/parent-test-mount/missing/..") == -1 && *__error_nid_postfix() == 2);
+    Require(std::filesystem::is_directory(root / "dot-victim") && std::filesystem::is_regular_file(root / "present.txt"));
+    std::filesystem::remove(root / "dot-victim");
 #ifndef _WIN32
     for (const char* name : {"slash-unlink", "slash-remove", "slash-rename", "slash-open", "slash-kernel"}) std::ofstream(root / name) << "kept";
     Require(unlink_nid_postfix("/parent-test-mount/slash-unlink/") == -1 && *__error_nid_postfix() == 20);
