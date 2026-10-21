@@ -35,6 +35,7 @@ int APS5_VABI sceNpCreateAsyncRequest(const NpCreateAsyncRequestParameter* param
 int APS5_VABI sceNpDeleteRequest(int reqId);
 int APS5_VABI sceNpAbortRequest(int reqId);
 int APS5_VABI sceNpPollAsync(int reqId, int* result);
+int APS5_VABI sceNpWaitAsync(void);
 int APS5_VABI sceNpSetTimeout(int reqId, std::int32_t resolveRetry, std::uint32_t resolveTimeout,
     std::uint32_t connTimeout, std::uint32_t sendTimeout, std::uint32_t recvTimeout);
 }
@@ -465,6 +466,12 @@ int main() {
     } catch (const std::runtime_error& error) {
         Require(std::string(error.what()) == "sceNpUnknown_WxLcN76q19o not implemented",
             "sceNpUnknown_WxLcN76q19o threw");
+    }
+    try {
+        sceNpWaitAsync();
+        Require(false, "sceNpWaitAsync must report that it is not implemented");
+    } catch (const std::runtime_error& error) {
+        Require(std::string(error.what()) == "sceNpWaitAsync not implemented", "sceNpWaitAsync threw");
     }
     return 0;
 }
