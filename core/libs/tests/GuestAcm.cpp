@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <initializer_list>
+#include <stdexcept>
 #include "SceTypes.hpp"
 
 static void Require(bool value) {
@@ -43,7 +44,13 @@ int main() {
     Require(sceAcmBatchStartBuffers(context2, 0, nullptr, nullptr, &batch2) == 0 && batch2 != 0);
     Require(sceAcmBatchWait(context2, batch2, 0) == 0);
 
-    Require(sceAcm_ConvReverb_SharedInput(nullptr, 0, nullptr, 0, nullptr, nullptr, nullptr) == 0);
+    bool sharedInputThrows = false;
+    try {
+        sceAcm_ConvReverb_SharedInput(nullptr, 0, nullptr, 0, nullptr, nullptr, nullptr);
+    } catch (const std::runtime_error&) {
+        sharedInputThrows = true;
+    }
+    Require(sharedInputThrows);
     Require(sceAcm_FFT(nullptr, 0, 0, 0, nullptr, 0, nullptr, 0) == BadPointer);
     alignas(128) std::byte commands[256]{};
     alignas(128) std::uint32_t sourceData[32]{};
