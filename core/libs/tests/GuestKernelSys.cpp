@@ -178,6 +178,22 @@ void CheckCondattrClock() {
     Require(scePthreadCondattrGetclock(&attr, &clock) == SCE_KERNEL_ERROR_EINVAL && clock == -1);
 }
 
+void CheckRawGetcwd() {
+    std::array<char, 4096> expected{};
+    Require(getcwd_nid_postfix(expected.data(), expected.size()) == expected.data());
+    std::array<char, 4096> buffer;
+    buffer.fill('#');
+    Require(__getcwd_nid_postfix(buffer.data(), buffer.size()) == 0);
+    Require(std::strcmp(buffer.data(), expected.data()) == 0);
+    Require(buffer[std::strlen(expected.data()) + 1] == '#');
+
+    std::array<char, 1> shortBuffer{'#'};
+    Require(__getcwd_nid_postfix(shortBuffer.data(), shortBuffer.size()) == -1 && Error() == 34);
+    Require(shortBuffer[0] == '#');
+    Require(__getcwd_nid_postfix(buffer.data(), 0) == -1 && Error() == 22);
+    Require(__getcwd_nid_postfix(nullptr, buffer.size()) == -1 && Error() == 14);
+}
+
 void CheckPathconf(const std::filesystem::path& root, const std::string& file) {
     const auto directory = root.generic_string();
     for (const auto& path : {file, directory}) {
@@ -209,22 +225,6 @@ void CheckPathconf(const std::filesystem::path& root, const std::string& file) {
     Require(pathconf_nid_postfix((directory + "/missing/" + std::string(256, 'n')).c_str(), 4) == -1 && Error() == 2);
     const auto longPath = directory + "/" + std::string(1024, 'p');
     Require(pathconf_nid_postfix(longPath.c_str(), 4) == -1 && Error() == 63);
-}
-
-void CheckRawGetcwd() {
-    std::array<char, 4096> expected{};
-    Require(getcwd_nid_postfix(expected.data(), expected.size()) == expected.data());
-    std::array<char, 4096> buffer;
-    buffer.fill('#');
-    Require(__getcwd_nid_postfix(buffer.data(), buffer.size()) == 0);
-    Require(std::strcmp(buffer.data(), expected.data()) == 0);
-    Require(buffer[std::strlen(expected.data()) + 1] == '#');
-
-    std::array<char, 1> shortBuffer{'#'};
-    Require(__getcwd_nid_postfix(shortBuffer.data(), shortBuffer.size()) == -1 && Error() == 34);
-    Require(shortBuffer[0] == '#');
-    Require(__getcwd_nid_postfix(buffer.data(), 0) == -1 && Error() == 22);
-    Require(__getcwd_nid_postfix(nullptr, buffer.size()) == -1 && Error() == 14);
 }
 
 void DirectoryRenameTests(const std::filesystem::path& parent) {
