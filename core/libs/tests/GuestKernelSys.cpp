@@ -45,6 +45,9 @@
 #include <unistd.h>
 #endif
 
+extern "C" {
+int APS5_VABI __getcwd_nid_postfix(char*, std::size_t);
+}
 void Require(bool condition, std::source_location location = std::source_location::current()) {
     if (!condition) {
         std::fprintf(stderr, "Kernel sys check failed at line %u (guest errno %d)\n", location.line(), *__error_nid_postfix());
@@ -662,6 +665,22 @@ void CheckSettimeofday() {
     Require(gettimeofday_nid_postfix(nullptr, &zone) == 0 && zone.tz_minuteswest == 0 && zone.tz_dsttime == 0);
 }
 
+void CheckRawGetcwd() {
+    std::array<char, 4096> expected{};
+    Require(getcwd_nid_postfix(expected.data(), expected.size()) == expected.data());
+    std::array<char, 4096> buffer;
+    buffer.fill('#');
+    Require(__getcwd_nid_postfix(buffer.data(), buffer.size()) == 0);
+    Require(std::strcmp(buffer.data(), expected.data()) == 0);
+    Require(buffer[std::strlen(expected.data()) + 1] == '#');
+
+    std::array<char, 1> shortBuffer{'#'};
+    Require(__getcwd_nid_postfix(shortBuffer.data(), shortBuffer.size()) == -1 && Error() == 34);
+    Require(shortBuffer[0] == '#');
+    Require(__getcwd_nid_postfix(buffer.data(), 0) == -1 && Error() == 22);
+    Require(__getcwd_nid_postfix(nullptr, buffer.size()) == -1 && Error() == 14);
+}
+
 void DirectoryRenameTests(const std::filesystem::path& parent) {
     const auto fixture = parent / "directory-identity";
     const auto original = fixture / "original";
@@ -906,6 +925,7 @@ int main() {
     Require(SetCurrentDirectoryW(hostDirectorySpelling.c_str()) != 0);
 #endif
     CheckProcessQueries();
+    CheckRawGetcwd();
     Require(setsid_nid_postfix() == -1 && Error() == 1);
     Require(profil_nid_postfix(nullptr, 0, 0, (1u << 16) + 1) == -1 && Error() == 22);
     Require(profil_nid_postfix(nullptr, 0, 0, 0xFFFFFFFFu) == -1 && Error() == 22);
