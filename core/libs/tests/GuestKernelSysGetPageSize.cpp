@@ -21,17 +21,21 @@ void Require(bool condition, const char* message) {
 }
 
 int main(int argc, char** argv) {
-    Require(argc == 3, "expected the libkernel and libkernel_sys paths");
+    Require(argc == 4, "expected the libc, libkernel and libkernel_sys paths");
 #ifdef _WIN32
-    const auto kernel = LoadLibraryA(argv[1]);
+    const auto libc = LoadLibraryA(argv[1]);
+    Require(libc != nullptr, "could not load libc");
+    const auto kernel = LoadLibraryA(argv[2]);
     Require(kernel != nullptr, "could not load libkernel");
-    const auto module = LoadLibraryA(argv[2]);
+    const auto module = LoadLibraryA(argv[3]);
     Require(module != nullptr, "could not load libkernel_sys");
     const auto getPageSize = reinterpret_cast<GetPageSize>(GetProcAddress(module, "getpagesize_nid_postfix"));
 #else
-    const auto kernel = dlopen(argv[1], RTLD_NOW | RTLD_GLOBAL);
+    const auto libc = dlopen(argv[1], RTLD_NOW | RTLD_GLOBAL);
+    Require(libc != nullptr, "could not load libc");
+    const auto kernel = dlopen(argv[2], RTLD_NOW | RTLD_GLOBAL);
     Require(kernel != nullptr, "could not load libkernel");
-    const auto module = dlopen(argv[2], RTLD_NOW | RTLD_LOCAL);
+    const auto module = dlopen(argv[3], RTLD_NOW | RTLD_LOCAL);
     Require(module != nullptr, "could not load libkernel_sys");
     const auto getPageSize = reinterpret_cast<GetPageSize>(dlsym(module, "getpagesize_nid_postfix"));
 #endif

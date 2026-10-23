@@ -28,6 +28,7 @@
 #include "prx/libkernel/File/include/DirectoryDescriptor.hpp"
 #include "prx/libkernel/File/include/DescriptorControl.hpp"
 #include "prx/libc/include/CreationMask.hpp"
+#include "prx/libkernel/DirectMemory/DirectMemory.hpp"
 #include "prx/libkernel/File/include/FileFlags.hpp"
 extern "C" int APS5_VABI getpid_nid_postfix(void);
 #ifdef _WIN32
@@ -266,6 +267,10 @@ int APS5_VABI sceKernelGetCompiledSdkVersion(std::int32_t* version) {
     static const auto* parameters = static_cast<const std::byte*>(ApplicationProcessParameters_nid_no_patch());
     std::memcpy(version, parameters + 0x10, sizeof(*version));
     return 0;
+}
+
+int APS5_VABI getpagesize_nid_postfix(void) {
+    return static_cast<int>(PS5_PAGE_SIZE);
 }
 
 int APS5_VABI fork_nid_postfix(void) {
