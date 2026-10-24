@@ -15,6 +15,17 @@ if(BUILD_TESTING)
             "PATH=path_list_prepend:$<TARGET_FILE_DIR:libSceLibreSsl>")
     endif()
 
+    add_test_executable(guest_libressl_obj_nid_tests ${LIBS_INCLUDE_DIR}/tests/GuestLibreSslObjNid.cpp)
+    target_include_directories(guest_libressl_obj_nid_tests PRIVATE ${LIBS_INCLUDE_DIR})
+    target_link_libraries(guest_libressl_obj_nid_tests PRIVATE libSceLibreSsl libc)
+    configure_windows_unwind(guest_libressl_obj_nid_tests)
+    add_test(NAME guest_libressl_obj_nid COMMAND guest_libressl_obj_nid_tests)
+    set_tests_properties(guest_libressl_obj_nid PROPERTIES TIMEOUT 30)
+    if(WIN32)
+        set_tests_properties(guest_libressl_obj_nid PROPERTIES ENVIRONMENT_MODIFICATION
+            "PATH=path_list_prepend:$<TARGET_FILE_DIR:libSceLibreSsl>")
+    endif()
+
     add_test_executable(guest_libressl_digest_tests ${LIBS_INCLUDE_DIR}/tests/GuestLibreSslDigest.cpp)
     target_include_directories(guest_libressl_digest_tests PRIVATE ${LIBS_INCLUDE_DIR})
     target_link_libraries(guest_libressl_digest_tests PRIVATE libSceLibreSsl libc)
