@@ -12,6 +12,7 @@ int APS5_VABI sceNpTusDeleteRequest(int);
 int APS5_VABI sceNpTusWaitAsync(int, int*);
 int APS5_VABI sceNpTssGetSmallStorage(int reqId, void* data, std::uint64_t maxSize, std::uint64_t* contentLength, void* option);
 int APS5_VABI sceNpTssGetDataAsync(int reqId, std::int32_t slotId, void* dataStatus, std::uint64_t dataStatusSize, void* data, std::uint64_t recvSize, const void* option);
+int APS5_VABI sceNpTssGetData(int reqId, std::int32_t slotId, void* dataStatus, std::uint64_t dataStatusSize, void* data, std::uint64_t recvSize, const void* option);
 int APS5_VABI sceNpTssGetSmallStorageAsync(int reqId, void* data, std::uint64_t maxSize, std::uint64_t* contentLength, void* option);
 int APS5_VABI sceNpTusAddAndGetVariable(int reqId, const void* targetNpId, std::int32_t slotId, std::int64_t inVariable, const void* isLastChangedAuthor, const void* isLastChangedDate, void* outVariable, std::uint64_t outVariableSize, void* option);
 int APS5_VABI sceNpTusAddAndGetVariableA(int reqId, std::uint64_t targetAccountId, std::int32_t slotId, std::int64_t inVariable, const std::uint64_t* isLastChangedAuthor, const void* isLastChangedDate, void* outVariable, std::uint64_t outVariableSize, void* option);
@@ -327,6 +328,7 @@ int main() {
     CheckAsync("sceNpTusDeleteMultiSlotDataVUserAsync", [&](int req) { return sceNpTusDeleteMultiSlotDataVUserAsync(req, &virtualUser, slots, 2, nullptr); }, [&]() { return sceNpTusDeleteMultiSlotDataVUserAsync(9999, &virtualUser, slots, 2, nullptr); }, [&](int req) { return sceNpTusDeleteMultiSlotDataVUserAsync(req, &virtualUser, slots, 2, &buffer); });
     CheckSync("sceNpTusDeleteMultiSlotDataVUser", [&](int req) { return sceNpTusDeleteMultiSlotDataVUser(req, &virtualUser, slots, 2, nullptr); });
     CheckTss("sceNpTssGetDataAsync", 0, [&](int req, int slotId, void* status, const TssOption* option) { return sceNpTssGetDataAsync(req, slotId, status, 24, buffer, 16, option); });
+    CheckTss("sceNpTssGetData", SignedOut, [&](int req, int slotId, void* status, const TssOption* option) { return sceNpTssGetData(req, slotId, status, 24, buffer, 16, option); });
     {
         int req = NewRequest();
         Require(sceNpTusAddAndGetVariableVUserAsync(req, &emptyUser, 1, 5, nullptr, nullptr, buffer, sizeof(buffer), nullptr) == InvalidArgument, "sceNpTusAddAndGetVariableVUserAsync", "an empty virtual user was taken");
