@@ -2,6 +2,7 @@
 
 ### Unknown function info
 
+- [FT_GlyphSlot_Own_Bitmap](../../../core/libs/prx/libSceFreeType/src/Bitmap.cpp) (libSceFreeType) - console signature and errors are unverified; the adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftbitmap.c) and republishes the guest slot bitmap after the native copy. The copy is owned by the native slot and released with the face
 - [FT_Bitmap_Embolden](../../../core/libs/prx/libSceFreeType/src/Bitmap.cpp) (libSceFreeType) - console signature and errors are unverified; the adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftbitmap.c) with LP64 strengths. A strength outside the host `FT_Pos` range throws on Windows, where the native type is 32 bits. The bitmap buffer is reallocated by the native library, so it must come from `FT_Bitmap_Copy`, `FT_Bitmap_Convert` or a glyph slot, as in the native API
 - [FT_Get_Sfnt_Name_Count, FT_Get_Sfnt_Name](../../../core/libs/prx/libSceFreeType/src/Names.cpp) (libSceFreeType) - console signatures, record layout and errors are unverified; the adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftsnames.c) and assumes the public LP64 `FT_SfntName` layout (24 bytes, string pointer at 8, byte length at 16). Strings retain their original encoding, borrow native face storage and remain valid only while the face is alive
 
