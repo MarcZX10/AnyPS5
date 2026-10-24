@@ -1,5 +1,6 @@
 # libSceFreeType technical debt
 
+- [FT_Get_PS_Font_Value](../../../core/libs/prx/libSceFreeType/src/PsFontValue.cpp) (libSceFreeType) - console signature and key numbering are unverified; the adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c) and copies the native value into the guest buffer only when it fits, as natively. Values whose native size depends on `FT_Long` match the guest's LP64 sizes only with a 64-bit host `FT_Long`, so a host with a 32-bit one (Windows) throws for a registered face
 ### Unknown function info
 - [FT_New_Size, FT_Activate_Size and FT_Done_Size](../../../core/libs/prx/libSceFreeType/Export.cpp) (libSceFreeType) - console signatures, errors and generic-finalizer ordering are unverified; the LP64 guest adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c). Private size fields are bridge-owned. Sizes created outside the bridge throw when selected.
 
