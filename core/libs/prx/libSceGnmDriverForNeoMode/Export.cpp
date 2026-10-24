@@ -153,7 +153,7 @@ int APS5_VABI sceGnmDestroyWorkloadStream(void) {
     return 0;
 }
 
-int APS5_VABI sceGnmDingDongForWorkload(void) {
+int APS5_VABI sceGnmDingDongForWorkload(std::uint32_t vqueueId, std::uint32_t nextOffsetDw, std::uint64_t workloadId) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -328,7 +328,7 @@ int APS5_VABI sceGnmDrawInitToDefaultContextState400(std::uint32_t* cmdbuf, std:
     return WriteContextState(cmdbuf, size, 0x100, GnmNeo::ContextState400);
 }
 
-int APS5_VABI sceGnmDrawInitToDefaultContextStateInternalCommand(void) {
+int APS5_VABI sceGnmDrawInitToDefaultContextStateInternalCommand(std::uint32_t* cmdbuf, std::uint32_t size) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -551,7 +551,7 @@ int APS5_VABI sceGnmRegisterGnmLiveCallbackConfig(void) {
     return 0;
 }
 
-int APS5_VABI sceGnmRegisterOwner(void) {
+int APS5_VABI sceGnmRegisterOwner(void* handle, const char* name) {
     return Failure;
 }
 
