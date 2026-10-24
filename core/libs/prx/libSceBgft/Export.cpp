@@ -9,6 +9,7 @@ struct BgftInitParam {
 };
 
 struct BgftProgress;
+struct BgftTaskInfo;
 struct BgftStorageTaskParam {
     std::uint32_t value0;
     std::uint32_t value4;
@@ -109,7 +110,7 @@ int APS5_VABI sceBgftServiceIntDownloadGetGameAndGameAcProgress(const char* cont
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
-int APS5_VABI sceBgftServiceIntDownloadGetPatchProgress() {
+int APS5_VABI sceBgftServiceIntDownloadGetPatchProgress(const char* contentId, BgftProgress* progress) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -121,7 +122,7 @@ int APS5_VABI sceBgftServiceIntDownloadGetProgress(int32_t taskId, BgftProgress*
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
-int APS5_VABI sceBgftServiceIntDownloadGetTaskInfo() {
+int APS5_VABI sceBgftServiceIntDownloadGetTaskInfo(int32_t taskId, BgftTaskInfo* taskInfo) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
