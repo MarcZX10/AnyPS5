@@ -92,6 +92,7 @@ int APS5_VABI sceNpTusTryAndSetVariableForCrossSaveVUser(int reqId, const NpOnli
 int APS5_VABI sceNpTusTryAndSetVariableForCrossSaveVUserAsync(int reqId, const NpOnlineId* targetVirtualUserId, std::int32_t slotId, std::int32_t opeType, std::int64_t variable, const std::int64_t* compareValue, const std::uint64_t* isLastChangedAuthor, const void* isLastChangedDate, void* resultVariable, std::uint64_t resultVariableSize, void* option);
 int APS5_VABI sceNpTusTryAndSetVariableVUser(int reqId, const NpOnlineId* targetVirtualUserId, std::int32_t slotId, std::int32_t opeType, std::int64_t variable, const std::int64_t* compareValue, const void* isLastChangedAuthor, const void* isLastChangedDate, void* resultVariable, std::uint64_t resultVariableSize, void* option);
 int APS5_VABI sceNpTusTryAndSetVariableVUserAsync(int reqId, const NpOnlineId* targetVirtualUserId, std::int32_t slotId, std::int32_t opeType, std::int64_t variable, const std::int64_t* compareValue, const void* isLastChangedAuthor, const void* isLastChangedDate, void* resultVariable, std::uint64_t resultVariableSize, void* option);
+int APS5_VABI sceNpTusGetFriendsDataStatusA(int reqId, std::int32_t slotId, std::int32_t includeSelf, std::int32_t sortType, void* array, std::uint64_t arraySize, int arrayLen, const void* option);
 int APS5_VABI sceNpTusGetFriendsDataStatusAAsync(int reqId, std::int32_t slotId, std::int32_t includeSelf, std::int32_t sortType, void* array, std::uint64_t arraySize, int arrayLen, const void* option);
 }
 
@@ -278,6 +279,7 @@ int main() {
     CheckSync("sceNpTusTryAndSetVariableForCrossSaveVUser", [&](int req) { return sceNpTusTryAndSetVariableForCrossSaveVUser(req, &virtualUser, 1, 1, 5, nullptr, nullptr, nullptr, buffer, sizeof(buffer), nullptr); });
     CheckSync("sceNpTusTryAndSetVariableVUser", [&](int req) { return sceNpTusTryAndSetVariableVUser(req, &virtualUser, 1, 1, 5, nullptr, nullptr, nullptr, buffer, sizeof(buffer), nullptr); });
     CheckFriends("sceNpTusGetFriendsDataStatusAAsync", 0, 2, false, [&](int req, int slotId, int sortType, void* array, int arrayLen, const FriendsOption* option) { return sceNpTusGetFriendsDataStatusAAsync(req, slotId, 0, sortType, array, 16, arrayLen, option); });
+    CheckFriends("sceNpTusGetFriendsDataStatusA", SignedOut, 2, true, [&](int req, int slotId, int sortType, void* array, int arrayLen, const FriendsOption* option) { return sceNpTusGetFriendsDataStatusA(req, slotId, 0, sortType, array, 16, arrayLen, option); });
     {
         int req = NewRequest();
         Require(sceNpTusAddAndGetVariableVUserAsync(req, &emptyUser, 1, 5, nullptr, nullptr, buffer, sizeof(buffer), nullptr) == InvalidArgument, "sceNpTusAddAndGetVariableVUserAsync", "an empty virtual user was taken");
