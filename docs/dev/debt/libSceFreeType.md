@@ -1,5 +1,6 @@
 # libSceFreeType technical debt
 
+- [FT_Get_Track_Kerning](../../../core/libs/prx/libSceFreeType/src/TrackKerning.cpp) (libSceFreeType) - console signature and errors are unverified; the adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c) with an LP64 point size and result, and leaves the result untouched on error. A point size outside the host `FT_Fixed` range throws on Windows, where the native type is 32 bits
 ### Unknown function info
 - [FT_New_Size, FT_Activate_Size and FT_Done_Size](../../../core/libs/prx/libSceFreeType/Export.cpp) (libSceFreeType) - console signatures, errors and generic-finalizer ordering are unverified; the LP64 guest adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c). Private size fields are bridge-owned. Sizes created outside the bridge throw when selected.
 
