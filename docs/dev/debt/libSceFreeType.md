@@ -1,5 +1,6 @@
 # libSceFreeType technical debt
 
+- [FT_Face_CheckTrueTypePatents](../../../core/libs/prx/libSceFreeType/src/FaceCompat.cpp) (libSceFreeType) - console signature is unverified; the adapter forwards to bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftpatent.c), where the call is deprecated and always returns false
 - [FT_Get_Font_Format](../../../core/libs/prx/libSceFreeType/src/FaceCompat.cpp) (libSceFreeType) - console signature is unverified; the adapter forwards to bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c). The returned string is static native storage, valid for the life of the process
 ### Unknown function info
 - [FT_New_Size, FT_Activate_Size and FT_Done_Size](../../../core/libs/prx/libSceFreeType/Export.cpp) (libSceFreeType) - console signatures, errors and generic-finalizer ordering are unverified; the LP64 guest adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c). Private size fields are bridge-owned. Sizes created outside the bridge throw when selected.
