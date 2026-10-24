@@ -1,0 +1,76 @@
+# libSceMarlin technical debt
+
+### Unknown function info
+
+The 70 exports in [Export.cpp](../../../core/libs/prx/libSceMarlin/Export.cpp) come from the `libSceMarlin` export list of [idc/ps4libdoc](https://github.com/idc/ps4libdoc/tree/9.00) (PS4 firmware 9.00, commit a71315e7f36e312ae71e9e3a92982e9ffbfc725f); a PS5 export inventory of this module is not available to the project, so the PS5 module may export more, fewer or different symbols. A name is listed only when its hash equals the recorded NID; the others are exported by NID alone. Prototypes and behaviour are unverified: every function takes no parameters in the import-resolution convention and throws through `NotImplemented_nid_no_patch`.
+
+- [goby_CheckLicense](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID 3FfhG3OCRyk)
+- [goby_CheckPersonality](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID qsf3QUNkffc)
+- [goby_DeleteLink](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID 1X+GW1hdTlM)
+- [goby_DescribeActionPlay](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID YXtF7mSQUvs)
+- [goby_Fin](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID Ulu9vNs5vn8)
+- [goby_FreeActionResults](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID hBw3k9ipLow)
+- [goby_FreeLicenseInfo](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID 7TKreizczvg)
+- [goby_FreeLinkList](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID bR3lFCbl2ow)
+- [goby_FreeNodeList](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID bbuFLemjwRA)
+- [goby_FreeRemoteInfo](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID uDv80Z-OaP8)
+- [goby_GetAvailableLinks](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID 3ovo4cphzuw)
+- [goby_GetDUIDParameters](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID QWVrYTt602Y)
+- [goby_GetLinkPeriod](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID hhlWfHpfPx0)
+- [goby_GetReachableNodes](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID n3dXGYgHTFM)
+- [goby_Init](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID qUFOjETOS-4)
+- [goby_ManageRights](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID 5osvee3K52Q)
+- [goby_ProcessMessage](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID +fo47VU51qw)
+- [nsff_FreeString](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID PM58j4m17Gw)
+- [nsnp_ActionCheck](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID VteK1e0o0fY)
+- [nsnp_ActionDescribe](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID bIjisuca0z8)
+- [nsnp_ActionPerform](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID wivfLfaFAZg)
+- [nsnp_Callback](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID GjQLdCasJDg)
+- [nsnp_CheckHMAC](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID n2nk-l3evas)
+- [nsnp_Decrypt](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID ERhsQL+87ks)
+- [nsnp_DecryptWithIV](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID YQC5ZjGfd+A)
+- [nsnp_DecryptWithOffset](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID 0aPYh8P2+Ps)
+- [nsnp_Fin](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID Y3hsRCZODFs)
+- [nsnp_FinSession](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID IkLRlZVvw5g)
+- [nsnp_FinTrack](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID xon5yCPxbAw)
+- [nsnp_FreeESB](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID b1hZVzYWL6E)
+- [nsnp_FreeLicenseMetadata](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID JCEBUaUl5QY)
+- [nsnp_FreeString](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID k+jX53jlQm4)
+- [nsnp_GetLicenseMetadata](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID -eI0Y-JCbf0)
+- [nsnp_GetLicensePath](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID I+TiE5hPhjg)
+- [nsnp_Init](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID dTC0LleFH1g)
+- [nsnp_InitSession](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID 6WLenADtOQk)
+- [nsnp_InitTrack](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID obXJpnjajeQ)
+- [nsnp_SetLicense](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown signature (NID Pl0MvaNRpQM)
+- [CtiDh2JMXxk](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [DncDGrveZ0U](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [FbaixPSALbc](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [F4646tzYFJk](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [GaFEMc15Bg4](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [G4IRShN06z0](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [HoGciK6SIYY](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [IW2Bh+-hlHw](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [IeoZPnAZ7k4](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [NxjFb+MyE7w](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [PD5SsJumwyI](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [TMON7RVeAJE](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [Xd1eWz9DHj0](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [YdIQEOdNFng](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [Yt4hEcnNkIk](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [aBl4kTx6o7o](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [fuhKEPRKqB0](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [h8XiZwYIgvk](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [jQntg0QpC-A](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [mlH2O6es024](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [m+8SU-CciqI](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [neGdjUCiCB8](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [pF537-jl-U0](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [pr6zUHpsUpk](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [rg6hj-LsQKs](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [szcZveHSczk](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [xBLwokH-9Jc](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [x6y+6aR5V+A](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [0L2K5gP5di8](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [2TPdxtKgvTs](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [4xUpUQjdvok](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
+- [+Fm6KrE0ANg](../../../core/libs/prx/libSceMarlin/Export.cpp) (libSceMarlin) - unknown name, signature
