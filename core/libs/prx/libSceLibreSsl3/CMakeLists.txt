@@ -4,6 +4,12 @@ target_link_libraries(libSceLibreSsl3 PRIVATE libSceLibreSsl libc)
 configure_windows_unwind(libSceLibreSsl3)
 
 if(BUILD_TESTING)
+    add_test_executable(guest_libressl3_asn1_object_tests src/Asn1Object.cpp tests/Asn1Object.cpp)
+    target_include_directories(guest_libressl3_asn1_object_tests PRIVATE ${LIBS_INCLUDE_DIR})
+    configure_windows_unwind(guest_libressl3_asn1_object_tests)
+    add_test(NAME guest_libressl3_asn1_object COMMAND guest_libressl3_asn1_object_tests)
+    set_tests_properties(guest_libressl3_asn1_object PROPERTIES TIMEOUT 30)
+
     add_test_executable(guest_crypto_memcmp_tests ${LIBS_INCLUDE_DIR}/tests/GuestCryptoMemcmp.cpp)
     target_include_directories(guest_crypto_memcmp_tests PRIVATE ${LIBS_INCLUDE_DIR})
     target_link_libraries(guest_crypto_memcmp_tests PRIVATE libSceLibreSsl3)
