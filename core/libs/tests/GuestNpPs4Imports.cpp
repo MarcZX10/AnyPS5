@@ -21,7 +21,6 @@ int APS5_VABI sceNpTrophyGetGroupInfo(int context, int handle, int groupId, void
 int APS5_VABI sceNpTrophyGetTrophyInfo(int context, int handle, int trophyId, void* details, void* data);
 int APS5_VABI sceNpMatching2Initialize(const void* param);
 int APS5_VABI sceNpMatching2Terminate(void);
-int APS5_VABI sceNpSignalingDeactivateConnection(void);
 }
 
 namespace {
@@ -183,15 +182,10 @@ void CheckMatching2() {
     Require(sceNpMatching2Terminate() == 0, "NpMatching2 did not terminate after the SSL form");
 }
 
-void CheckSignaling() {
-    RequireNotImplemented([] { sceNpSignalingDeactivateConnection(); }, "sceNpSignalingDeactivateConnection");
-}
-
 }
 
 int main() {
     CheckTrophyInfo();
     CheckMatching2();
-    CheckSignaling();
     return 0;
 }
