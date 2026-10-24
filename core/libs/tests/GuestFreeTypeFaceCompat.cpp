@@ -15,6 +15,7 @@ using namespace FreeType;
 
 extern "C" {
 const char* APS5_VABI FT_Get_Font_Format_nid_postfix(GuestFaceRec*);
+std::uint8_t APS5_VABI FT_Face_CheckTrueTypePatents_nid_postfix(GuestFaceRec*);
 }
 
 static void Check(bool value, int line) {
@@ -49,6 +50,8 @@ static void Query(FacePair& face, const char* format) {
     Require(actual && expected && std::strcmp(actual, expected) == 0 && std::strcmp(actual, format) == 0);
     Require(actual == FT_Get_Font_Format(face.guest.host));
     Require(FT_Get_Font_Format_nid_postfix(&face.guest.rec) == FT_Get_X11_Font_Format(face.guest.host));
+    Require(FT_Face_CheckTrueTypePatents_nid_postfix(&face.guest.rec) == FT_Face_CheckTrueTypePatents(face.oracle));
+    Require(FT_Face_CheckTrueTypePatents_nid_postfix(&face.guest.rec) == 0);
 }
 
 int main() {
@@ -63,6 +66,7 @@ int main() {
         GuestFaceRec empty{};
         for (GuestFaceRec* face : {static_cast<GuestFaceRec*>(nullptr), &empty}) {
             Require(FT_Get_Font_Format_nid_postfix(face) == FT_Get_Font_Format(nullptr));
+            Require(FT_Face_CheckTrueTypePatents_nid_postfix(face) == 0);
         }
     }
     Require(FT_Done_FreeType(library.host) == 0 && FT_Done_FreeType(nativeLibrary) == 0);
