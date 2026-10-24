@@ -4,6 +4,7 @@ add_library(libSceFreeType SHARED EXCLUDE_FROM_ALL
         src/Outline.cpp
         src/Charmap.cpp
         src/FaceInfo.cpp
+        src/OutlineBitmap.cpp
         src/SfntTable.cpp
         src/GuestObjects.cpp
         src/Names.cpp
