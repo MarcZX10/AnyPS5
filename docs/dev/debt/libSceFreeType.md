@@ -1,5 +1,6 @@
 # libSceFreeType technical debt
 
+- [FT_Done_Library](../../../core/libs/prx/libSceFreeType/Export.cpp) (libSceFreeType) - console signature and errors are unverified; the adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c): the native library, with its faces and modules, is released when the last reference is dropped, and the guest wrapper with it. Like the native call, it does not free the memory manager that `FT_Init_FreeType` created, so releasing a library only with `FT_Done_Library` leaks it; `FT_Done_FreeType` releases both
 ### Unknown function info
 - [FT_New_Size, FT_Activate_Size and FT_Done_Size](../../../core/libs/prx/libSceFreeType/Export.cpp) (libSceFreeType) - console signatures, errors and generic-finalizer ordering are unverified; the LP64 guest adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c). Private size fields are bridge-owned. Sizes created outside the bridge throw when selected.
 
