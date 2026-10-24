@@ -1,5 +1,6 @@
 # libSceFreeType technical debt
 
+- [FT_Open_Face](../../../core/libs/prx/libSceFreeType/Export.cpp) (libSceFreeType) - console signature, `FT_Open_Args` layout and errors are unverified; the adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c) with the LP64 argument layout. Only `FT_OPEN_MEMORY` and `FT_OPEN_PATHNAME` sources are supported; a path is read into memory owned by the face, as in `FT_New_Face`. `FT_OPEN_STREAM`, `FT_OPEN_DRIVER` and `FT_OPEN_PARAMS` throw because they carry guest callbacks, module handles or parameter arrays the host cannot use. Caller-owned font bytes must remain valid until the face is freed
 ### Unknown function info
 - [FT_New_Size, FT_Activate_Size and FT_Done_Size](../../../core/libs/prx/libSceFreeType/Export.cpp) (libSceFreeType) - console signatures, errors and generic-finalizer ordering are unverified; the LP64 guest adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c). Private size fields are bridge-owned. Sizes created outside the bridge throw when selected.
 
