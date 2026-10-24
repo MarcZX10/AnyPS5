@@ -5,7 +5,7 @@
 
 extern "C" {
 
-int APS5_VABI sceCompanionUtilGetEvent() {
+int APS5_VABI sceCompanionUtilGetEvent(void* event) {
     return static_cast<int>(0x80AD0008);
 }
 
