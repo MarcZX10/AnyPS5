@@ -2,7 +2,7 @@
 
 ### Unknown function info
 
-The 1424 exports in [Export.cpp](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (declared in chunks of at most 150 over 10 pull requests; this file holds the first 150) come from the `libSceOrbisCompat` export list of [idc/ps4libdoc](https://github.com/idc/ps4libdoc/tree/9.00) (PS4 firmware 9.00, commit a71315e7f36e312ae71e9e3a92982e9ffbfc725f), sorted by name, then the NID-only entries; a PS5 export inventory of this module is not available to the project, so the PS5 module may export more, fewer or different symbols. A name is listed only when its hash equals the recorded NID; the others are exported by NID alone. Prototypes and behaviour are unverified: every function takes no parameters in the import-resolution convention and throws through `NotImplemented_nid_no_patch`.
+The 1424 exports in [Export.cpp](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (declared in chunks of at most 150 over 10 pull requests; this file holds the first 300) come from the `libSceOrbisCompat` export list of [idc/ps4libdoc](https://github.com/idc/ps4libdoc/tree/9.00) (PS4 firmware 9.00, commit a71315e7f36e312ae71e9e3a92982e9ffbfc725f), sorted by name, then the NID-only entries; a PS5 export inventory of this module is not available to the project, so the PS5 module may export more, fewer or different symbols. A name is listed only when its hash equals the recorded NID; the others are exported by NID alone. Prototypes and behaviour are unverified: every function takes no parameters in the import-resolution convention and throws through `NotImplemented_nid_no_patch`.
 
 - [_ZN3NTF10initializeERKNS_18CreationParametersE](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID jDiVksx1LG8)
 - [_ZN3NTF13URLRequestJob6createEPNS_17URLRequestMessageEPNS_18URLRequestListenerE](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID bvrWxnkc-tI)
@@ -154,3 +154,153 @@ The 1424 exports in [Export.cpp](../../../core/libs/prx/libSceOrbisCompat/Export
 - [_ZN4Manx11MediaPlayer6createEPNS_17MediaPlayerClientE](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID ztTyvdGDypw)
 - [_ZN4Manx11MediaPlayerC2EPNS_17MediaPlayerClientE](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID ONaXqeUPwdE)
 - [_ZN4Manx11MediaPlayerD0Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID nWl-yEHwdbA)
+- [_ZN4Manx11MediaPlayerD1Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID +6hsgukv-aE)
+- [_ZN4Manx11MediaPlayerD2Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID l+HrV8hb4IU)
+- [_ZN4Manx11MediaSourceD0Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID jXVfFs6zVUs)
+- [_ZN4Manx11MediaSourceD1Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID jpjT3LHx42U)
+- [_ZN4Manx11MediaSourceD2Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID d9-l0C7GhTM)
+- [_ZN4Manx11StoragePath11sqlDatabaseEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID RAyoefHN9Is)
+- [_ZN4Manx11StoragePath12iconDatabaseEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID 9GyicjhjtZM)
+- [_ZN4Manx11StoragePath12localStorageEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID GCcHBTn+aZc)
+- [_ZN4Manx11StoragePath8appCacheEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID CrVW6NdjgmE)
+- [_ZN4Manx11getFontDataEPKcPPvPj](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID uo3JXMzZRLM)
+- [_ZN4Manx11getFontNameEPKwjPKcRNS_17FontSynthesisHintE](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID cJha2OgVEw0)
+- [_ZN4Manx11getFontPathEPKwj](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID CILQQaLK8kg)
+- [_ZN4Manx12getFontScaleEPKwj](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID wJvtSG39UTY)
+- [_ZN4Manx13KeyboardEventC1ENS0_4TypeEibbbbb](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID 6WUUBTvfOBk)
+- [_ZN4Manx13KeyboardEventC2ENS0_4TypeEibbbbb](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID F5JF36X3ATs)
+- [_ZN4Manx15ProcessLauncher10invalidateEi](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID goiLnDJ4lCI)
+- [_ZN4Manx15ProcessLauncher9terminateEi](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID fwrLfExxKr8)
+- [_ZN4Manx15textFromKeyCodeEib](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID asyymNe9-xA)
+- [_ZN4Manx16getGenericFamilyEPKwj](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID 4bxhcpUu04g)
+- [_ZN4Manx17getBaselineOffsetEPKwj](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID JFfq04EYkr8)
+- [_ZN4Manx18getDefaultFontPathEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID UYh1S31dB8M)
+- [_ZN4Manx19getFontWeightOffsetEPKwj](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID MJAGcIT3D1w)
+- [_ZN4Manx20getGenericFamilyTypeEPKwj](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID Ohhjm+gd9gQ)
+- [_ZN4Manx21DisplayRefreshMonitor10waitVblankEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID vXvLTrtRn90)
+- [_ZN4Manx21DisplayRefreshMonitor4stopEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID U0EOfsJ6Euw)
+- [_ZN4Manx21DisplayRefreshMonitor5startEi](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID l5q0L2fFbDg)
+- [_ZN4Manx21DisplayRefreshMonitorC1Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID akvKAVg-uyk)
+- [_ZN4Manx21DisplayRefreshMonitorC2Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID IGJ-lPf5b1Y)
+- [_ZN4Manx21DisplayRefreshMonitorD1Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID AZb2Bl9bMsk)
+- [_ZN4Manx21DisplayRefreshMonitorD2Ev](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID 2BIkSnOhATY)
+- [_ZN4Manx21getPlatformFamilyListEPKwj](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID ZJPqg9OExng)
+- [_ZN4Manx23keyIdentifierForKeyCodeEi](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID q9rs7Vyz9d0)
+- [_ZN4Manx27monotonicallyIncreasingTimeEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID SWUBqIUFFjM)
+- [_ZN4Manx4Pipe5closeEi](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID PlJvKz-RQMU)
+- [_ZN4Manx4Pipe6createEPiS1_](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID x4QytmKUIr8)
+- [_ZN4Manx6Bundle6createEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID 4lKmeH7ib7w)
+- [_ZN4Manx6Locale11getLanguageEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID ZuIxZ6j0Ftk)
+- [_ZN4Manx6Screen14availableWidthEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID diU1x2QioOE)
+- [_ZN4Manx6Screen15availableHeightEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID uKTxb5P1CQ0)
+- [_ZN4Manx6Screen5widthEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID R5+WvSLQgec)
+- [_ZN4Manx6Screen6heightEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID NPm90V3xkv4)
+- [_ZN4Manx6System19setVirtualRangeNameEPvmPKc](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID xl+1PNJSId0)
+- [_ZN4Manx6System21defaultThreadPriorityEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID MvgmWLuycpI)
+- [_ZN4Manx6System24setDefaultThreadPriorityEi](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID CPmbbHsaQ14)
+- [_ZN4Manx6System6osNameEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID 2FHeipL4TDM)
+- [_ZN4Manx7RunLoop3runEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID D-Om2SCd1RA)
+- [_ZN4Manx7RunLoop4pollEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID K7XzBKsFyaI)
+- [_ZN4Manx7RunLoop7currentEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID 9s9O6EEZzuU)
+- [_ZN4Manx8Gamepads6createEv](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID K5Krt9eME4k)
+- [_ZN4Manx8ImeEventC1ENS0_12ImeEventTypeEPKci](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID zGHnh4mo8-0)
+- [_ZN4Manx8ImeEventC1ENS0_12ImeEventTypeEPKcji](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID 4+f471j+4aY)
+- [_ZN4Manx8ImeEventC2ENS0_12ImeEventTypeEPKci](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID eoUJa9cJC-g)
+- [_ZN4Manx8ImeEventC2ENS0_12ImeEventTypeEPKcji](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID OIWOB9zHruU)
+- [_ZN4Manx9WorkQueue6createEPKc](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID ze4kWDwPjso)
+- [_ZNK3NTF3URL10protocolIsEPKc](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID GR9+J8OgWSs)
+- [gp_set_functions](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID UDkeOtF5o-k)
+- [gp_trace](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID yhd+GKb-NyQ)
+- [pa_pop_marker](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID x4-3rrCkF1s)
+- [pa_push_marker](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID jQ06QCNi21g)
+- [pa_set_functions](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID QRO9p-E0uPg)
+- [pa_sync](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown signature (NID 8VBA6xuvSBA)
+- [AAGRcf2vpz8](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [ABO30LgriVs](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [ADNY9ijeAWw](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AFn8RbUg4cw](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AH2J-o23qxk](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AI2T9jWrMAU](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [ANQY6yrv4Dg](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [APpljvVNKuo](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AS2oevsQDmw](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AVqNb4+Qvtk](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AWqc74qjljo](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AcbCvEmMJ88](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AeC1PWVvbmI](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AeISkTLRjz0](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [AgYLUvJ6xlo](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [Am1VKrdnjw4](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [A1EPxzeVmCM](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [A4sGVYPflwU](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [A5tGKgNlUw4](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [A6Vi1RRmLT8](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [A7PHnZYEe58](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BC3IZNLmEks](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BKtNhoCFmwM](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BLvdHOv6bIQ](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BOXkx27w-DU](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BTaDs6s7OPU](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BXD8pWY28A4](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BaA01LCfMw4](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BacPj+2GMcc](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BePzt0g6fJU](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BeX6LqW3D6Y](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [Beh-yuk77qA](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BhtBp4owVOg](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [Bk5inY3sMN4](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BlunaFzLmxM](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BsWzoVnUdig](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [Bx5-CcaWDsM](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [By8bmhIpJSM](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BzBVn7j8E28](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [BzwUGfHOdkc](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [B44zWRC6iAg](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [B7CP2BaF4M4](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [B7LP0EPgmVA](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [B9AtHIw4eRw](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CKcXwD6J8Ko](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CLbvOhNsVIw](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CN7VnEIrCT8](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CQIJIf-fzMc](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CQebOy2RPHs](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CRTa9LJ6yso](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CdXU4UQWKE8](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [Che5h-e77qY](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CoUuLG2u80I](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CpIC+foMJcw](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CpUg5MJAmfg](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CrsY29qNp3s](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [CzqWu4IX2xI](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DBAGp-v6ihA](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DDscs8miR8M](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DEEodxfUE-Q](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DFxoeXYiQQ4](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DHUfUV5xfEY](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DHbm2PzPrKY](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DH3SINFP4uI](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DLMHBpdtf-M](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DMAJMStOrPw](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DPi8G-2iqos](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DRhE1qC7PVE](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DZ-Sm8Hmutw](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DfVoIdSy-Co](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DkrZ6-xiAmI](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DrwBLKrW2Vo](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [DvaoDG9-9b4](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [D5DrOyX8RWo](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [D561zPKVoxQ](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [D+VbYbodWsE](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [D+kB6nPtjug](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EACmmssc1ZQ](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EA5NTi-9zlI](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [ECqTqxekq9w](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EGXEEyWeSPo](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EIOgbbNw8eU](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EKO87yiBabk](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EOtGkGsFifY](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EUeIt4de7r8](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EVXq3nm-7J8](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EXyHdqVh190](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EZZBDcU1RgY](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
+- [EeKjJjsqowg](../../../core/libs/prx/libSceOrbisCompat/Export.cpp) (libSceOrbisCompat) - unknown name, signature
