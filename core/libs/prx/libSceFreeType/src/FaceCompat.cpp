@@ -14,4 +14,9 @@ const char* APS5_VABI FT_Get_Font_Format_nid_postfix(GuestFaceRec* face) {
     return FT_Get_Font_Format(owner ? owner->host : nullptr);
 }
 
+std::uint8_t APS5_VABI FT_Face_CheckTrueTypePatents_nid_postfix(GuestFaceRec* face) {
+    const GuestFace* owner = FaceOf(face);
+    return FT_Face_CheckTrueTypePatents(owner ? owner->host : nullptr);
+}
+
 }
