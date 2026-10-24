@@ -37,12 +37,12 @@ int nextObject() {
 
 extern "C" {
 
-int APS5_VABI sceNpWebApiAbortRequest() {
+int APS5_VABI sceNpWebApiAbortRequest(std::int64_t requestId) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
 
-int APS5_VABI sceNpWebApiCreateContext() {
+int APS5_VABI sceNpWebApiCreateContext(int libCtxId, void* onlineId) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -81,7 +81,7 @@ int APS5_VABI sceNpWebApiCreateServicePushEventFilter(int libCtxId, int handleId
     return SCE_NP_WEBAPI_ERROR_SIGNED_IN_USER_NOT_FOUND;
 }
 
-int APS5_VABI sceNpWebApiDeleteContext() {
+int APS5_VABI sceNpWebApiDeleteContext(int titleUserCtxId) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -100,7 +100,7 @@ int APS5_VABI sceNpWebApiDeletePushEventFilter(int libCtxId, int filterId) {
     return context->second.pushEventFilters.erase(filterId) != 0 ? 0 : SCE_NP_WEBAPI_ERROR_PUSH_EVENT_FILTER_NOT_FOUND;
 }
 
-int APS5_VABI sceNpWebApiDeleteRequest() {
+int APS5_VABI sceNpWebApiDeleteRequest(std::int64_t requestId) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -122,7 +122,7 @@ int APS5_VABI sceNpWebApiGetHttpResponseHeaderValueLength() {
     return 0;
 }
 
-int APS5_VABI sceNpWebApiGetHttpStatusCode() {
+int APS5_VABI sceNpWebApiGetHttpStatusCode(std::int64_t requestId, int* statusCode) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -138,7 +138,7 @@ int APS5_VABI sceNpWebApiInitialize(int libHttpCtxId, std::size_t poolSize) {
     return SCE_NP_WEBAPI_ERROR_LIB_CONTEXT_MAX;
 }
 
-int APS5_VABI sceNpWebApiReadData() {
+int APS5_VABI sceNpWebApiReadData(std::int64_t requestId, void* data, std::uint64_t size) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -153,7 +153,7 @@ int APS5_VABI sceNpWebApiRegisterServicePushEventCallback() {
     return 0;
 }
 
-int APS5_VABI sceNpWebApiSendRequest() {
+int APS5_VABI sceNpWebApiSendRequest(std::int64_t requestId, const void* data, std::uint64_t dataSize) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -163,12 +163,12 @@ int APS5_VABI sceNpWebApiTerminate(int libCtxId) {
     return contexts.erase(libCtxId) != 0 ? 0 : SCE_NP_WEBAPI_ERROR_LIB_CONTEXT_NOT_FOUND;
 }
 
-int APS5_VABI sceNpWebApiUnregisterPushEventCallback() {
+int APS5_VABI sceNpWebApiUnregisterPushEventCallback(int titleUserCtxId, int callbackId) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
 
-int APS5_VABI sceNpWebApiUnregisterServicePushEventCallback() {
+int APS5_VABI sceNpWebApiUnregisterServicePushEventCallback(int titleUserCtxId, int callbackId) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
