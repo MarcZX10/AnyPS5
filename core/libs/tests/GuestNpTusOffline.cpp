@@ -206,6 +206,7 @@ int main() {
     CheckFriends("sceNpTusGetFriendsDataStatusA", SignedOut, 2, true, [&](int req, int slotId, int sortType, void* array, int arrayLen, const FriendsOption* option) { return sceNpTusGetFriendsDataStatusA(req, slotId, 0, sortType, array, 16, arrayLen, option); });
     CheckFriends("sceNpTusGetFriendsVariableAAsync", 0, 4, false, [&](int req, int slotId, int sortType, void* array, int arrayLen, const FriendsOption* option) { return sceNpTusGetFriendsVariableAAsync(req, slotId, 0, sortType, array, 16, arrayLen, option); });
     CheckFriends("sceNpTusGetFriendsVariableA", SignedOut, 4, true, [&](int req, int slotId, int sortType, void* array, int arrayLen, const FriendsOption* option) { return sceNpTusGetFriendsVariableA(req, slotId, 0, sortType, array, 16, arrayLen, option); });
+    CheckFriends("sceNpTusGetFriendsDataStatusForCrossSaveAsync", 0, 2, false, [&](int req, int slotId, int sortType, void* array, int arrayLen, const FriendsOption* option) { return sceNpTusGetFriendsDataStatusForCrossSaveAsync(req, slotId, 0, sortType, array, 16, arrayLen, option); });
     {
         const int req = NewRequest();
         Require(sceNpTusGetData(req, &npId, 1, buffer, sizeof(buffer), buffer, 16, &buffer) == InvalidArgument, "sceNpTusGetData", "an option was not refused before waiting");
