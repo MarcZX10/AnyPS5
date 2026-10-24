@@ -9,6 +9,7 @@
 
 ### Unknown function info
 
+- [sceGameLiveStreamingGetCurrentStatus](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) - throws through `NotImplemented_nid_no_patch`; behaviour and the PS5 prototypes are unmeasured. The only source of the parameter lists is shadPS4's PS4-derived prototypes (GPLv2, used as a reference only), with no second reference; structure pointers are `void*` because no layout is known.
 - [sceGameLiveStreamingScreenInitialize](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
 - [sceGameLiveStreamingScreenInitializeSeparateModeParameter](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
 - [sceGameLiveStreamingScreenTerminate](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
@@ -18,7 +19,6 @@
 - [sceGameLiveStreamingScreenSetMode](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
 - [sceGameLiveStreamingPermitLiveStreaming](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
 - [sceGameLiveStreamingSetMaxBitrate](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
-- [sceGameLiveStreamingGetCurrentStatus](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
 - [sceGameLiveStreamingEnableSocialFeedback](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
 - [sceGameLiveStreamingGetSocialFeedbackMessagesCount](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
 - [sceGameLiveStreamingGetSocialFeedbackMessages](../../../core/libs/prx/libSceGameLiveStreaming/Export.cpp) (libSceGameLiveStreaming) - unknown signature
