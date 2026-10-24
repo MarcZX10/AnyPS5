@@ -19,4 +19,9 @@ std::uint8_t APS5_VABI FT_Face_CheckTrueTypePatents_nid_postfix(GuestFaceRec* fa
     return FT_Face_CheckTrueTypePatents(owner ? owner->host : nullptr);
 }
 
+std::uint8_t APS5_VABI FT_Face_SetUnpatentedHinting_nid_postfix(GuestFaceRec* face, std::uint8_t value) {
+    const GuestFace* owner = FaceOf(face);
+    return FT_Face_SetUnpatentedHinting(owner ? owner->host : nullptr, value);
+}
+
 }
