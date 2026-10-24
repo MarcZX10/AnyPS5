@@ -5255,4 +5255,754 @@ int APS5_VABI WKPreferencesGetSimpleLineLayoutEnabled_nid_postfix(void) {
     return 0;
 }
 
+int APS5_VABI WKPreferencesGetSmartInsertDeleteEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetSnapshotAllPlugIns_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetSpatialNavigationEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetStorageBlockingPolicy_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetSubpixelCSSOMElementMetricsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetSuppressesIncrementalRendering_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetTabToLinksEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetTabsToLinks_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetTelephoneNumberParsingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetTextAreasAreResizable_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetTextAutosizingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetThreadedScrollingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetTiledScrollingIndicatorVisible_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetTypeID_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetUniversalAccessFromFileURLsAllowed_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetViewGestureDebuggingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetVisibleDebugOverlayRegions_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetWebArchiveDebugModeEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetWebAudioEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetWebGLEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetWebSecurityEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesGetXSSAuditorEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAVFoundationEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAccelerated2DCanvasEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAcceleratedCompositingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAcceleratedCompositingForOverflowScrollEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAcceleratedDrawingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAggressiveTileRetentionEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAllowsAirPlayForMediaPlayback_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAntialiasedFontDilationEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetApplicationChromeModeEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetArtificialPluginInitializationDelayEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAsynchronousPluginInitializationEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAsynchronousPluginInitializationEnabledForAllPlugins_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAsynchronousSpellCheckingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetAuthorAndUserStylesEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetBackspaceKeyNavigationEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetCSSAnimationTriggersEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetCSSRegionsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetCaretBrowsingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetCompositingBordersVisible_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetCompositingRepaintCountersVisible_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetCookieEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetCursiveFontFamily_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDNSPrefetchingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDOMPasteAllowed_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDOMTimersThrottlingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDatabasesEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDefaultFixedFontSize_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDefaultFontSize_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDefaultTextEncodingName_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDeveloperExtrasEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDiagnosticLoggingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetDoNotTrack_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetEditableLinkBehavior_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetEnableInheritURIQueryComponent_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetEncodingDetectorEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetFTPDirectoryTemplatePath_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetFantasyFontFamily_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetFileAccessFromFileURLsAllowed_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetFixedFontFamily_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetFontSmoothingLevel_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetForceEnableVideo_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetForceFTPDirectoryListings_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetForceSoftwareWebGLRendering_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetFrameFlatteningEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetFullScreenEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetGamepadsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetHTTPEquivEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetHiddenPageCSSAnimationSuspensionEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetHiddenPageDOMTimerThrottlingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetHixie76WebSocketProtocolEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetHyperlinkAuditingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetIgnoreViewportScalingConstraints_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetImageControlsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetIncrementalRenderingSuppressionTimeout_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetInspectorUsesWebKitUserInterface_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetInteractiveFormValidationEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetJavaEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetJavaEnabledForLocalFiles_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetJavaScriptCanAccessClipboard_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetJavaScriptCanOpenWindowsAutomatically_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetJavaScriptEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetJavaScriptMarkupEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetJavaScriptRuntimeFlags_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetLoadsImagesAutomatically_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetLoadsSiteIconsIgnoringImageLoadingPreference_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetLocalFileContentSniffingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetLocalStorageEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetLogsPageMessagesToSystemConsoleEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetLongMousePressEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMediaControlsScaleWithPageZoom_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMediaPlaybackAllowsInline_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMediaPlaybackRequiresUserGesture_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMediaSourceEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMediaStreamEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMetaRefreshEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMinimumFontSize_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMinimumZoomFontSize_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMockScrollbarsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetMultithreadedWebGLEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetNeedsSiteSpecificQuirks_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetNewBlockInsideInlineModelEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetNotificationsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetOfflineWebApplicationCacheEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPDFPluginEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPageCacheEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPageCacheSupportsPlugins_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPageVisibilityBasedProcessSuppressionEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPaginateDuringLayoutEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPictographFontFamily_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPlugInSnapshottingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPluginsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPrimaryPlugInSnapshotDetectionEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetPrivateBrowsingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetQTKitEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetRegionBasedColumnsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetRequestAnimationFrameEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSansSerifFontFamily_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetScreenFontSubstitutionEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetScrollingPerformanceLoggingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSelectTrailingWhitespaceEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSerifFontFamily_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetServiceControlsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetShouldConvertPositionStyleOnCopy_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetShouldDisplayCaptions_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetShouldDisplaySubtitles_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetShouldDisplayTextDescriptions_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetShouldPrintBackgrounds_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetShouldRespectImageOrientation_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetShowsToolTipOverTruncatedText_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetShowsURLsInToolTipsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSimpleLineLayoutDebugBordersEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSimpleLineLayoutEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSmartInsertDeleteEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSnapshotAllPlugIns_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSpatialNavigationEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetStorageBlockingPolicy_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSubpixelCSSOMElementMetricsEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetSuppressesIncrementalRendering_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetTabToLinksEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetTabsToLinks_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetTelephoneNumberParsingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetTextAreasAreResizable_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetTextAutosizingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetThreadedScrollingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetTiledScrollingIndicatorVisible_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetUniversalAccessFromFileURLsAllowed_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetUseLegacyTextAlignPositionedElementBehavior_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
+int APS5_VABI WKPreferencesSetViewGestureDebuggingEnabled_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
