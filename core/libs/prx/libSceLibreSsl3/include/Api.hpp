@@ -4,10 +4,12 @@
 #include "prx/libSceLibreSsl3/include/Key.hpp"
 #include "prx/libSceLibreSsl/include/Api.hpp"
 
+struct Asn1Object_nid_no_patch;
+
 extern "C" {
 
 int APS5_VABI ASN1_INTEGER_free_nid_postfix(void);
-int APS5_VABI ASN1_OBJECT_free_nid_postfix(void);
+void APS5_VABI ASN1_OBJECT_free_nid_postfix(Asn1Object_nid_no_patch* object);
 int APS5_VABI ASN1_STRING_get0_data_nid_postfix(void);
 int APS5_VABI BIO_up_ref_nid_postfix(void);
 int APS5_VABI BIO_vfree_nid_postfix(void);
