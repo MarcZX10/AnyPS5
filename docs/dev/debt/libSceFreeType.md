@@ -1,5 +1,6 @@
 # libSceFreeType technical debt
 
+- [FT_Library_SetLcdFilterWeights](../../../core/libs/prx/libSceFreeType/src/LcdFilter.cpp) (libSceFreeType) - as for `FT_Library_SetLcdFilter`, the bundled build returns `FT_Err_Unimplemented_Feature` and no weights take effect; the signature is unverified. The five weights are copied from the guest buffer before the call
 - [FT_Library_SetLcdFilter](../../../core/libs/prx/libSceFreeType/src/LcdFilter.cpp) (libSceFreeType) - the bundled FreeType 2.13.3 is built without `FT_CONFIG_OPTION_SUBPIXEL_RENDERING`, so the call returns `FT_Err_Unimplemented_Feature` as in [ftlcdfil.c](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftlcdfil.c) and no filter takes effect; whether the console library enables subpixel rendering and its signature are unverified
 ### Unknown function info
 - [FT_New_Size, FT_Activate_Size and FT_Done_Size](../../../core/libs/prx/libSceFreeType/Export.cpp) (libSceFreeType) - console signatures, errors and generic-finalizer ordering are unverified; the LP64 guest adapter follows bundled [FreeType 2.13.3](https://github.com/freetype/freetype/blob/42608f77f20749dd6ddc9e0536788eaad70ea4b5/src/base/ftobjs.c). Private size fields are bridge-owned. Sizes created outside the bridge throw when selected.
