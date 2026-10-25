@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "prx/libSceLibreSsl/include/Api.hpp"
 #include "prx/libc/include/General.hpp"
 #include "prx/libc/include/general/VabiMacros.hpp"
 
