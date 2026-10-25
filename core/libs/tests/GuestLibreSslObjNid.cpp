@@ -27,7 +27,7 @@ int main() {
     Object known{nullptr, nullptr, 672, 9, encoded, 0};
     Require(OBJ_obj2nid_nid_postfix(&known) == 672, "an object with a NID returns it without reading the bytes");
     Object empty{nullptr, nullptr, 0, 0, nullptr, 0};
-    Require(OBJ_obj2nid_nid_postfix(&empty) == 0, "an object without a NID or bytes has NID_undef");
+    Require(OBJ_obj2nid_nid_postfix(&empty) == 404, "an empty object follows LibreSSL 2.5.4 table search to NID_ccitt");
     Object unnamed{nullptr, nullptr, 0, 3, encoded, 0};
     try {
         static_cast<void>(OBJ_obj2nid_nid_postfix(&unnamed));

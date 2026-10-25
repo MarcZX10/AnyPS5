@@ -18,7 +18,7 @@ extern "C" int APS5_VABI OBJ_obj2nid_nid_postfix(const void* value) {
     if (!value) return 0;
     const auto* object = static_cast<const Object*>(value);
     if (object->nid != 0) return object->nid;
-    if (object->length == 0) return 0;
+    if (object->length == 0) return 404;
     NotImplemented_nid_no_patch("OBJ_obj2nid lookup of an object identifier by its encoded bytes");
     return 0;
 }
