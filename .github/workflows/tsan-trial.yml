@@ -1,0 +1,42 @@
+name: TSan trial
+on:
+  push:
+    branches: [tsan-trial]
+permissions:
+  contents: read
+jobs:
+  tsan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: git submodule update --init --recursive --depth 1 --jobs 8
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build libx11-dev libxext-dev libxrandr-dev libasound2-dev libpulse-dev mesa-vulkan-drivers
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo sysctl vm.mmap_rnd_bits=28 || true
+      - id: configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DANYPS5_ENABLE_TSAN=ON "-DCMAKE_C_FLAGS=-g1" "-DCMAKE_CXX_FLAGS=-g1"
+      - if: steps.configure.outcome == 'success'
+        run: cmake --build build -- -k 0 || true
+      - if: steps.configure.outcome == 'success'
+        run: cmake --build build --target libs -- -k 0 || true
+      - if: steps.configure.outcome == 'success'
+        env:
+          TSAN_OPTIONS: halt_on_error=1:second_deadlock_stack=1:suppressions=${{ github.workspace }}/tools/tsan-suppressions.txt
+        run: |
+          cd build
+          ctest --timeout 600 --parallel 4 --output-junit ctest.xml > ctest.log 2>&1 || true
+          tail -30 ctest.log
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tsan-tests
+          path: |
+            build/ctest.xml
+            build/ctest.log
+            build/Testing/Temporary/LastTest.log
+          if-no-files-found: ignore
