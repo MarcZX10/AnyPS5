@@ -1,0 +1,35 @@
+name: Getrlimit trial
+on:
+  push:
+    branches: [marc-getrlimit-trial]
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 5
+      - run: git submodule update --init --recursive --depth 1 --jobs 8
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build libx11-dev libxext-dev libxrandr-dev libasound2-dev libpulse-dev
+      - name: Plain
+        run: |
+          cmake -S . -B plain -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON > /dev/null
+          cmake --build plain --target guest_getrlimit_tests
+          cd plain && ctest -R "^guest_getrlimit$" --output-on-failure 2>&1 | grep -E "Test +#|tests passed"
+      - name: ASan with the change
+        env:
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          cmake -S . -B san -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DANYPS5_ENABLE_ASAN=ON > /dev/null
+          cmake --build san --target guest_getrlimit_tests
+          cd san && ctest -R "^guest_getrlimit$" --output-on-failure 2>&1 | grep -E "Test +#|ERROR|tests passed"
+      - name: ASan without the change
+        env:
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          git checkout -q HEAD~2 -- core/libs/tests/GuestGetrlimit.cpp
+          cmake --build san --target guest_getrlimit_tests
+          cd san && ctest -R "^guest_getrlimit$" --output-on-failure 2>&1 | grep -E "Test +#|ERROR|tests passed" || true
