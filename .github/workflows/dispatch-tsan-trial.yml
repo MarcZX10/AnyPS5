@@ -1,0 +1,34 @@
+name: Dispatch TSan trial
+on:
+  push:
+    branches: [marc-dispatch-tsan-trial]
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - run: git submodule update --init --recursive --depth 1 --jobs 8
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build libx11-dev libxext-dev libxrandr-dev libasound2-dev libpulse-dev mesa-vulkan-drivers && sudo sysctl vm.mmap_rnd_bits=28 || true
+      - run: |
+          cmake -S . -B tsan -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DANYPS5_ENABLE_TSAN=ON -DCMAKE_CXX_FLAGS=-g1 > /dev/null
+          cmake --build tsan --target agc_driver_prepared_shaders_tests libs 2>&1 | tail -2 || true
+          cd tsan && ctest -N | grep -i "concurrent_lazy"
+      - name: With the fix
+        env:
+          APS5_PROFILE_DRAW: "1"
+          TSAN_OPTIONS: halt_on_error=1:suppressions=${{ github.workspace }}/tools/tsan-suppressions.txt
+        run: cd tsan && for i in 1 2 3; do ctest -R "concurrent_lazy" --output-on-failure 2>&1 | grep -E "Test +#|SUMMARY"; done || true
+      - name: Without the fix
+        env:
+          APS5_PROFILE_DRAW: "1"
+          TSAN_OPTIONS: halt_on_error=1:suppressions=${{ github.workspace }}/tools/tsan-suppressions.txt
+        run: |
+          git -c user.name=t -c user.email=t@t revert --no-edit d8a6d87c6c578aeffaed6f713458e6d64e002ee9
+          cmake --build tsan --target agc_driver_prepared_shaders_tests libs 2>&1 | tail -1
+          cd tsan && for i in 1 2 3; do ctest -R "concurrent_lazy" --output-on-failure 2>&1 | grep -E "Test +#|SUMMARY"; done || true
