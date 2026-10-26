@@ -1,0 +1,37 @@
+name: Vorbis trial
+on:
+  push:
+    branches: [marc-vorbis-trial]
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 5
+      - run: git submodule update --init --recursive --depth 50 --jobs 8
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build libx11-dev libxext-dev libxrandr-dev libasound2-dev libpulse-dev
+      - name: Plain
+        run: |
+          cmake -S . -B plain -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON > /dev/null
+          cd plain && ninja -t targets all | grep -oE "^[a-z0-9_]*vorbis[a-z0-9_]*_tests" | sort -u | xargs ninja
+          ctest -R vorbis --output-on-failure 2>&1 | grep -E "Test +#|tests passed"
+      - name: UBSan with the update
+        env:
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          cmake -S . -B san -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DANYPS5_ENABLE_ASAN=ON "-DCMAKE_C_FLAGS=-g1 -fsanitize=undefined -fno-sanitize=vptr" "-DCMAKE_CXX_FLAGS=-g1 -fsanitize=undefined -fno-sanitize=vptr" > /dev/null
+          cd san && ninja -t targets all | grep -oE "^[a-z0-9_]*vorbis[a-z0-9_]*_tests" | sort -u | xargs ninja
+          ctest -R vorbis --output-on-failure 2>&1 | grep -E "Test +#|runtime error|tests passed"
+      - name: UBSan with the old libvorbis
+        env:
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          git -C 3rdparty/vorbis checkout -q 0657aee69dec8508a0011f47f3b69d7538e9d262
+          cd san && ninja -t targets all | grep -oE "^[a-z0-9_]*vorbis[a-z0-9_]*_tests" | sort -u | xargs ninja
+          ctest -R vorbis --output-on-failure 2>&1 | grep -E "Test +#|runtime error|tests passed" || true
