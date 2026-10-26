@@ -22,14 +22,16 @@ jobs:
       - name: ASan with the change
         env:
           ASAN_OPTIONS: detect_leaks=0
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: |
-          cmake -S . -B san -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DANYPS5_ENABLE_ASAN=ON > /dev/null
+          cmake -S . -B san -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DANYPS5_ENABLE_ASAN=ON "-DCMAKE_C_FLAGS=-g1 -fsanitize=undefined -fno-sanitize=vptr" "-DCMAKE_CXX_FLAGS=-g1 -fsanitize=undefined -fno-sanitize=vptr" > /dev/null
           cmake --build san --target guest_getrlimit_tests
-          cd san && ctest -R "^guest_getrlimit$" --output-on-failure 2>&1 | grep -E "Test +#|ERROR|tests passed"
+          cd san && ctest -R "^guest_getrlimit$" --output-on-failure 2>&1 | grep -E "Test +#|ERROR|DTLS|tests passed"
       - name: ASan without the change
         env:
           ASAN_OPTIONS: detect_leaks=0
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: |
-          git checkout -q HEAD~2 -- core/libs/tests/GuestGetrlimit.cpp
+          git checkout -q HEAD~3 -- core/libs/tests/GuestGetrlimit.cpp
           cmake --build san --target guest_getrlimit_tests
-          cd san && ctest -R "^guest_getrlimit$" --output-on-failure 2>&1 | grep -E "Test +#|ERROR|tests passed" || true
+          cd san && ctest -R "^guest_getrlimit$" --output-on-failure 2>&1 | grep -E "Test +#|ERROR|DTLS|tests passed" || true
