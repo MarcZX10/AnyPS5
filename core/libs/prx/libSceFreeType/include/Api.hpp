@@ -96,4 +96,6 @@ void APS5_VABI FT_Stroker_Rewind_nid_postfix(void* stroker);
 int APS5_VABI FT_Stroker_BeginSubPath_nid_postfix(void* stroker, const FreeType::GuestVector* to, std::uint8_t open);
 int APS5_VABI FT_Stroker_ConicTo_nid_postfix(void* stroker, const FreeType::GuestVector* control, const FreeType::GuestVector* to);
 
+int APS5_VABI FT_Outline_New_nid_postfix(FreeType::GuestLibrary* library, std::uint32_t numPoints, std::int32_t numContours, FreeType::GuestOutline* outline);
+int APS5_VABI FT_Outline_Done_nid_postfix(FreeType::GuestLibrary* library, FreeType::GuestOutline* outline);
 }
