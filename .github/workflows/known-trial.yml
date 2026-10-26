@@ -1,0 +1,22 @@
+name: Known trial
+on:
+  push:
+    branches: [marc-known-trial]
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: git submodule update --init --recursive --depth 1 --jobs 8
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build libx11-dev libxext-dev libxrandr-dev libasound2-dev libpulse-dev
+      - env:
+          ASAN_OPTIONS: detect_leaks=0
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DANYPS5_ENABLE_ASAN=ON "-DCMAKE_C_FLAGS=-g1 -fsanitize=undefined -fno-sanitize=vptr" "-DCMAKE_CXX_FLAGS=-g1 -fsanitize=undefined -fno-sanitize=vptr" > /dev/null
+          cmake --build build --target guest_posix_spawn_tests guest_sce_v2_exceptions_tests guest_system_configuration_tests guest_convert_keycode_tests relinker libs -- -k 0 || true
+          cd build && ctest -R "^(guest_posix_spawn|guest_sce_v2_exceptions|guest_system_configuration|guest_convert_keycode|input_magic)$" --output-on-failure 2>&1 | grep -E "Test +#|SUMMARY|tests passed|Not Run"
