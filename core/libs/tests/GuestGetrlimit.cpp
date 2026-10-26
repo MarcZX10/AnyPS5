@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include <initializer_list>
 #include <limits>
@@ -148,10 +149,18 @@ static void RequireHostLimit(int resource, int hostResource) {
     Require(guest.rlim_max == Guest(host.rlim_max));
 }
 
+static rlim_t DataInUse() {
+    std::ifstream status("/proc/self/status");
+    std::string line;
+    while (std::getline(status, line))
+        if (line.rfind("VmData:", 0) == 0) return static_cast<rlim_t>(std::stoull(line.substr(7))) * 1024;
+    return 0;
+}
+
 static void LoweredHostLimitIsReported() {
     rlimit host{};
     Require(getrlimit(RLIMIT_DATA, &host) == 0);
-    const rlim_t lowered = rlim_t{1} << 40;
+    const rlim_t lowered = std::max(rlim_t{1} << 40, DataInUse() + (rlim_t{1} << 40));
     if (host.rlim_max != RLIM_INFINITY && host.rlim_max < lowered) return;
     host.rlim_cur = lowered;
     Require(setrlimit(RLIMIT_DATA, &host) == 0);
