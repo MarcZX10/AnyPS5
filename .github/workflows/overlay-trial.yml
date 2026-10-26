@@ -1,0 +1,29 @@
+name: Overlay trial
+on:
+  push:
+    branches: [marc-overlay-trial]
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: git submodule update --init --recursive --depth 1 --jobs 8
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build libx11-dev libxext-dev libxrandr-dev libasound2-dev libpulse-dev mesa-vulkan-drivers
+      - name: Plain
+        run: |
+          cmake -S . -B plain -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON > /dev/null
+          cmake --build plain --target agc_performance_overlay_tests libs
+          cd plain && for i in 1 2 3; do ctest -R "^agc_performance_overlay$" --timeout 600 2>&1 | grep -E "Test +#"; done
+      - name: ASan and UBSan
+        env:
+          ASAN_OPTIONS: detect_leaks=0
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: |
+          cmake -S . -B san -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DANYPS5_ENABLE_ASAN=ON "-DCMAKE_C_FLAGS=-g1 -fsanitize=undefined -fno-sanitize=vptr" "-DCMAKE_CXX_FLAGS=-g1 -fsanitize=undefined -fno-sanitize=vptr" > /dev/null
+          cmake --build san --target agc_performance_overlay_tests libs
+          cd san && for i in 1 2 3; do ctest -R "^agc_performance_overlay$" --timeout 600 2>&1 | grep -E "Test +#"; done
