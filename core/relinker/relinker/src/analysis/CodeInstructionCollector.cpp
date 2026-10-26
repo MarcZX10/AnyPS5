@@ -6,6 +6,7 @@
 #include <codegen/IInstructionScanner.hpp>
 #include <codegen/x86/X64InstructionDecoder.hpp>
 #include <codegen/CodegenException.hpp>
+#include <elfpatcher/general/ElfConstants.hpp>
 #include <io/BufferUtils.hpp>
 #include <algorithm>
 #include <bit>
@@ -70,11 +71,11 @@ std::set<Domain::VirtualAddress> CodeInstructionCollector::Collect(const std::ve
     for (const auto& header : headers) {
         if (header.Type == 0x61000000) sceBase = header.Offset;
         if (header.Type != 2) continue;
-        if (hasDynamic || header.FileSize % 16 != 0) throw Domain::RelinkerException("Code analysis: invalid dynamic segment");
+        if (hasDynamic) throw Domain::RelinkerException("Code analysis: invalid dynamic segment");
         hasDynamic = true;
         range(header.Offset, header.FileSize);
         bool terminated = false;
-        for (std::uint64_t offset = header.Offset; offset < header.Offset + header.FileSize; offset += 16) {
+        for (std::uint64_t offset = header.Offset; header.Offset + header.FileSize - offset >= 16; offset += 16) {
             const auto tag = Io::ReadU64(bytes, offset);
             if (tag == 0) { terminated = true; break; }
             const auto value = Io::ReadU64(bytes, offset + 8);
@@ -99,6 +100,19 @@ std::set<Domain::VirtualAddress> CodeInstructionCollector::Collect(const std::ve
         return offset;
     };
     std::vector<Domain::CodeRange> sceFunctions;
+    const auto trimToCode = [&](Domain::ProgramHeader& header, std::uint64_t end, bool interpreterAnywhere) {
+        const std::span<const std::uint8_t> segment(bytes.data() + header.Offset, header.FileSize);
+        auto begin = header.MappedAddress;
+        for (const auto& interpreter : headers)
+            if (interpreter.Type == 3 && interpreter.MappedAddress < end &&
+                (interpreterAnywhere ? interpreter.MappedAddress >= begin : interpreter.MappedAddress == begin))
+                begin = interpreter.MappedAddress + std::min(interpreter.FileSize, end - interpreter.MappedAddress);
+        const std::string_view loaderPath("/libexec/ld-elf.so.1", 21);
+        if (begin == header.MappedAddress && end - begin > loaderPath.size() && std::equal(loaderPath.begin(), loaderPath.end(), segment.begin())) begin += loaderPath.size();
+        header.Offset += begin - header.MappedAddress;
+        header.MappedAddress = begin;
+        header.FileSize = end - begin;
+    };
     if (sceBase) {
         const auto unwindFunctions = UnusedNidFilter::ReadExceptionFunctions(bytes, headers, {}, {});
         for (const auto& function : unwindFunctions) sceFunctions.push_back({function.Begin, function.End});
@@ -107,15 +121,12 @@ std::set<Domain::VirtualAddress> CodeInstructionCollector::Collect(const std::ve
             if (header.Type != 1 || (header.Flags & 1) == 0) continue;
             range(header.Offset, header.FileSize);
             const std::span<const std::uint8_t> segment(bytes.data() + header.Offset, header.FileSize);
-            const auto end = FindSceCodeEnd(segment, header.MappedAddress, unwindFunctions, value(3, 0x61000027).value_or(0), value(2, 0x6100002d).value_or(0)).value_or(header.MappedAddress + header.FileSize);
-            auto begin = header.MappedAddress;
-            for (const auto& interpreter : headers)
-                if (interpreter.Type == 3 && interpreter.MappedAddress >= begin && interpreter.MappedAddress < end) begin = interpreter.MappedAddress + std::min(interpreter.FileSize, end - interpreter.MappedAddress);
-            const std::string_view loaderPath("/libexec/ld-elf.so.1", 21);
-            if (begin == header.MappedAddress && end - begin > loaderPath.size() && std::equal(loaderPath.begin(), loaderPath.end(), segment.begin())) begin += loaderPath.size();
-            header.Offset += begin - header.MappedAddress;
-            header.MappedAddress = begin;
-            header.FileSize = end - begin;
+            trimToCode(header, FindSceCodeEnd(segment, header.MappedAddress, unwindFunctions, value(3, 0x61000027).value_or(0), value(2, 0x6100002d).value_or(0)).value_or(header.MappedAddress + header.FileSize), true);
+        }
+    } else {
+        for (auto& header : codeHeaders) {
+            if (header.Type != 1 || (header.Flags & 1) == 0) continue;
+            trimToCode(header, header.MappedAddress + header.FileSize, false);
         }
     }
     std::set<std::uint64_t> roots;
@@ -262,7 +273,8 @@ std::set<Domain::VirtualAddress> CodeInstructionCollector::Collect(const std::ve
         symbols = table(6, 0x61000039, symbolCount * 24);
         for (std::uint64_t index = 0; index < symbolCount; ++index) {
             const auto offset = symbols + index * 24;
-            if ((bytes[offset + 4] & 15) == 2 && Io::ReadU16(bytes, offset + 6) != 0) {
+            const auto section = Io::ReadU16(bytes, offset + 6);
+            if ((bytes[offset + 4] & 15) == 2 && section != 0 && section != Elfpatcher::SHN_ABS) {
                 const auto address = Io::ReadU64(bytes, offset + 8);
                 addRoot(address);
                 addFunction(address, Io::ReadU64(bytes, offset + 16), true);
@@ -298,7 +310,8 @@ std::set<Domain::VirtualAddress> CodeInstructionCollector::Collect(const std::ve
                 const auto matchingDefinedSymbol = hasSymbol && Io::ReadU16(bytes, symbol + 6) != 0
                     && addend <= static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max())
                     && Io::ReadU64(bytes, symbol + 8) == addend;
-                if ((index != 0 && !zeroSectionSymbol && !matchingDefinedSymbol) || !pointers.Values.emplace(slot, addend).second) throw Domain::RelinkerException("Code analysis: invalid relative relocation", slot);
+                const auto [recorded, inserted] = pointers.Values.emplace(slot, addend);
+                if ((index != 0 && !zeroSectionSymbol && !matchingDefinedSymbol) || (!inserted && recorded->second != addend)) throw Domain::RelinkerException("Code analysis: invalid relative relocation", slot);
                 addPointerRoot(addend);
             } else if (type == 1 || type == 6 || type == 7) {
                 if (index != 0 && index >= symbolCount) throw Domain::RelinkerException("Code analysis: invalid relocation symbol", slot);
@@ -306,7 +319,8 @@ std::set<Domain::VirtualAddress> CodeInstructionCollector::Collect(const std::ve
                 if (index == 0 || Io::ReadU16(bytes, symbol + 6) == 0) importSlots.insert(slot);
                 else {
                     const auto target = Io::ReadU64(bytes, symbol + 8) + addend;
-                    if (!pointers.Values.emplace(slot, target).second) throw Domain::RelinkerException("Code analysis: duplicate pointer relocation", slot);
+                    const auto [recorded, inserted] = pointers.Values.emplace(slot, target);
+                    if (!inserted && recorded->second != target) throw Domain::RelinkerException("Code analysis: duplicate pointer relocation", slot);
                     addPointerRoot(target);
                 }
             }
@@ -334,7 +348,7 @@ std::set<Domain::VirtualAddress> CodeInstructionCollector::Collect(const std::ve
         addFunction(function.Begin, function.End - function.Begin, false);
         for (const auto target : function.ExtraTargets) addRoot(target);
     }
-    if (sceBase) {
+    if (sceBase || !functions.empty()) {
         const std::vector<std::pair<std::uint64_t, std::uint64_t>> ranges(functions.begin(), functions.end());
         for (const auto& header : codeHeaders) {
             if (header.Type != 1 || (header.Flags & 1) == 0) continue;

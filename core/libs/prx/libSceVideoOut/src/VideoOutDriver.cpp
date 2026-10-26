@@ -1,4 +1,5 @@
 #include <bit>
+#include <charconv>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -6,6 +7,7 @@
 #include <exception>
 #include <thread>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -19,6 +21,7 @@
 #include "prx/libScePad/include/PadState.hpp"
 #include "prx/libkernel/Equeue/Equeue.hpp"
 #include "prx/libkernel/Time/include/Time.hpp"
+#include "prx/libkernel/Time/include/SleepWake.hpp"
 #include "prx/libSceVideoOut/include/VideoOutDriver.hpp"
 #if APS5_ENABLE_TIMING_LOG
 #include "prx/libSceVideoOut/include/FrameTimingLog.hpp"
@@ -38,6 +41,26 @@ constexpr std::uint64_t PRESENT_POLL_MICROS = 10000;
 
 void require(bool condition, const char* reason) {
     if (!condition) throw std::runtime_error(std::string("VideoOut: ") + reason);
+}
+
+std::uint32_t resolutionIndex(std::uint32_t width, std::uint32_t height) {
+    return (width >= 3840 || height >= 2160) ? VIDEO_OUT_RESOLUTION_2160P : VIDEO_OUT_RESOLUTION_1080P;
+}
+
+std::optional<std::uint32_t> configuredResolution() {
+    const char* value = std::getenv("APS5_OUTPUT_RESOLUTION");
+    if (value == nullptr || *value == '\0') return std::nullopt;
+    const std::string text(value);
+    const char* end = text.data() + text.size();
+    std::uint32_t width = 0;
+    std::uint32_t height = 0;
+    const auto widthResult = std::from_chars(text.data(), end, width);
+    const bool separated = widthResult.ec == std::errc{} && widthResult.ptr != end && (*widthResult.ptr == 'x' || *widthResult.ptr == 'X');
+    const auto heightResult = separated ? std::from_chars(widthResult.ptr + 1, end, height) : std::from_chars_result{end, std::errc::invalid_argument};
+    if (!separated || heightResult.ec != std::errc{} || heightResult.ptr != end || width == 0 || height == 0) {
+        throw std::runtime_error("VideoOut: APS5_OUTPUT_RESOLUTION must be <width>x<height> with positive integers, got \"" + text + "\"");
+    }
+    return resolutionIndex(width, height);
 }
 
 std::vector<const char*> windowExtensions(SDL_Window* window) {
@@ -488,12 +511,18 @@ int VideoOutDriver::GetDisplayRefreshRate() {
     return displayRefreshRate.load();
 }
 
+std::uint32_t VideoOutDriver::GetDisplayResolution() {
+    if (const auto configured = configuredResolution()) return *configured;
+    return displayResolution.load();
+}
+
 void VideoOutDriver::updateDisplayRefreshRate() {
     const int display = SDL_GetWindowDisplayIndex(window.Handle());
     if (display < 0) throw std::runtime_error(std::string("SDL_GetWindowDisplayIndex failed: ") + SDL_GetError());
     SDL_DisplayMode mode{};
     if (SDL_GetCurrentDisplayMode(display, &mode) != 0) throw std::runtime_error(std::string("SDL_GetCurrentDisplayMode failed: ") + SDL_GetError());
     displayRefreshRate.store(mode.refresh_rate);
+    displayResolution.store(resolutionIndex(mode.w, mode.h));
 }
 
 void VideoOutDriver::pollHostHdr() {
@@ -541,7 +570,11 @@ void VideoOutDriver::processFlip(FlipRequest& req) {
             req.ReleaseLocked();
             return;
         }
-        require(req.cfg->outputMode != VIDEO_OUT_OUTPUT_MODE_119_88HZ || SupportsHighFrameRate(), "display no longer supports 119.88 Hz output");
+        if (req.cfg->outputMode == VIDEO_OUT_OUTPUT_MODE_119_88HZ && !SupportsHighFrameRate()) {
+            req.cfg->outputMode = VIDEO_OUT_OUTPUT_MODE_DEFAULT;
+            triggerEvents(*req.cfg, VIDEO_OUT_EVENT_SET_MODE, reinterpret_cast<void*>(req.cfg->outputMode));
+            std::fprintf(stderr, "[videoout] display no longer supports 119.88 Hz; fell back to 59.94 Hz\n");
+        }
         require(req.ready && !req.terminal && req.generation == req.cfg->generation, "stale or incomplete flip request");
         const auto interval = static_cast<uint64_t>(req.flipRate + 1);
         require(req.cfg->lastFlipVblank <= std::numeric_limits<uint64_t>::max() - interval, "flip interval overflow");
@@ -578,11 +611,12 @@ void VideoOutDriver::processFlip(FlipRequest& req) {
             request.gpuComplete = true;
             request.cfg->vblankCond.notify_all();
         };
+        const auto plane = overlayPlane();
         if (req.index >= 0 && !req.unregistered) {
             const auto display = DescribeVideoOutBuffer(req.buffer, req.group);
-            AgcDriverPresentBuffer_nid_postfix(target, display, gpuReady, &req);
+            AgcDriverPresentBuffer_nid_postfix(target, display, plane ? &*plane : nullptr, gpuReady, &req);
         } else {
-            AgcDriverPresentClear_nid_postfix(target, req.unregistered || req.index == VIDEO_OUT_BUFFER_INDEX_BLACK, gpuReady, &req);
+            AgcDriverPresentClear_nid_postfix(target, req.unregistered || req.index == VIDEO_OUT_BUFFER_INDEX_BLACK, plane ? &*plane : nullptr, gpuReady, &req);
         }
         timing.Mark("present");
         window.UpdateTitle();
@@ -619,7 +653,22 @@ void VideoOutDriver::processFlip(FlipRequest& req) {
     }
     req.terminal = true;
     req.cfg->vblankCond.notify_all();
+    KernelWakeSleepers_nid_no_patch();
     timing.Mark("notify_game");
+}
+
+std::optional<AgcDriver::DisplayBuffer> VideoOutDriver::overlayPlane() {
+    std::shared_ptr<VideoOutConfig> overlay;
+    {
+        std::lock_guard lock(mutex);
+        overlay = contexts[VIDEO_OUT_BUS_TYPE_OVERLAY + 1];
+    }
+    if (!overlay) return std::nullopt;
+    std::lock_guard lock(overlay->mutex);
+    const auto index = overlay->flipStatus.currentBuffer;
+    if (overlay->Closed() || index < 0 || index >= VIDEO_OUT_BUFFER_NUM_MAX || !overlay->buffers[index].Occupied()) return std::nullopt;
+    const auto& buffer = overlay->buffers[index];
+    return DescribeVideoOutBuffer(buffer, overlay->groups[buffer.groupIndex]);
 }
 
 void VideoOutDriver::presentLoop(std::stop_token token, std::promise<void>& started) {

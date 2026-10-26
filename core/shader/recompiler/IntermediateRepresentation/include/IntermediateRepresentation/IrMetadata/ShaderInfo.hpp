@@ -38,6 +38,7 @@ struct ShaderInfo {
     bool dispatchThreadLimit = false;
     bool rasterPrimitive = false;
     bool layerExported = false;
+    bool smoothOffsetBarycentrics = false;
 
     bool operator==(const ShaderInfo& other) const = default;
 };
