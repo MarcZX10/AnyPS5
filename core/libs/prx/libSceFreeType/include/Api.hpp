@@ -97,5 +97,10 @@ int APS5_VABI FT_Stroker_BeginSubPath_nid_postfix(void* stroker, const FreeType:
 int APS5_VABI FT_Stroker_ConicTo_nid_postfix(void* stroker, const FreeType::GuestVector* control, const FreeType::GuestVector* to);
 int APS5_VABI ft_corner_is_flat_nid_postfix(std::int64_t in_x, std::int64_t in_y, std::int64_t out_x, std::int64_t out_y);
 int APS5_VABI ft_corner_orientation_nid_postfix(std::int64_t in_x, std::int64_t in_y, std::int64_t out_x, std::int64_t out_y);
+int APS5_VABI FT_Load_Glyph_nid_postfix(FreeType::GuestFaceRec* face, std::uint32_t glyph_index, std::int32_t load_flags);
+int APS5_VABI FT_Bitmap_Copy_nid_postfix(FreeType::GuestLibrary* library, const FreeType::GuestBitmap* source, FreeType::GuestBitmap* target);
+int APS5_VABI FT_GlyphSlot_Own_Bitmap_nid_postfix(FreeType::GuestGlyphSlotRec* slot);
+int APS5_VABI FT_Bitmap_Done_nid_postfix(FreeType::GuestLibrary* library, FreeType::GuestBitmap* bitmap);
+int APS5_VABI FT_Bitmap_Embolden_nid_postfix(FreeType::GuestLibrary* library, FreeType::GuestBitmap* bitmap, std::int64_t xStrength, std::int64_t yStrength);
 
 }
