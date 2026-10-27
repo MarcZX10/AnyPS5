@@ -86,8 +86,6 @@ FileStream* __stdinp_nid_postfix = &input;
 FileStream* __stdoutp_nid_postfix = &_Stdout_nid_postfix;
 FileStream* __stderrp_nid_postfix = &_Stderr_nid_postfix;
 int __isthreaded_nid_postfix = 1;
-std::size_t APS5_VABI mbrtowc_nid_postfix(std::uint16_t* destination, const char* source, std::size_t count, void* state);
-int APS5_VABI mbsinit_nid_postfix(const void* state);
 void HostEntropy_nid_no_patch(void* buffer, std::size_t size);
 
 int APS5_VABI fgetc_nid_postfix(FileStream* stream) {
