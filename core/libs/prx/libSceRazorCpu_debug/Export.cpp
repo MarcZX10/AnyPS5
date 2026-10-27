@@ -1,3 +1,4 @@
+#include "prx/libSceRazorCpu_debug/include/Api.hpp"
 #include <cstdint>
 #include <cstddef>
 #include "SceTypes.hpp"
