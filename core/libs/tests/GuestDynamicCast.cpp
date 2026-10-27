@@ -38,7 +38,7 @@ const Vtable DerivedVtable{0, &DerivedType, nullptr};
 const MultipleRecord MultipleType{_ZTVN10__cxxabiv121__vmi_class_type_infoE_nid_postfix + 16, "8Multiple", 0, 1,
                                   {{&BaseType, (16 << 8) | 2}}};
 const MultipleRecord PrivateType{_ZTVN10__cxxabiv121__vmi_class_type_infoE_nid_postfix + 16, "7Private", 0, 1,
-                                 {{&BaseType, (16 << 8) | 1}}};
+                                 {{&BaseType, 16 << 8}}};
 const MultipleRecord VirtualType{_ZTVN10__cxxabiv121__vmi_class_type_infoE_nid_postfix + 16, "7Virtual", 0, 1,
                                  {{&BaseType, (-3 * static_cast<std::ptrdiff_t>(sizeof(void*)) * 256) | 3}}};
 
@@ -76,6 +76,8 @@ int main() {
                        virtualObject.data() + 16) == 7);
     Require(FindPublic(reinterpret_cast<const TypeRecord*>(&MultipleType), -3, multipleObject.data(), &BaseType,
                        multipleObject.data() + 16) == 6);
+    Require(FindPublic(reinterpret_cast<const TypeRecord*>(&VirtualType), -3, virtualObject.data(), &BaseType,
+                       virtualObject.data() + 16) == 1);
     void* object = __cxa_allocate_exception_nid_postfix(16);
     auto* type = reinterpret_cast<std::type_info*>(const_cast<TypeRecord*>(&DerivedType));
     LibcException::Header* header = __cxa_init_primary_exception_nid_postfix(object, type, Destroy);
