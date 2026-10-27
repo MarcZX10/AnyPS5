@@ -45,9 +45,6 @@
 #include <unistd.h>
 #endif
 
-extern "C" {
-int APS5_VABI __getcwd_nid_postfix(char*, std::size_t);
-}
 void Require(bool condition, std::source_location location = std::source_location::current()) {
     if (!condition) {
         std::fprintf(stderr, "Kernel sys check failed at line %u (guest errno %d)\n", location.line(), *__error_nid_postfix());
