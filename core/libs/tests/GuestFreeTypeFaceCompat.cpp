@@ -1,3 +1,4 @@
+#include "prx/libSceFreeType/include/Api.hpp"
 #include "FontFixture.hpp"
 #include "prx/libSceFreeType/include/GuestObjects.hpp"
 #include "prx/libc/include/general/VabiMacros.hpp"
@@ -12,12 +13,6 @@
 #include <vector>
 
 using namespace FreeType;
-
-extern "C" {
-const char* APS5_VABI FT_Get_Font_Format_nid_postfix(GuestFaceRec*);
-std::uint8_t APS5_VABI FT_Face_CheckTrueTypePatents_nid_postfix(GuestFaceRec*);
-std::uint8_t APS5_VABI FT_Face_SetUnpatentedHinting_nid_postfix(GuestFaceRec*, std::uint8_t);
-}
 
 static void Check(bool value, int line) {
     if (!value) {
