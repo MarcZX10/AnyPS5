@@ -2,31 +2,8 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include "prx/libSceLibreSsl3/include/Api.hpp"
 #include "prx/libc/include/General.hpp"
-
-struct LibreSsl3Asn1String {
-    int length;
-    int type;
-    unsigned char* data;
-    std::int64_t flags;
-};
-
-struct LibreSsl3X509Algor {
-    void* algorithm;
-    void* parameter;
-};
-
-struct LibreSsl3X509Pubkey {
-    LibreSsl3X509Algor* algor;
-    LibreSsl3Asn1String* publicKey;
-    void* pkey;
-};
-
-static_assert(sizeof(LibreSsl3Asn1String) == 24);
-static_assert(offsetof(LibreSsl3Asn1String, data) == 8);
-static_assert(sizeof(LibreSsl3X509Algor) == 16);
-static_assert(sizeof(LibreSsl3X509Pubkey) == 24);
-static_assert(offsetof(LibreSsl3X509Pubkey, publicKey) == 8);
 
 namespace {
 

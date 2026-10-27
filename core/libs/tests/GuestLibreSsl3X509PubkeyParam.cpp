@@ -1,3 +1,4 @@
+#include "prx/libSceLibreSsl3/include/Api.hpp"
 #include "prx/libc/include/general/VabiMacros.hpp"
 #include <cstddef>
 #include <cstdint>
@@ -6,28 +7,6 @@
 #include <source_location>
 #include <stdexcept>
 #include <string>
-
-struct LibreSsl3Asn1String {
-    int length;
-    int type;
-    unsigned char* data;
-    std::int64_t flags;
-};
-
-struct LibreSsl3X509Algor {
-    void* algorithm;
-    void* parameter;
-};
-
-struct LibreSsl3X509Pubkey {
-    LibreSsl3X509Algor* algor;
-    LibreSsl3Asn1String* publicKey;
-    void* pkey;
-};
-
-extern "C" {
-int APS5_VABI X509_PUBKEY_get0_param_nid_postfix(void**, const unsigned char**, int*, void**, const void*);
-}
 
 static void Require(bool condition, std::source_location location = std::source_location::current()) {
     if (condition) return;
