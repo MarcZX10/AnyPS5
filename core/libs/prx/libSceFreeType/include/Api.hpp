@@ -101,5 +101,5 @@ int APS5_VABI FT_Load_Glyph_nid_postfix(FreeType::GuestFaceRec* face, std::uint3
 int APS5_VABI FT_Bitmap_Copy_nid_postfix(FreeType::GuestLibrary* library, const FreeType::GuestBitmap* source, FreeType::GuestBitmap* target);
 int APS5_VABI FT_GlyphSlot_Own_Bitmap_nid_postfix(FreeType::GuestGlyphSlotRec* slot);
 int APS5_VABI FT_Bitmap_Embolden_nid_postfix(FreeType::GuestLibrary* library, FreeType::GuestBitmap* bitmap, std::int64_t xStrength, std::int64_t yStrength);
-
+int APS5_VABI sceFreeTypeOtGlyphSlotOwnBitmap_nid_no_patch();
 }
