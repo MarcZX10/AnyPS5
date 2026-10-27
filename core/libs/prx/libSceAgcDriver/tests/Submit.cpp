@@ -124,6 +124,15 @@ void testThreadDimensionGroups() {
     check(ThreadDimensionGroups(0xffffffffu, 64) == 0x4000000u, "a thread count near 2^32 wrapped before the division");
 }
 
+void testSelfReferencingIndirectBuffer() {
+    std::vector<std::uint32_t> commands(4);
+    const auto self = reinterpret_cast<std::uintptr_t>(commands.data());
+    commands = {0xc0023f00u, static_cast<std::uint32_t>(self), static_cast<std::uint32_t>(static_cast<std::uint64_t>(self) >> 32u), 4u};
+    Packet packet{commands.data(), static_cast<std::uint32_t>(commands.size()), 0, {}};
+    const auto message = expectFailure([&] { sceAgcDriverSubmitDcb(&packet); });
+    check(message.find("nest too deeply") != std::string::npos, "an indirect buffer that jumps to itself was not rejected as nesting too deeply");
+}
+
 void testReadOnlyResummarize() {
     std::vector<std::uint32_t> commands;
     for (const auto [offset, value] : {std::pair{0x000u, 0x10u}, {0x200u, 0x007007f3u}, {0x010u, 0xa0000183u}, {0x011u, 0x20000180u}, {0x8eu, 0xffffffffu}, {0x8fu, 0u}, {0x1c4u, 0u}, {0x203u, 0u}}) {
@@ -1065,6 +1074,7 @@ int main(int argc, char** argv) {
         testEvents();
         testValidation();
         testThreadDimensionGroups();
+        testSelfReferencingIndirectBuffer();
         testClearState();
         testSubmissions();
         testEndOfPipeInterrupts();
