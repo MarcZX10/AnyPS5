@@ -5,3 +5,4 @@
 #include "Unescape.hpp"
 #include "Utf32.hpp"
 #include "JavaUtf8.hpp"
+#include "Compare.hpp"
