@@ -98,7 +98,7 @@ class Trace:
             elif phase == "C":
                 tid = _event_tid(event, index)
                 self.folded[tid] += sum(_event_value(value, "args value", index) for value in _event_args(event, index).values())
-        self.presents.sort()
+        self.presents.sort(key=lambda present: present[0])
         for slices in self.slices.values():
             slices.sort(key=lambda entry: (entry[0], -entry[1]))
             stack = []
