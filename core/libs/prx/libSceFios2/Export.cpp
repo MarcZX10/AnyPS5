@@ -126,41 +126,6 @@ int APS5_VABI sceFiosClearTimeStamps() {
     return 0;
 }
 
-int APS5_VABI sceFiosDHClose() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDHCloseSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDHGetPath() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDHOpen() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDHOpenSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDHRead() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDHReadSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceFiosDLLInitialize() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
