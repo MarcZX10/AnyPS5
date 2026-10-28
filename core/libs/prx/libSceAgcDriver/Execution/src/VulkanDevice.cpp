@@ -28,6 +28,7 @@
 #include "prx/libSceAgcDriver/Execution/include/PresentMode.hpp"
 #include "prx/libSceAgcDriver/Execution/include/SwapchainImages.hpp"
 #include "prx/libSceAgcDriver/Execution/include/PerformanceOverlay.hpp"
+#include "prx/libSceAgcDriver/Execution/include/KeyboardOverlay.hpp"
 #include "prx/libSceAgcDriver/Execution/include/PresentationPass.hpp"
 #include "prx/libSceAgcDriver/Execution/include/PresentationScaler.hpp"
 #include "prx/libSceAgcDriver/Execution/include/Screenshot.hpp"
@@ -383,6 +384,7 @@ struct VulkanDevice::State {
     bool fragmentShaderBarycentric = false;
     bool shaderTerminateInvocation = false;
     bool fusedExactArithmetic = false;
+    bool fragmentBarycentricBuiltins = false;
     bool geometryShader = false;
     bool largePoints = false;
     bool sampleRateShading = false;
@@ -404,6 +406,7 @@ struct VulkanDevice::State {
     bool exactRobustLoads = false;
     bool subgroupControlBarriers = true;
     bool workgroupScopeFences = true;
+    bool ldsLockFences = false;
     // VK_EXT_descriptor_indexing with non-uniform image array indexing (bindless image tables in
     // graphics stages, and compute workgroups wider than a wave).
     bool descriptorIndexing = false;
@@ -525,6 +528,7 @@ struct VulkanDevice::State {
     std::unique_ptr<PresentationPass> presentation;
     std::unique_ptr<PresentationPass> planePass;
     std::unique_ptr<PerformanceOverlay> overlay;
+    std::unique_ptr<PerformanceOverlay> keyboard;
     VkFormat surfaceFormat = VK_FORMAT_B8G8R8A8_UNORM;
     VkColorSpaceKHR surfaceColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     bool swapchainColorSpaces = false;
@@ -924,6 +928,7 @@ struct VulkanDevice::State {
             colorTransfer.reset();
             overlay.reset();
             planePass.reset();
+            keyboard.reset();
             presentation.reset();
             scaler.reset();
             hdrScaler.reset();
@@ -1107,6 +1112,7 @@ ComputePipelineReplayResult VulkanDevice::ReplayComputePipeline(const ComputePip
     phase = std::chrono::steady_clock::now();
     CreateComputePipeline(state->device, state->DeviceFunction<PFN_vkCreateComputePipelines>("vkCreateComputePipelines"), replay.cache, objects.module, objects.layout, capture.flags, capture.stageFlags, specialization.Info(), capture.requiredSubgroupSize, &objects.pipeline);
     result.pipelineMilliseconds = elapsed(phase);
+    if ((capture.flags & VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR) != 0) Graphics::LogPipelineStatistics_nid_no_patch(graphicsContext(), objects.pipeline);
     phase = std::chrono::steady_clock::now();
     const auto getCache = state->DeviceFunction<PFN_vkGetPipelineCacheData>("vkGetPipelineCacheData");
     std::size_t cacheBytes = 0;
@@ -1302,6 +1308,7 @@ VulkanDevice::VulkanDevice(const PresentationWindow* window, bool compileOnly) :
         state->tessellationPipelineCache = TessellationPipelineCacheUsable(driver.driverID);
         state->subgroupControlBarriers = SubgroupControlBarrierUsable(driver.driverID);
         state->workgroupScopeFences = WorkgroupScopeFenceUsable(driver.driverID);
+        state->ldsLockFences = LdsLockFencesRequired(driver.driverID);
     }
     if (driverId == VK_DRIVER_ID_NVIDIA_PROPRIETARY && hasExtension(VK_NV_SHADER_SM_BUILTINS_EXTENSION_NAME)) {
         VkPhysicalDeviceShaderSMBuiltinsPropertiesNV smBuiltins{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_PROPERTIES_NV};
@@ -1338,6 +1345,7 @@ VulkanDevice::VulkanDevice(const PresentationWindow* window, bool compileOnly) :
         VkPhysicalDeviceFeatures2 features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, &barycentricFeatures};
         state->InstanceFunction<PFN_vkGetPhysicalDeviceFeatures2>("vkGetPhysicalDeviceFeatures2")(selected, &features);
         state->fragmentShaderBarycentric = barycentricFeatures.fragmentShaderBarycentric == VK_TRUE;
+        state->fragmentBarycentricBuiltins = state->fragmentShaderBarycentric;
         if (state->fragmentShaderBarycentric && hasExtension(VK_KHR_DRIVER_PROPERTIES_EXTENSION_NAME)) {
             VkPhysicalDeviceDriverProperties driver{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES};
             VkPhysicalDeviceProperties2 driverProperties{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, &driver};
@@ -1392,7 +1400,7 @@ VulkanDevice::VulkanDevice(const PresentationWindow* window, bool compileOnly) :
         deviceExtensions.push_back(VK_EXT_HDR_METADATA_EXTENSION_NAME);
         state->hdrMetadata = true;
     }
-    if (state->fragmentShaderBarycentric) {
+    if (state->fragmentBarycentricBuiltins) {
         deviceExtensions.push_back(VK_KHR_FRAGMENT_SHADER_BARYCENTRIC_EXTENSION_NAME);
         state->capabilities.push_back(spv::CapabilityFragmentBarycentricKHR);
         state->spirvExtensions.push_back("SPV_KHR_fragment_shader_barycentric");
@@ -1809,8 +1817,10 @@ VulkanDevice::VulkanDevice(const PresentationWindow* window, bool compileOnly) :
     // Recompiled storage-image access declares no format (the guest descriptor decides it).
     enabled.shaderStorageImageMultisample = available.shaderStorageImageMultisample;
     state->storageImageMultisample = enabled.shaderStorageImageMultisample == VK_TRUE;
-    if (enabled.shaderStorageImageMultisample) state->capabilities.push_back(spv::CapabilityStorageImageMultisample);
-    state->capabilities.push_back(spv::CapabilityImageMSArray);
+    if (enabled.shaderStorageImageMultisample) {
+        state->capabilities.push_back(spv::CapabilityStorageImageMultisample);
+        state->capabilities.push_back(spv::CapabilityImageMSArray);
+    }
     enabled.shaderStorageImageWriteWithoutFormat = available.shaderStorageImageWriteWithoutFormat;
     state->storageImageWriteWithoutFormat = enabled.shaderStorageImageWriteWithoutFormat == VK_TRUE;
     enabled.shaderStorageImageReadWithoutFormat = available.shaderStorageImageReadWithoutFormat;
@@ -1929,7 +1939,7 @@ VulkanDevice::VulkanDevice(const PresentationWindow* window, bool compileOnly) :
         deviceInfo.pNext = &coverageReductionFeatures;
     }
     byteFeatures.pNext = const_cast<void*>(deviceInfo.pNext);
-    if (state->fragmentShaderBarycentric) {
+    if (state->fragmentBarycentricBuiltins) {
         barycentricFeatures.pNext = byteFeatures.pNext;
         byteFeatures.pNext = &barycentricFeatures;
     }
@@ -3628,6 +3638,9 @@ bool VulkanDevice::present(std::uint32_t width, std::uint32_t height, bool opaqu
         plane = nullptr;
     }
     const auto planeSource = plane != nullptr ? OverlayPlaneSource(graphicsContext(), *plane) : PlaneSource{};
+    const auto keyboardView = SystemOverlayView();
+    const bool keyboard = keyboardView.has_value();
+    const bool drawsOver = overlay || keyboard || plane != nullptr;
     if (display != nullptr && resident == nullptr) {
         static_cast<void>(DisplayBufferSize(*display));
         state->colorTransfer->Upload(display->address, width, height, Graphics::ColorTileMode::RenderTarget, DisplayTexelBytes(display->pixelFormat));
@@ -3747,7 +3760,7 @@ bool VulkanDevice::present(std::uint32_t width, std::uint32_t height, bool opaqu
         }
         if (drawn) {
             state->presentation->Bind(slotIndex, resident->Image(), width, height, display->pixelFormat, whiteNits, residentLayer);
-            state->presentation->RecordPresent(commands, slotIndex, barrier.image, state->surfaceFormat, state->surfaceColorSpace, state->extent, overlay || plane != nullptr ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+            state->presentation->RecordPresent(commands, slotIndex, barrier.image, state->surfaceFormat, state->surfaceColorSpace, state->extent, drawsOver ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         } else {
             scaler->RecordLetterbox(commands, width, height, barrier.image, state->extent.width, state->extent.height);
             if (direct) PresentationScaler::RecordBlitFrom(graphicsContext(), commands, resident->Image(), VK_IMAGE_LAYOUT_GENERAL, width, height, residentFilter, barrier.image, state->extent.width, state->extent.height, residentLayer);
@@ -3791,7 +3804,7 @@ bool VulkanDevice::present(std::uint32_t width, std::uint32_t height, bool opaqu
     }
     if (plane != nullptr) {
         bindPlane();
-        state->planePass->RecordOverlay(commands, planeSlot, barrier.image, state->surfaceFormat, state->surfaceColorSpace, state->extent, drawn ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, overlay ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        state->planePass->RecordOverlay(commands, planeSlot, barrier.image, state->surfaceFormat, state->surfaceColorSpace, state->extent, drawn ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, overlay || keyboard ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         if (planeSource.resident != nullptr) {
             planeBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
             planeBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -3799,11 +3812,15 @@ bool VulkanDevice::present(std::uint32_t width, std::uint32_t height, bool opaqu
             Graphics::Recorder::CountBarriers(CommandClass::PresentBlit);
         }
     }
+    if (keyboard) {
+        if (!state->keyboard) state->keyboard = std::make_unique<PerformanceOverlay>(graphicsContext(), state->presentSlots.size());
+        state->keyboard->RecordRects(commands, static_cast<std::size_t>(&slot - state->presentSlots.data()), barrier.image, state->surfaceFormat, state->surfaceColorSpace, state->extent, drawn || plane != nullptr ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, overlay ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, LayOutKeyboard(*keyboardView, state->extent));
+    }
     if (overlay) {
         if (!state->overlay) state->overlay = std::make_unique<PerformanceOverlay>(graphicsContext(), state->presentSlots.size());
         state->overlay->NotePresent(std::chrono::steady_clock::now(), clearOnly ? VkExtent2D{} : VkExtent2D{width, height}, OverlayPresentInfo{std::exchange(state->presentedAddress, 0), state->presentMode, presentCounters.acquireDrops});
-        state->overlay->Record(commands, static_cast<std::size_t>(&slot - state->presentSlots.data()), barrier.image, state->surfaceFormat, state->surfaceColorSpace, state->extent, drawn || plane != nullptr ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-    } else if (!drawn && plane == nullptr) {
+        state->overlay->Record(commands, static_cast<std::size_t>(&slot - state->presentSlots.data()), barrier.image, state->surfaceFormat, state->surfaceColorSpace, state->extent, drawn || plane != nullptr || keyboard ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    } else if (!drawn && plane == nullptr && !keyboard) {
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask = 0;
         barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -4032,6 +4049,7 @@ ShaderRecompiler::SpirvTarget VulkanDevice::buildTarget() const {
     const auto& limits = state->properties.limits;
     ShaderRecompiler::SpirvTarget target{VK_API_VERSION_1_1, state->meshShader ? 0x00010400u : 0x00010300u, state->subgroup.subgroupSize, ShaderRecompiler::BdaAbi::Version, state->capabilities, state->spirvExtensions, false, {limits.maxComputeWorkGroupSize[0], limits.maxComputeWorkGroupSize[1], limits.maxComputeWorkGroupSize[2]}, limits.maxComputeWorkGroupInvocations, limits.maxComputeSharedMemorySize, {}, {}};
     target.fragmentShaderBarycentricEnabled = state->fragmentShaderBarycentric;
+    target.fragmentBarycentricBuiltins = state->fragmentBarycentricBuiltins;
     target.nonConstantImageOffsets = state->maintenance8;
     target.narrowSubgroupClock = state->narrowSubgroupClock;
     target.float64DenormPreserve = state->float64DenormPreserve;
@@ -4046,6 +4064,7 @@ ShaderRecompiler::SpirvTarget VulkanDevice::buildTarget() const {
     target.largePixelFunctionLdsBuffer = state->driverId == VK_DRIVER_ID_NVIDIA_PROPRIETARY;
     target.pixelFunctionStorageDwords = state->pixelFunctionStorageDwords;
     target.deviceScopeLdsMemoryBarriers = !state->workgroupScopeFences;
+    target.ldsLockFences = state->ldsLockFences;
     target.srgbDecodeFormats = state->srgbDecodeFormats & ~state->srgbCopyFormats;
     target.vertexSubgroups = (state->subgroup.supportedStages & VK_SHADER_STAGE_VERTEX_BIT) != 0;
     if (state->meshShader) {
@@ -4118,7 +4137,7 @@ Graphics::Context VulkanDevice::buildContext() const {
         state->depthRangeUnrestricted,
         true,
         state->subgroup,
-        state->fragmentShaderBarycentric,
+        state->fragmentBarycentricBuiltins,
         state->samplerAnisotropy,
         state->textureCompressionBC,
         state->detiler.get(),
@@ -4204,6 +4223,7 @@ Graphics::Context VulkanDevice::buildContext() const {
     context.primitiveListRestart = state->primitiveListRestart;
     context.imageViewMinLod = state->imageViewMinLod;
     context.pipelineExecutableInfo = state->pipelineExecutableInfo;
+    context.maintenance8 = state->maintenance8;
     context.srgbDecodeFormats = state->srgbDecodeFormats;
     context.srgbCopyFormats = state->srgbCopyFormats;
     context.sampleLocationSampleCounts = state->sampleLocationSampleCounts;
@@ -4266,7 +4286,7 @@ bool VulkanDevice::PrebuildGraphicsLibraries(const Graphics::ShaderStages& stage
     return Graphics::Pipeline::Prebuild(context, state, Graphics::VertexInputLayout{}, layouts.View(), group);
 }
 
-void VulkanDevice::Draw(const Graphics::State& graphics, const Pm4::DrawParameters& draw, std::span<const Graphics::CompiledShader> shaders, std::span<const Graphics::GuestMemorySnapshot> snapshots, std::shared_ptr<const DrawRecipe>* recipe, const DrawTraceContext* trace) {
+void VulkanDevice::Draw(const Graphics::State& graphics, const Pm4::DrawParameters& draw, std::span<const Graphics::CompiledShader> shaders, std::span<const Graphics::GuestMemorySnapshot> snapshots, std::shared_ptr<const DrawRecipe>* recipe, const DrawTraceContext* trace, std::uint64_t shape) {
     startJournalReplay();
     for (const auto& shader : shaders) {
         require(shader.program != nullptr, "missing compiled shader");
@@ -4277,7 +4297,7 @@ void VulkanDevice::Draw(const Graphics::State& graphics, const Pm4::DrawParamete
     static const bool traceDraws = std::getenv("APS5_TRACE_DRAWS") != nullptr;
     if (traceDraws) APS5_LOG_OUT("VulkanDevice::Draw indices=%u instances=%u indexSize=%u address=0x%llx shaders=%zu colorTarget=%u", draw.indexCount, draw.instanceCount, draw.indexSize, static_cast<unsigned long long>(draw.indexAddress), shaders.size(), static_cast<unsigned>(graphics.hasColorTarget));
     const auto context = graphicsContext();
-    Graphics::Draw(context, graphics, draw, shaders, snapshots, recipe, trace);
+    Graphics::Draw(context, graphics, draw, shaders, snapshots, recipe, trace, shape);
     if (traceDraws) APS5_LOG_CHARS_OUT("VulkanDevice::Draw complete");
 }
 
