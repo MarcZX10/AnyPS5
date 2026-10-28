@@ -721,6 +721,22 @@ class HipOracleTests(unittest.TestCase):
         import oracle_hip
         self.oracle_hip = oracle_hip
 
+    def test_cli_rejects_non_integer_dispatch_sizes_before_file_or_hip_access(self):
+        for argv, diagnostic in (
+                (["code.co", "not-an-int", "in.bin", "out.bin", "1"], "THREADS must be an integer"),
+                (["code.co", "1", "in.bin", "out.bin", "not-an-int"], "OUT_DWORDS must be an integer")):
+            with self.subTest(argv=argv), \
+                    patch.object(Path, "read_bytes", side_effect=AssertionError("input file read")), \
+                    patch.object(self.oracle_hip, "dispatch", side_effect=AssertionError("HIP dispatch called")), \
+                    contextlib.redirect_stdout(io.StringIO()) as output, \
+                    contextlib.redirect_stderr(io.StringIO()) as error, \
+                    self.assertRaises(SystemExit) as exited:
+                self.oracle_hip.main(argv)
+            self.assertEqual(exited.exception.code, 2)
+            self.assertIn(diagnostic, error.getvalue())
+            self.assertNotIn("Traceback", error.getvalue())
+            self.assertEqual(output.getvalue(), "")
+
     def test_cli_rejects_mixed_or_incomplete_requests(self):
         for argv in ([], ["--target", "code", "32", "in", "out", "16"], ["--wave64", "code", "32", "in", "out", "16"],
                      ["code", "32", "in", "out"], ["code", "0", "in", "out", "16"], ["code", "1025", "in", "out", "16"],
