@@ -223,6 +223,74 @@ static void CheckSuspension(const std::string& file) {
     REQUIRE(sceFiosGetSuspendCount() == 0);
 }
 
+static void CheckMutations(const std::string& directory) {
+    const std::string sub = directory + "/sub";
+    const std::string target = sub + "/a.bin";
+    REQUIRE(sceFiosDirectoryCreateSync(nullptr, sub.c_str()) == SCE_FIOS_OK);
+    REQUIRE(sceFiosDirectoryCreateSync(nullptr, sub.c_str()) == SCE_FIOS_ERROR_ALREADY_EXISTS);
+    REQUIRE(sceFiosDirectoryCreateSync(nullptr, (directory + "/none/deeper").c_str()) == SCE_FIOS_ERROR_BAD_PATH);
+    REQUIRE(sceFiosDirectoryCreateSync(nullptr, nullptr) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosDirectoryExistsSync(nullptr, sub.c_str()));
+
+    REQUIRE(sceFiosFileWriteSync(nullptr, target.c_str(), "hello world", 11, 0) == 11);
+    char buffer[32] = {};
+    REQUIRE(sceFiosFileReadSync(nullptr, target.c_str(), buffer, 11, 0) == 11 && std::memcmp(buffer, "hello world", 11) == 0);
+    std::memset(buffer, 0, sizeof(buffer));
+    REQUIRE(sceFiosFileReadSync(nullptr, target.c_str(), buffer, 5, 6) == 5 && std::memcmp(buffer, "world", 5) == 0);
+    REQUIRE(sceFiosFileReadSync(nullptr, target.c_str(), buffer, 100, 6) == 5);
+    REQUIRE(sceFiosFileReadSync(nullptr, target.c_str(), buffer, 4, 500) == 0);
+    REQUIRE(sceFiosFileReadSync(nullptr, target.c_str(), buffer, 0, 0) == 0);
+    REQUIRE(sceFiosFileReadSync(nullptr, (sub + "/none").c_str(), buffer, 4, 0) == SCE_FIOS_ERROR_BAD_PATH);
+    REQUIRE(sceFiosFileReadSync(nullptr, target.c_str(), buffer, -1, 0) == SCE_FIOS_ERROR_BAD_SIZE);
+    REQUIRE(sceFiosFileReadSync(nullptr, target.c_str(), buffer, 4, -1) == SCE_FIOS_ERROR_BAD_OFFSET);
+    REQUIRE(sceFiosFileReadSync(nullptr, target.c_str(), nullptr, 4, 0) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFileReadSync(nullptr, sub.c_str(), buffer, 4, 0) < 0);
+    REQUIRE(sceFiosFileWriteSync(nullptr, target.c_str(), "xyzzy", 5, 20) == 5);
+    REQUIRE(sceFiosFileGetSizeSync(nullptr, target.c_str()) == 25);
+    REQUIRE(sceFiosFileWriteSync(nullptr, target.c_str(), nullptr, 5, 0) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFileWriteSync(nullptr, (sub + "/none/x").c_str(), "a", 1, 0) == SCE_FIOS_ERROR_BAD_PATH);
+    REQUIRE(sceFiosFileWriteSync(nullptr, (sub + "/created.bin").c_str(), "a", 1, 0) == 1);
+    REQUIRE(sceFiosFileDeleteSync(nullptr, (sub + "/created.bin").c_str()) == SCE_FIOS_OK);
+
+    std::memset(buffer, 0, sizeof(buffer));
+    const SceFiosOp read = sceFiosFileRead(nullptr, target.c_str(), buffer, 5, 6);
+    REQUIRE(sceFiosOpGetRequestCount(read) == 5 && sceFiosOpGetOffset(read) == 6 && sceFiosOpGetBuffer(read) == buffer);
+    REQUIRE(sceFiosOpGetActualCount(read) == 5 && sceFiosOpSyncWaitForIO(read) == 5 && std::memcmp(buffer, "world", 5) == 0);
+
+    REQUIRE(sceFiosFileTruncateSync(nullptr, target.c_str(), 4) == SCE_FIOS_OK);
+    REQUIRE(sceFiosFileGetSizeSync(nullptr, target.c_str()) == 4);
+    REQUIRE(sceFiosFileTruncateSync(nullptr, target.c_str(), -1) == SCE_FIOS_ERROR_BAD_SIZE);
+    REQUIRE(sceFiosFileTruncateSync(nullptr, (sub + "/none").c_str(), 4) == SCE_FIOS_ERROR_BAD_PATH);
+
+    const std::string renamed = sub + "/b.bin";
+    REQUIRE(sceFiosRenameSync(nullptr, target.c_str(), renamed.c_str()) == SCE_FIOS_OK);
+    REQUIRE(!sceFiosExistsSync(nullptr, target.c_str()) && sceFiosFileExistsSync(nullptr, renamed.c_str()));
+    REQUIRE(sceFiosRenameSync(nullptr, target.c_str(), renamed.c_str()) == SCE_FIOS_ERROR_BAD_PATH);
+    REQUIRE(sceFiosRenameSync(nullptr, renamed.c_str(), nullptr) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosRenameSync(nullptr, nullptr, renamed.c_str()) == SCE_FIOS_ERROR_BAD_PTR);
+
+    REQUIRE(sceFiosFileDeleteSync(nullptr, sub.c_str()) == SCE_FIOS_ERROR_NOT_A_FILE);
+    REQUIRE(sceFiosDirectoryDeleteSync(nullptr, renamed.c_str()) == SCE_FIOS_ERROR_NOT_A_DIRECTORY);
+    REQUIRE(sceFiosDirectoryDeleteSync(nullptr, sub.c_str()) == SCE_FIOS_ERROR_ACCESS);
+    REQUIRE(sceFiosFileDeleteSync(nullptr, renamed.c_str()) == SCE_FIOS_OK);
+    REQUIRE(sceFiosFileDeleteSync(nullptr, renamed.c_str()) == SCE_FIOS_ERROR_BAD_PATH);
+    REQUIRE(sceFiosDirectoryDeleteSync(nullptr, sub.c_str()) == SCE_FIOS_OK);
+    REQUIRE(sceFiosDirectoryCreateSync(nullptr, sub.c_str()) == SCE_FIOS_OK);
+    REQUIRE(sceFiosDeleteSync(nullptr, sub.c_str()) == SCE_FIOS_OK);
+    REQUIRE(sceFiosFileWriteSync(nullptr, renamed.c_str(), "a", 1, 0) == SCE_FIOS_ERROR_BAD_PATH);
+    REQUIRE(sceFiosFileWriteSync(nullptr, (directory + "/c.bin").c_str(), "a", 1, 0) == 1);
+    REQUIRE(sceFiosDeleteSync(nullptr, (directory + "/c.bin").c_str()) == SCE_FIOS_OK);
+    REQUIRE(sceFiosDeleteSync(nullptr, (directory + "/c.bin").c_str()) == SCE_FIOS_ERROR_BAD_PATH);
+
+    g_completed = 0;
+    const SceFiosOpAttr attr = CountingAttr();
+    const SceFiosOp created = sceFiosDirectoryCreate(&attr, sub.c_str());
+    REQUIRE(g_completed == 1 && sceFiosOpGetError(created) == SCE_FIOS_OK);
+    sceFiosOpDelete(created);
+    const SceFiosOp removed = sceFiosDelete(&attr, sub.c_str());
+    REQUIRE(g_completed == 2 && sceFiosOpSyncWait(removed) == SCE_FIOS_OK);
+}
+
 int main() {
     const std::filesystem::path directory = "fios2_probe";
     std::filesystem::remove_all(directory);
@@ -237,6 +305,7 @@ int main() {
     CheckOperationLifecycle(file);
     CheckCallbacks(file);
     CheckSuspension(file);
+    CheckMutations(directory.generic_string());
     sceFiosTerminate();
     REQUIRE(!sceFiosIsInitialized(nullptr));
     std::filesystem::remove_all(directory);

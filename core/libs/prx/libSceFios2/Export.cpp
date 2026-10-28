@@ -216,42 +216,12 @@ int APS5_VABI sceFiosDebugDumpOp() {
     return 0;
 }
 
-int APS5_VABI sceFiosDelete() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDeleteSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDirectoryCreate() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDirectoryCreateSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceFiosDirectoryCreateWithMode() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
 
 int APS5_VABI sceFiosDirectoryCreateWithModeSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDirectoryDelete() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDirectoryDeleteSync() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -426,46 +396,6 @@ int APS5_VABI sceFiosFHWritevSync() {
     return 0;
 }
 
-int APS5_VABI sceFiosFileDelete() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileDeleteSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileRead() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileReadSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileTruncate() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileTruncateSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileWrite() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileWriteSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceFiosFilenoToFH() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -567,16 +497,6 @@ int APS5_VABI sceFiosPrintTimeStamps() {
 }
 
 int APS5_VABI sceFiosPrintf() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosRename() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosRenameSync() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
