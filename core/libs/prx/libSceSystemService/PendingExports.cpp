@@ -852,16 +852,6 @@ bool APS5_VABI sceShellCoreUtilGetGnmCompositorOnScreenProfilerFlag() {
     return 0;
 }
 
-int APS5_VABI sceShellCoreUtilGetGpuLoadEmulationMode() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceShellCoreUtilGetGpuLoadEmulationModeByAppId(std::int32_t appId) {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceShellCoreUtilGetHidConfigFileInfoString(char* value, std::size_t capacity, std::int32_t configIndex) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -1377,16 +1367,6 @@ int APS5_VABI sceShellCoreUtilSetGnmCompositorOnScreenProfilerFlag(std::int32_t 
     return 0;
 }
 
-int APS5_VABI sceShellCoreUtilSetGpuLoadEmulationMode(std::uint32_t mode) {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceShellCoreUtilSetGpuLoadEmulationModeByAppId(std::int32_t appId, std::uint32_t mode) {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceShellCoreUtilSetIDUMode(std::uint8_t mode) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -1818,11 +1798,6 @@ int APS5_VABI sceSystemServiceGetEventForDaemon(SystemServiceDaemonEvent* event)
     return 0;
 }
 
-int APS5_VABI sceSystemServiceGetGpuLoadEmulationMode() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceSystemServiceGetLocalProcessStatusList(SystemServiceLocalProcessStatus* statuses, std::uint32_t capacity, std::uint32_t* count) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -2078,11 +2053,6 @@ int APS5_VABI sceSystemServiceSaveVideoToken(std::int32_t userId, const char* to
 }
 
 int APS5_VABI sceSystemServiceSetControllerFocusPermission(std::uint8_t permission) {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceSystemServiceSetGpuLoadEmulationMode(std::uint32_t mode) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
