@@ -594,22 +594,6 @@ void CheckAmmWaitConcurrentSubmits() {
     Require(sceKernelWaitCommandBufferCompletion(newest.load()) == 0);
 }
 
-void CheckRawGetcwd() {
-    std::array<char, 4096> expected{};
-    Require(getcwd_nid_postfix(expected.data(), expected.size()) == expected.data());
-    std::array<char, 4096> buffer;
-    buffer.fill('#');
-    Require(__getcwd_nid_postfix(buffer.data(), buffer.size()) == 0);
-    Require(std::strcmp(buffer.data(), expected.data()) == 0);
-    Require(buffer[std::strlen(expected.data()) + 1] == '#');
-
-    std::array<char, 1> shortBuffer{'#'};
-    Require(__getcwd_nid_postfix(shortBuffer.data(), shortBuffer.size()) == -1 && Error() == 34);
-    Require(shortBuffer[0] == '#');
-    Require(__getcwd_nid_postfix(buffer.data(), 0) == -1 && Error() == 22);
-    Require(__getcwd_nid_postfix(nullptr, buffer.size()) == -1 && Error() == 14);
-}
-
 void CheckPathconf(const std::filesystem::path& root, const std::string& file) {
     const auto directory = root.generic_string();
     for (const auto& path : {file, directory}) {
@@ -677,7 +661,6 @@ void CheckSettimeofday() {
     Require(settimeofday_nid_postfix(nullptr, &zero) == 0);
     Require(gettimeofday_nid_postfix(nullptr, &zone) == 0 && zone.tz_minuteswest == 0 && zone.tz_dsttime == 0);
 }
-
 
 void DirectoryRenameTests(const std::filesystem::path& parent) {
     const auto fixture = parent / "directory-identity";
@@ -914,6 +897,22 @@ void CheckUnsupportedPathconf(F fn, int descriptor) {
     Require(fn(descriptor, 53) == 200112);
     for (const int name : {0, 1, 4, 5, 6, 7, 8, 12, 18, 54, 55, 61, -1})
         Require(fn(descriptor, name) == -1 && Error() == 45);
+}
+
+void CheckRawGetcwd() {
+    std::array<char, 4096> expected{};
+    Require(getcwd_nid_postfix(expected.data(), expected.size()) == expected.data());
+    std::array<char, 4096> buffer;
+    buffer.fill('#');
+    Require(__getcwd_nid_postfix(buffer.data(), buffer.size()) == 0);
+    Require(std::strcmp(buffer.data(), expected.data()) == 0);
+    Require(buffer[std::strlen(expected.data()) + 1] == '#');
+
+    std::array<char, 1> shortBuffer{'#'};
+    Require(__getcwd_nid_postfix(shortBuffer.data(), shortBuffer.size()) == -1 && Error() == 34);
+    Require(shortBuffer[0] == '#');
+    Require(__getcwd_nid_postfix(buffer.data(), 0) == -1 && Error() == 22);
+    Require(__getcwd_nid_postfix(nullptr, buffer.size()) == -1 && Error() == 14);
 }
 
 int main() {
