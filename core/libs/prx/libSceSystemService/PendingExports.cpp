@@ -982,11 +982,6 @@ int APS5_VABI sceShellCoreUtilGetSupportSiteURL(std::uint32_t first, std::uint32
     return 0;
 }
 
-bool APS5_VABI sceShellCoreUtilGetSuspendConfirmationDialogFlag(std::int32_t appId) {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceShellCoreUtilGetSystemBGState(std::int32_t appId, std::uint32_t* state) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -1739,11 +1734,6 @@ int APS5_VABI sceSystemServiceDisablePersonalEyeToEyeDistanceSetting() {
     return 0;
 }
 
-int APS5_VABI sceSystemServiceDisableSuspendConfirmationDialog() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceSystemServiceDisableSuspendNotification() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -1754,11 +1744,6 @@ int APS5_VABI sceSystemServiceDisableVoiceRecognition() {
 }
 
 int APS5_VABI sceSystemServiceEnablePersonalEyeToEyeDistanceSetting() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceSystemServiceEnableSuspendConfirmationDialog() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }

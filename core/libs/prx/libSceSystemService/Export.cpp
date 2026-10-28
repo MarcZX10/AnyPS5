@@ -307,9 +307,26 @@ int GetGpuLoadEmulationModeOfApp(const char* caller, std::int32_t appId) {
     return static_cast<int>(GpuLoadEmulationMode.load(std::memory_order_relaxed));
 }
 
+std::atomic<bool> SuspendConfirmationDialogEnabled{true};
+
 }
 
 extern "C" {
+
+int APS5_VABI sceSystemServiceEnableSuspendConfirmationDialog() {
+    SuspendConfirmationDialogEnabled.store(true, std::memory_order_relaxed);
+    return SYSTEM_SERVICE_OK;
+}
+
+int APS5_VABI sceSystemServiceDisableSuspendConfirmationDialog() {
+    SuspendConfirmationDialogEnabled.store(false, std::memory_order_relaxed);
+    return SYSTEM_SERVICE_OK;
+}
+
+bool APS5_VABI sceShellCoreUtilGetSuspendConfirmationDialogFlag(std::int32_t appId) {
+    if (appId != SYSTEM_SERVICE_RUNNING_APP_ID) NotImplemented_nid_no_patch("sceShellCoreUtilGetSuspendConfirmationDialogFlag: application other than the running title");
+    return SuspendConfirmationDialogEnabled.load(std::memory_order_relaxed);
+}
 
 int APS5_VABI sceSystemServiceSetGpuLoadEmulationMode(std::uint32_t mode) {
     return SetGpuLoadEmulationMode("sceSystemServiceSetGpuLoadEmulationMode", mode);

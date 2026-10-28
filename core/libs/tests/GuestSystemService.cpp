@@ -110,6 +110,31 @@ void TestPlayerDialogParam() {
     Require(sceSystemServiceLaunchPlayerDialog(buffer) == SYSTEM_SERVICE_OK);
 }
 
+void TestSuspendConfirmationDialog() {
+    const int runningAppId = sceSystemServiceGetAppIdOfRunningBigApp();
+    Require(sceShellCoreUtilGetSuspendConfirmationDialogFlag(runningAppId));
+    Require(sceSystemServiceDisableSuspendConfirmationDialog() == SYSTEM_SERVICE_OK);
+    Require(!sceShellCoreUtilGetSuspendConfirmationDialogFlag(runningAppId));
+    Require(sceSystemServiceDisableSuspendConfirmationDialog() == SYSTEM_SERVICE_OK);
+    Require(!sceShellCoreUtilGetSuspendConfirmationDialogFlag(runningAppId));
+    Require(sceSystemServiceEnableSuspendConfirmationDialog() == SYSTEM_SERVICE_OK);
+    Require(sceShellCoreUtilGetSuspendConfirmationDialogFlag(runningAppId));
+    Require(Throws([runningAppId] { return sceShellCoreUtilGetSuspendConfirmationDialogFlag(runningAppId + 1); }));
+    Require(Throws([] { return sceShellCoreUtilGetSuspendConfirmationDialogFlag(-1); }));
+    std::vector<std::thread> threads;
+    for (unsigned index = 0; index < 4; ++index) {
+        threads.emplace_back([index] {
+            for (unsigned round = 0; round < 1000; ++round) {
+                const int result = ((index + round) & 1u) ? sceSystemServiceEnableSuspendConfirmationDialog() : sceSystemServiceDisableSuspendConfirmationDialog();
+                Require(result == SYSTEM_SERVICE_OK);
+            }
+        });
+    }
+    for (std::thread& thread : threads) thread.join();
+    Require(sceSystemServiceEnableSuspendConfirmationDialog() == SYSTEM_SERVICE_OK);
+    Require(sceShellCoreUtilGetSuspendConfirmationDialogFlag(runningAppId));
+}
+
 void TestGpuLoadEmulationMode() {
     const int runningAppId = sceSystemServiceGetAppIdOfRunningBigApp();
     Require(sceSystemServiceGetGpuLoadEmulationMode() == 1);
@@ -248,4 +273,5 @@ int main() {
     TestRunningAppState();
     TestPlayerDialogParam();
     TestGpuLoadEmulationMode();
+    TestSuspendConfirmationDialog();
 }
