@@ -137,6 +137,17 @@ void Driver::copyCommands(Submission& submission, const std::uint32_t* guest, st
 
 bool Driver::copySegment(Submission& submission, const std::uint32_t* guest, std::size_t words, std::size_t& budget, std::size_t depth) {
     require(depth < MaximumSegmentDepth, "command buffer jumps nest too deeply (a jump loop?)");
+    for (;;) {
+        const std::uint32_t* chained = nullptr;
+        std::size_t chainedWords = 0;
+        if (copyLink(submission, guest, words, budget, depth, chained, chainedWords)) return true;
+        if (chained == nullptr) return false;
+        guest = chained;
+        words = chainedWords;
+    }
+}
+
+bool Driver::copyLink(Submission& submission, const std::uint32_t* guest, std::size_t words, std::size_t& budget, std::size_t depth, const std::uint32_t*& chained, std::size_t& chainedWords) {
     require(words <= budget, "command buffer jumps exceed the copy limit (a jump loop?)");
     budget -= words;
     std::vector<std::pair<std::size_t, std::size_t>> guarded;
@@ -200,11 +211,15 @@ bool Driver::copySegment(Submission& submission, const std::uint32_t* guest, std
                 cursor += count;
                 continue;
             }
+            if (chain) {
+                chained = target;
+                chainedWords = targetWords;
+                return false;
+            }
             if (copySegment(submission, target, targetWords, budget, depth + 1)) {
                 require(guarded.empty(), "a REWIND inside a conditional execution range is not implemented");
                 return true;
             }
-            if (chain) return false;
             cursor += count;
             continue;
         }
