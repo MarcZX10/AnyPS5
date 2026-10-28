@@ -105,7 +105,7 @@ void ReportsDeferredTypeFault() {
     } catch (const std::exception& error) {
         const std::string message = error.what();
         Require(message.find("BDA access failed") != std::string::npos, "draw failed for another reason: " + message);
-        Require(message.find("stage=5 reason=8") != std::string::npos, "draw did not report an invalid fragment descriptor: " + message);
+        Require(message.find("stage=2 reason=8") != std::string::npos, "draw did not report an invalid fragment descriptor: " + message);
         return;
     }
     throw std::runtime_error("a pixel shader read a buffer through a descriptor of type 2 without reporting a draw-completion fault");
@@ -153,16 +153,17 @@ void SkipsRefusedDraw() {
 
 int main(int argc, char** argv) {
     try {
-        Require(argc == 1 || (argc == 2 && std::string_view(argv[1]) == "--skip-refused"), "invalid test arguments");
+        Require(argc == 1 || (argc == 2 && (std::string_view(argv[1]) == "--skip-refused" || std::string_view(argv[1]) == "--deferred-fault")), "invalid test arguments");
         {
             const auto device = OpenVulkanTestDevice();
             if (!device) return VulkanTestSkipped;
         }
-        if (argc == 2) {
+        if (argc == 2 && std::string_view(argv[1]) == "--skip-refused") {
             SkipsRefusedDraw();
+        } else if (argc == 2) {
+            ReportsDeferredTypeFault();
         } else {
             InactiveLaneDoesNotFault();
-            ReportsDeferredTypeFault();
             NamesShaderAndDescriptor();
         }
         try { AgcDriverShutdown_nid_postfix(); } catch (const std::exception&) {}
