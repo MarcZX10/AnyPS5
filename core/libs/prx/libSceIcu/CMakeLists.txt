@@ -1,4 +1,4 @@
-add_library(libSceIcu SHARED EXCLUDE_FROM_ALL Export.cpp Invariant.cpp Version.cpp Unescape.cpp Utf32.cpp JavaUtf8.cpp Compare.cpp Search.cpp Character.cpp)
+add_library(libSceIcu SHARED EXCLUDE_FROM_ALL Export.cpp Invariant.cpp Version.cpp Unescape.cpp Utf32.cpp JavaUtf8.cpp Compare.cpp Search.cpp Character.cpp Configuration.cpp)
 target_include_directories(libSceIcu PRIVATE ${LIBS_INCLUDE_DIR})
 configure_windows_unwind(libSceIcu)
 target_sources(libSceIcu PRIVATE CString.cpp)

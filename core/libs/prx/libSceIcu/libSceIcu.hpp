@@ -8,3 +8,4 @@
 #include "Compare.hpp"
 #include "Search.hpp"
 #include "Character.hpp"
+#include "Configuration.hpp"
