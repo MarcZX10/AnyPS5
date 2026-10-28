@@ -291,6 +291,114 @@ static void CheckMutations(const std::string& directory) {
     REQUIRE(g_completed == 2 && sceFiosOpSyncWait(removed) == SCE_FIOS_OK);
 }
 
+static void CheckFileHandles(const std::string& directory) {
+    const std::string path = directory + "/handle.bin";
+    SceFiosOpenParams writer{};
+    writer.openFlags = (SCE_FIOS_O_READ | SCE_FIOS_O_WRITE | SCE_FIOS_O_CREAT);
+    SceFiosFH fh = 0;
+    REQUIRE(sceFiosFHOpenSync(nullptr, &fh, path.c_str(), nullptr) == SCE_FIOS_ERROR_BAD_PATH);
+    REQUIRE(sceFiosFHOpenSync(nullptr, nullptr, path.c_str(), &writer) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFHOpenSync(nullptr, &fh, nullptr, &writer) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFHOpenSync(nullptr, &fh, directory.c_str(), nullptr) == SCE_FIOS_ERROR_NOT_A_FILE);
+    REQUIRE(sceFiosFHOpenSync(nullptr, &fh, path.c_str(), &writer) == SCE_FIOS_OK);
+    REQUIRE(fh > 0 && sceFiosIsValidHandle(fh));
+    REQUIRE(path == sceFiosFHGetPath(fh) && sceFiosFHGetOpenParams(fh)->openFlags == writer.openFlags);
+    REQUIRE(sceFiosFHGetSize(fh) == 0);
+    std::uint32_t listed[4] = {};
+    REQUIRE(sceFiosGetAllFHs(reinterpret_cast<SceFiosFH*>(listed), 4) == 1 && listed[0] == static_cast<std::uint32_t>(fh));
+
+    REQUIRE(sceFiosFHWriteSync(nullptr, fh, "abcdef", 6) == 6);
+    REQUIRE(sceFiosFHTell(fh) == 6 && sceFiosFHGetSize(fh) == 6);
+    REQUIRE(sceFiosFHSeek(fh, 1, SCE_FIOS_SEEK_SET) == 1);
+    char buffer[16] = {};
+    REQUIRE(sceFiosFHReadSync(nullptr, fh, buffer, 3) == 3 && std::memcmp(buffer, "bcd", 3) == 0);
+    REQUIRE(sceFiosFHSeek(fh, -1, SCE_FIOS_SEEK_END) == 5 && sceFiosFHSeek(fh, 1, SCE_FIOS_SEEK_CUR) == 6);
+    REQUIRE(sceFiosFHReadSync(nullptr, fh, buffer, 3) == 0);
+    REQUIRE(sceFiosFHSeek(fh, 0, 7) == SCE_FIOS_ERROR_BAD_OFFSET);
+    REQUIRE(sceFiosFHSeek(fh, -100, SCE_FIOS_SEEK_SET) == SCE_FIOS_ERROR_BAD_OFFSET);
+    REQUIRE(sceFiosFHPwriteSync(nullptr, fh, "XY", 2, 1) == 2 && sceFiosFHTell(fh) == 6);
+    std::memset(buffer, 0, sizeof(buffer));
+    REQUIRE(sceFiosFHPreadSync(nullptr, fh, buffer, 6, 0) == 6 && std::memcmp(buffer, "aXYdef", 6) == 0);
+    REQUIRE(sceFiosFHPreadSync(nullptr, fh, buffer, 4, -1) == SCE_FIOS_ERROR_BAD_OFFSET);
+    REQUIRE(sceFiosFHReadSync(nullptr, fh, buffer, -1) == SCE_FIOS_ERROR_BAD_SIZE);
+    REQUIRE(sceFiosFHReadSync(nullptr, fh, nullptr, 4) == SCE_FIOS_ERROR_BAD_PTR);
+
+    char first[2] = {};
+    char second[3] = {};
+    const SceFiosBuffer reads[2] = {{first, sizeof(first)}, {second, sizeof(second)}};
+    REQUIRE(sceFiosFHPreadvSync(nullptr, fh, reads, 2, 1) == 5 && std::memcmp(first, "XY", 2) == 0 && std::memcmp(second, "def", 3) == 0);
+    REQUIRE(sceFiosFHSeek(fh, 0, SCE_FIOS_SEEK_SET) == 0);
+    REQUIRE(sceFiosFHReadvSync(nullptr, fh, reads, 2) == 5 && std::memcmp(first, "aX", 2) == 0 && std::memcmp(second, "Yde", 3) == 0);
+    const SceFiosBuffer writes[2] = {{const_cast<char*>("12"), 2}, {const_cast<char*>("345"), 3}};
+    REQUIRE(sceFiosFHPwritevSync(nullptr, fh, writes, 2, 6) == 5 && sceFiosFHGetSize(fh) == 11);
+    REQUIRE(sceFiosFHSeek(fh, 0, SCE_FIOS_SEEK_END) == 11);
+    REQUIRE(sceFiosFHWritevSync(nullptr, fh, writes, 2) == 5 && sceFiosFHGetSize(fh) == 16);
+    REQUIRE(sceFiosFHReadvSync(nullptr, fh, reads, 0) == SCE_FIOS_ERROR_BAD_IOVCNT);
+    REQUIRE(sceFiosFHReadvSync(nullptr, fh, reads, 5000) == SCE_FIOS_ERROR_BAD_IOVCNT);
+    REQUIRE(sceFiosFHReadvSync(nullptr, fh, nullptr, 1) == SCE_FIOS_ERROR_BAD_PTR);
+
+    SceFiosStat stat{};
+    REQUIRE(sceFiosFHStatSync(nullptr, fh, &stat) == SCE_FIOS_OK && stat.fileSize == 16);
+    REQUIRE(sceFiosFHStatSync(nullptr, fh, nullptr) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFHTruncateSync(nullptr, fh, 4) == SCE_FIOS_OK && sceFiosFHGetSize(fh) == 4);
+    REQUIRE(sceFiosFHTruncateSync(nullptr, fh, -1) == SCE_FIOS_ERROR_BAD_SIZE);
+    REQUIRE(sceFiosFHSyncSync(nullptr, fh) == SCE_FIOS_OK);
+
+    const SceFiosOp op = sceFiosFHPread(nullptr, fh, buffer, 4, 0);
+    REQUIRE(sceFiosOpGetRequestCount(op) == 4 && sceFiosOpGetOffset(op) == 0 && path == sceFiosOpGetPath(op));
+    REQUIRE(sceFiosOpSyncWaitForIO(op) == 4 && std::memcmp(buffer, "aXYd", 4) == 0);
+
+    REQUIRE(sceFiosFHCloseSync(nullptr, fh) == SCE_FIOS_OK);
+    REQUIRE(!sceFiosIsValidHandle(fh) && sceFiosFHGetPath(fh) == nullptr && sceFiosFHGetOpenParams(fh) == nullptr);
+    REQUIRE(sceFiosFHCloseSync(nullptr, fh) == SCE_FIOS_ERROR_BAD_FH);
+    REQUIRE(sceFiosFHReadSync(nullptr, fh, buffer, 1) == SCE_FIOS_ERROR_BAD_FH);
+    REQUIRE(sceFiosFHSeek(fh, 0, 0) == SCE_FIOS_ERROR_BAD_FH && sceFiosFHTell(fh) == SCE_FIOS_ERROR_BAD_FH);
+    REQUIRE(sceFiosFHGetSize(fh) == SCE_FIOS_ERROR_BAD_FH);
+    REQUIRE(sceFiosFHStatSync(nullptr, fh, &stat) == SCE_FIOS_ERROR_BAD_FH);
+    REQUIRE(sceFiosFHSyncSync(nullptr, fh) == SCE_FIOS_ERROR_BAD_FH);
+
+    SceFiosOpenParams reader{};
+    reader.openFlags = SCE_FIOS_O_READ;
+    REQUIRE(sceFiosFHOpenSync(nullptr, &fh, path.c_str(), &reader) == SCE_FIOS_OK);
+    REQUIRE(sceFiosFHWriteSync(nullptr, fh, "z", 1) == SCE_FIOS_ERROR_READ_ONLY);
+    REQUIRE(sceFiosFHTruncateSync(nullptr, fh, 1) == SCE_FIOS_ERROR_READ_ONLY);
+    REQUIRE(sceFiosFHPreadSync(nullptr, fh, buffer, 4, 0) == 4);
+    sceFiosCloseAllFiles();
+    REQUIRE(!sceFiosIsValidHandle(fh) && sceFiosGetAllFHs(nullptr, 0) == 0);
+
+    SceFiosOpenParams writeOnly{};
+    writeOnly.openFlags = SCE_FIOS_O_WRITE | SCE_FIOS_O_TRUNC;
+    REQUIRE(sceFiosFHOpenSync(nullptr, &fh, path.c_str(), &writeOnly) == SCE_FIOS_OK);
+    REQUIRE(sceFiosFHGetSize(fh) == 0 && sceFiosFHReadSync(nullptr, fh, buffer, 1) == SCE_FIOS_ERROR_WRITE_ONLY);
+    REQUIRE(sceFiosFHCloseSync(nullptr, fh) == SCE_FIOS_OK);
+
+    SceFiosOpenParams appender{};
+    appender.openFlags = SCE_FIOS_O_WRITE | SCE_FIOS_O_APPEND | SCE_FIOS_O_CREAT;
+    const std::string created = directory + "/appended.bin";
+    REQUIRE(sceFiosFHOpenWithModeSync(nullptr, &fh, created.c_str(), &appender, 0644) == SCE_FIOS_OK);
+    REQUIRE(sceFiosFHWriteSync(nullptr, fh, "ab", 2) == 2 && sceFiosFHWriteSync(nullptr, fh, "cd", 2) == 2);
+    REQUIRE(sceFiosFHCloseSync(nullptr, fh) == SCE_FIOS_OK);
+    REQUIRE(sceFiosFileGetSizeSync(nullptr, created.c_str()) == 4);
+
+    g_completed = 0;
+    const SceFiosOpAttr attr = CountingAttr();
+    const SceFiosOp opened = sceFiosFHOpen(&attr, &fh, created.c_str(), &reader);
+    REQUIRE(g_completed == 1 && sceFiosOpGetError(opened) == SCE_FIOS_OK && sceFiosIsValidHandle(fh));
+    sceFiosOpDelete(opened);
+    const SceFiosOp closed = sceFiosFHClose(&attr, fh);
+    REQUIRE(g_completed == 2 && sceFiosOpSyncWait(closed) == SCE_FIOS_OK);
+
+    sceFiosSuspend();
+    const SceFiosOp deferred = sceFiosFHOpen(nullptr, &fh, created.c_str(), &reader);
+    REQUIRE(!sceFiosOpIsDone(deferred));
+    sceFiosResume();
+    REQUIRE(sceFiosOpSyncWait(deferred) == SCE_FIOS_OK && sceFiosIsValidHandle(fh));
+    sceFiosShutdownAndCancelOps();
+    REQUIRE(!sceFiosIsValidHandle(fh));
+    REQUIRE(sceFiosDeleteSync(nullptr, created.c_str()) == SCE_FIOS_OK);
+    REQUIRE(sceFiosDeleteSync(nullptr, path.c_str()) == SCE_FIOS_OK);
+}
+
 int main() {
     const std::filesystem::path directory = "fios2_probe";
     std::filesystem::remove_all(directory);
@@ -306,6 +414,7 @@ int main() {
     CheckCallbacks(file);
     CheckSuspension(file);
     CheckMutations(directory.generic_string());
+    CheckFileHandles(directory.generic_string());
     sceFiosTerminate();
     REQUIRE(!sceFiosIsInitialized(nullptr));
     std::filesystem::remove_all(directory);
