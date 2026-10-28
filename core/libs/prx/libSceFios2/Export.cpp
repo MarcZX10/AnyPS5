@@ -136,21 +136,6 @@ int APS5_VABI sceFiosDLLTerminate() {
     return 0;
 }
 
-int APS5_VABI sceFiosDateFromComponents() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDateGetCurrent() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDateToComponents() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceFiosDeallocatePassthruFH() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -317,16 +302,6 @@ int APS5_VABI sceFiosSaveTimeStamp() {
 }
 
 int APS5_VABI sceFiosTimeGetCurrent() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosTimeIntervalFromNanoseconds() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosTimeIntervalToNanoseconds() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }

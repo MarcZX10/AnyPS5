@@ -106,6 +106,11 @@ int APS5_VABI sceFiosDHReadSync(const SceFiosOpAttr* attr, SceFiosDH dh, SceFios
 SceFiosOp APS5_VABI sceFiosDHClose(const SceFiosOpAttr* attr, SceFiosDH dh);
 int APS5_VABI sceFiosDHCloseSync(const SceFiosOpAttr* attr, SceFiosDH dh);
 const char* APS5_VABI sceFiosDHGetPath(SceFiosDH dh);
+SceFiosDate APS5_VABI sceFiosDateGetCurrent();
+SceFiosDate APS5_VABI sceFiosDateFromComponents(const SceFiosTm* components);
+SceFiosTm* APS5_VABI sceFiosDateToComponents(SceFiosDate date, SceFiosTm* outComponents);
+SceFiosTimeInterval APS5_VABI sceFiosTimeIntervalFromNanoseconds(std::int64_t nanoseconds);
+std::int64_t APS5_VABI sceFiosTimeIntervalToNanoseconds(SceFiosTimeInterval interval);
 
 int APS5_VABI sceFiosArchiveGetDecompressorThreadCount();
 int APS5_VABI sceFiosArchiveGetMountBufferSize();
@@ -133,9 +138,6 @@ int APS5_VABI sceFiosCachePrefetchFileSync();
 int APS5_VABI sceFiosClearTimeStamps();
 int APS5_VABI sceFiosDLLInitialize();
 int APS5_VABI sceFiosDLLTerminate();
-int APS5_VABI sceFiosDateFromComponents();
-int APS5_VABI sceFiosDateGetCurrent();
-int APS5_VABI sceFiosDateToComponents();
 int APS5_VABI sceFiosDeallocatePassthruFH();
 int APS5_VABI sceFiosDebugDumpDH();
 int APS5_VABI sceFiosDebugDumpDate();
@@ -170,8 +172,6 @@ int APS5_VABI sceFiosResolve();
 int APS5_VABI sceFiosResolveSync();
 int APS5_VABI sceFiosSaveTimeStamp();
 int APS5_VABI sceFiosTimeGetCurrent();
-int APS5_VABI sceFiosTimeIntervalFromNanoseconds();
-int APS5_VABI sceFiosTimeIntervalToNanoseconds();
 int APS5_VABI sceFiosTraceTimestamp();
 int APS5_VABI sceFiosVprintf();
 

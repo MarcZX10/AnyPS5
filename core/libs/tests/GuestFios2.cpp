@@ -470,6 +470,42 @@ static void CheckDirectories(const std::string& directory) {
     REQUIRE(sceFiosDeleteSync(nullptr, root.c_str()) == SCE_FIOS_OK);
 }
 
+static void CheckDates() {
+    SceFiosTm tm{};
+    tm.tm_year = 124;
+    tm.tm_mon = 1;
+    tm.tm_mday = 29;
+    tm.tm_hour = 13;
+    tm.tm_min = 14;
+    tm.tm_sec = 15;
+    const SceFiosDate date = sceFiosDateFromComponents(&tm);
+    REQUIRE(date == 1709212455ull * 1000000000ull);
+    SceFiosTm back{};
+    REQUIRE(sceFiosDateToComponents(date + 999999999, &back) == &back);
+    REQUIRE(back.tm_year == 124 && back.tm_mon == 1 && back.tm_mday == 29 && back.tm_hour == 13 && back.tm_min == 14 && back.tm_sec == 15);
+    REQUIRE(back.tm_wday == 4 && back.tm_yday == 59 && back.tm_isdst == 0);
+    REQUIRE(sceFiosDateToComponents(0, &back) == &back && back.tm_year == 70 && back.tm_mon == 0 && back.tm_mday == 1 && back.tm_wday == 4 && back.tm_yday == 0);
+    REQUIRE(sceFiosDateToComponents(date, nullptr) == nullptr && sceFiosDateFromComponents(nullptr) == 0);
+    SceFiosTm overflow{};
+    overflow.tm_year = 99;
+    overflow.tm_mon = 12;
+    overflow.tm_mday = 32;
+    overflow.tm_hour = 24;
+    overflow.tm_min = 60;
+    overflow.tm_sec = 60;
+    SceFiosTm normalized{};
+    sceFiosDateToComponents(sceFiosDateFromComponents(&overflow), &normalized);
+    REQUIRE(normalized.tm_year == 100 && normalized.tm_mon == 1 && normalized.tm_mday == 2 && normalized.tm_hour == 1 && normalized.tm_min == 1 && normalized.tm_sec == 0);
+    SceFiosTm negative{};
+    negative.tm_year = 70;
+    negative.tm_mon = -1;
+    negative.tm_mday = 1;
+    REQUIRE(sceFiosDateFromComponents(&negative) == 0);
+    const SceFiosDate now = sceFiosDateGetCurrent();
+    REQUIRE(now > 1700000000ull * 1000000000ull && sceFiosDateGetCurrent() >= now);
+    REQUIRE(sceFiosTimeIntervalFromNanoseconds(-5) == -5 && sceFiosTimeIntervalToNanoseconds(123456789012) == 123456789012);
+}
+
 int main() {
     const std::filesystem::path directory = "fios2_probe";
     std::filesystem::remove_all(directory);
@@ -487,6 +523,7 @@ int main() {
     CheckMutations(directory.generic_string());
     CheckFileHandles(directory.generic_string());
     CheckDirectories(directory.generic_string());
+    CheckDates();
     sceFiosTerminate();
     REQUIRE(!sceFiosIsInitialized(nullptr));
     std::filesystem::remove_all(directory);

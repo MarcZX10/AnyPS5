@@ -114,3 +114,15 @@ static_assert(sizeof(SceFiosOpAttr) == 48);
 static_assert(sizeof(SceFiosOpenParams) == 24);
 static_assert(sizeof(SceFiosStat) == 80);
 static_assert(sizeof(SceFiosDirEntry) == 24 + SCE_FIOS_PATH_MAX);
+
+struct SceFiosTm {
+    std::int32_t tm_sec;
+    std::int32_t tm_min;
+    std::int32_t tm_hour;
+    std::int32_t tm_mday;
+    std::int32_t tm_mon;
+    std::int32_t tm_year;
+    std::int32_t tm_wday;
+    std::int32_t tm_yday;
+    std::int32_t tm_isdst;
+};
