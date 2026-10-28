@@ -121,17 +121,7 @@ int APS5_VABI sceFiosCachePrefetchFileSync() {
     return 0;
 }
 
-int APS5_VABI sceFiosCancelAllOps() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceFiosClearTimeStamps() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosCloseAllFiles() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -262,26 +252,6 @@ int APS5_VABI sceFiosDirectoryDelete() {
 }
 
 int APS5_VABI sceFiosDirectoryDeleteSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDirectoryExists() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosDirectoryExistsSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosExists() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosExistsSync() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -466,26 +436,6 @@ int APS5_VABI sceFiosFileDeleteSync() {
     return 0;
 }
 
-int APS5_VABI sceFiosFileExists() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileExistsSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileGetSize() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosFileGetSizeSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceFiosFileRead() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -521,41 +471,6 @@ int APS5_VABI sceFiosFilenoToFH() {
     return 0;
 }
 
-int APS5_VABI sceFiosGetAllDHs() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosGetAllFHs() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosGetAllOps() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosGetDefaultOpAttr() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosGetGlobalDefaultOpAttr() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosGetSuspendCount() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosGetThreadDefaultOpAttr() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceFiosIOFilterAdd() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -581,86 +496,6 @@ int APS5_VABI sceFiosIOFilterRemove() {
     return 0;
 }
 
-int APS5_VABI sceFiosInitialize() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosIsIdle() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosIsInitialized() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosIsSuspended() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosIsValidHandle() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpCancel() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpDelete() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpGetActualCount() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpGetAttr() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpGetBuffer() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpGetError() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpGetOffset() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpGetPath() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpGetRequestCount() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpIsCancelled() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpIsDone() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceFiosOpReschedule() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
@@ -672,21 +507,6 @@ int APS5_VABI sceFiosOpRescheduleWithPriority() {
 }
 
 int APS5_VABI sceFiosOpSetBuffer() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpSyncWait() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpSyncWaitForIO() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosOpWait() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -771,47 +591,7 @@ int APS5_VABI sceFiosResolveSync() {
     return 0;
 }
 
-int APS5_VABI sceFiosResume() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
 int APS5_VABI sceFiosSaveTimeStamp() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosSetGlobalDefaultOpAttr() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosSetThreadDefaultOpAttr() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosShutdownAndCancelOps() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosStat() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosStatSync() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosSuspend() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosTerminate() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
@@ -832,11 +612,6 @@ int APS5_VABI sceFiosTimeIntervalToNanoseconds() {
 }
 
 int APS5_VABI sceFiosTraceTimestamp() {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-
-int APS5_VABI sceFiosUpdateParameters() {
     NotImplemented_nid_no_patch(__func__);
     return 0;
 }
