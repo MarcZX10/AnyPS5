@@ -481,11 +481,6 @@ int APS5_VABI sceIcuUnknown_Z5ljxAg3thw_nid_no_patch() {
 }
 APS5_EXPORT("Z5ljxAg3thw", sceIcuUnknown_Z5ljxAg3thw_nid_no_patch);
 
-int APS5_VABI sceIcuUnknown_RIcNJWDYKhM_nid_no_patch() {
-    NotImplemented_nid_no_patch(__func__);
-}
-APS5_EXPORT("RIcNJWDYKhM", sceIcuUnknown_RIcNJWDYKhM_nid_no_patch);
-
 int APS5_VABI sceIcuUnknown_4FrZfvvYHCI_nid_no_patch() {
     NotImplemented_nid_no_patch(__func__);
 }
