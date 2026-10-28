@@ -27,6 +27,8 @@ static_assert(offsetof(PadVirtualTriggerInternalState, flags) == 9);
 
 static_assert(sizeof(PadLightBarBlinkingParameter) == 3);
 static_assert(sizeof(PadContainerIdInformation) == 0x2004);
+static_assert(sizeof(PadVolumeGain) == 4);
+static_assert(offsetof(PadVolumeGain, micGain) == 3);
 static_assert(sizeof(PadButtonRemappingInfo) == 16);
 static_assert(offsetof(PadButtonRemappingInfo, mode) == 15);
 
@@ -452,6 +454,31 @@ int APS5_VABI scePadSetVibrationMode(int handle, int mode) {
  if (mode > 3 && mode != 5) return PAD_ERROR_INVALID_ARG;
  if (SpecialHandle(handle)) return PAD_OK;
  Pad::SetVibrationMode(PortOf(handle), mode);
+ return PAD_OK;
+}
+
+int APS5_VABI scePadIsSupportedAudioFunction(int handle) {
+ if (!Pad::IsInitialized()) return PAD_ERROR_NOT_INITIALIZED;
+ const int device = DeviceOf(handle);
+ if (device != PAD_OK) return device;
+ return 1;
+}
+
+int APS5_VABI scePadSetAudioOutPath(int handle, int path) {
+ if (!Pad::IsInitialized()) return PAD_ERROR_NOT_INITIALIZED;
+ if (static_cast<unsigned>(path) > 4u) return PAD_ERROR_INVALID_ARG;
+ if (!KnownHandle(handle)) return PAD_ERROR_INVALID_HANDLE;
+ if (SpecialHandle(handle)) return PAD_OK;
+ Pad::SetAudioOutPath(PortOf(handle), path);
+ return PAD_OK;
+}
+
+int APS5_VABI scePadSetVolumeGain(int handle, const PadVolumeGain* gain) {
+ if (!Pad::IsInitialized()) return PAD_ERROR_NOT_INITIALIZED;
+ if (gain == nullptr) return PAD_ERROR_INVALID_ARG;
+ if (!KnownHandle(handle)) return PAD_ERROR_INVALID_HANDLE;
+ if (SpecialHandle(handle)) return PAD_OK;
+ Pad::SetVolumeGain(PortOf(handle), gain->speakerVolume, gain->headsetVolume, gain->micGain);
  return PAD_OK;
 }
 
