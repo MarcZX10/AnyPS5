@@ -144,8 +144,7 @@ SceFiosOp StartClose(const SceFiosOpAttr* attr, SceFiosDH handle) {
 }
 
 int StatusSync(SceFiosOp op) {
-    Fios::Completion completion;
-    return Fios::SyncWait(op, completion) ? completion.error : SCE_FIOS_ERROR_BAD_OP;
+    return Fios::SyncStatus(op);
 }
 
 }

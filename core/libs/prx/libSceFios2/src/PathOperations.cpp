@@ -24,14 +24,11 @@ SceFiosOp SubmitPath(const SceFiosOpAttr* attr, const char* path, std::int64_t r
 }
 
 int StatusSync(SceFiosOp op) {
-    Fios::Completion completion;
-    return Fios::SyncWait(op, completion) ? completion.error : SCE_FIOS_ERROR_BAD_OP;
+    return Fios::SyncStatus(op);
 }
 
 std::int64_t CountSync(SceFiosOp op) {
-    Fios::Completion completion;
-    if (!Fios::SyncWait(op, completion)) return SCE_FIOS_ERROR_BAD_OP;
-    return completion.error != SCE_FIOS_OK ? completion.error : completion.result;
+    return Fios::SyncCount(op);
 }
 
 bool IsDirectory(const std::string& path, std::int32_t& error) {

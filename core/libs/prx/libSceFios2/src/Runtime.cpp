@@ -164,6 +164,10 @@ bool CopyOut(void* destination, const void* source, std::size_t bytes) {
     return GuestCopyOut_nid_no_patch(destination, source, bytes);
 }
 
+bool CopyIn(void* destination, const void* source, std::size_t bytes) {
+    return GuestCopyIn_nid_no_patch(destination, source, bytes);
+}
+
 std::uint64_t TimespecToDate(std::int64_t seconds, std::int64_t nanoseconds) {
     if (seconds < 0) return 0;
     return static_cast<std::uint64_t>(seconds) * 1000000000ull + static_cast<std::uint64_t>(nanoseconds);
@@ -172,12 +176,14 @@ std::uint64_t TimespecToDate(std::int64_t seconds, std::int64_t nanoseconds) {
 SceFiosOp Submit(const SceFiosOpAttr* attr, OpInfo info, Work work) {
     auto op = std::make_shared<Op>();
     bool runNow = false;
+    SceFiosOpAttr given{};
+    if (attr != nullptr && !CopyIn(&given, attr, sizeof(given))) return SCE_FIOS_ERROR_BAD_PTR;
     {
         const std::lock_guard lock(Global().mutex);
         State& state = Global();
         const SceFiosHandle id = NextHandle(state);
         if (id == 0) return SCE_FIOS_ERROR_CANT_ALLOCATE_OP;
-        if (attr != nullptr) op->attr = *attr;
+        if (attr != nullptr) op->attr = given;
         else if (g_threadAttr) op->attr = *g_threadAttr;
         else if (state.globalAttr) op->attr = *state.globalAttr;
         op->id = id;
@@ -208,6 +214,19 @@ std::int32_t Wait(SceFiosOp op) {
     if (!found) return SCE_FIOS_ERROR_BAD_OP;
     Global().finished.wait(lock, [&] { return found->done; });
     return found->error;
+}
+
+std::int32_t SyncStatus(SceFiosOp op) {
+    if (op < 0) return op;
+    Completion completion;
+    return SyncWait(op, completion) ? completion.error : SCE_FIOS_ERROR_BAD_OP;
+}
+
+std::int64_t SyncCount(SceFiosOp op) {
+    if (op < 0) return op;
+    Completion completion;
+    if (!SyncWait(op, completion)) return SCE_FIOS_ERROR_BAD_OP;
+    return completion.error != SCE_FIOS_OK ? completion.error : completion.result;
 }
 
 bool SyncWait(SceFiosOp op, Completion& completion) {
@@ -398,25 +417,30 @@ bool IsValidHandle(SceFiosHandle handle) {
     return HandleInUse(Global(), handle);
 }
 
-void StoreParameters(State& state, const void* params) {
-    state.parameters.clear();
-    if (params == nullptr) return;
+bool StoreParameters(State& state, const void* params) {
+    if (params == nullptr) {
+        state.parameters.clear();
+        return true;
+    }
     std::uint32_t first = 0;
-    std::memcpy(&first, params, sizeof(first));
+    if (!CopyIn(&first, params, sizeof(first))) return false;
     const std::size_t size = std::min<std::size_t>((first >> 1) & 0x7fff, MaxStoredParameters);
-    state.parameters.resize(size);
-    if (size != 0) std::memcpy(state.parameters.data(), params, size);
+    std::vector<std::uint8_t> copy(size);
+    if (size != 0 && !CopyIn(copy.data(), params, size)) return false;
+    state.parameters = std::move(copy);
+    return true;
 }
 
-void Initialize(const void* params) {
+bool Initialize(const void* params) {
     const std::lock_guard lock(Global().mutex);
-    StoreParameters(Global(), params);
+    if (!StoreParameters(Global(), params)) return false;
     Global().initialized = true;
+    return true;
 }
 
-void UpdateParameters(const void* params) {
+bool UpdateParameters(const void* params) {
     const std::lock_guard lock(Global().mutex);
-    if (Global().initialized) StoreParameters(Global(), params);
+    return Global().initialized && StoreParameters(Global(), params);
 }
 
 void Terminate() {
@@ -477,10 +501,13 @@ bool IsIdle() {
     return Global().pending.empty();
 }
 
-void SetGlobalAttr(const SceFiosOpAttr* attr) {
+bool SetGlobalAttr(const SceFiosOpAttr* attr) {
+    SceFiosOpAttr copy{};
+    if (attr != nullptr && !CopyIn(&copy, attr, sizeof(copy))) return false;
     const std::lock_guard lock(Global().mutex);
     if (attr == nullptr) Global().globalAttr.reset();
-    else Global().globalAttr = *attr;
+    else Global().globalAttr = copy;
+    return true;
 }
 
 bool GlobalAttr(SceFiosOpAttr& attr) {
@@ -490,9 +517,12 @@ bool GlobalAttr(SceFiosOpAttr& attr) {
     return true;
 }
 
-void SetThreadAttr(const SceFiosOpAttr* attr) {
+bool SetThreadAttr(const SceFiosOpAttr* attr) {
+    SceFiosOpAttr copy{};
+    if (attr != nullptr && !CopyIn(&copy, attr, sizeof(copy))) return false;
     if (attr == nullptr) g_threadAttr.reset();
-    else g_threadAttr = *attr;
+    else g_threadAttr = copy;
+    return true;
 }
 
 bool ThreadAttr(SceFiosOpAttr& attr) {

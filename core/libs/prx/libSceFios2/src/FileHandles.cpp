@@ -80,7 +80,10 @@ SceFiosOp StartVectors(const SceFiosOpAttr* attr, SceFiosFH handle, const SceFio
     if (iovcnt <= 0 || iovcnt > MaxVectors) invalid = SCE_FIOS_ERROR_BAD_IOVCNT;
     else if (iov == nullptr) invalid = SCE_FIOS_ERROR_BAD_PTR;
     else if (positioned && offset < 0) invalid = SCE_FIOS_ERROR_BAD_OFFSET;
-    else vectors.assign(iov, iov + iovcnt);
+    else {
+        vectors.resize(static_cast<std::size_t>(iovcnt));
+        if (!Fios::CopyIn(vectors.data(), iov, vectors.size() * sizeof(SceFiosBuffer))) invalid = SCE_FIOS_ERROR_BAD_PTR;
+    }
     std::int64_t request = 0;
     for (const SceFiosBuffer& vector : vectors) {
         if (vector.pPtr == nullptr && vector.length != 0) invalid = SCE_FIOS_ERROR_BAD_PTR;
@@ -111,8 +114,8 @@ SceFiosOp StartOpen(const SceFiosOpAttr* attr, SceFiosFH* outFH, const char* pat
     Fios::OpInfo info;
     std::int32_t invalid = outFH == nullptr ? SCE_FIOS_ERROR_BAD_PTR : Fios::CopyPath(path, info.path);
     SceFiosOpenParams params{};
-    if (openParams != nullptr) params = *openParams;
-    else params.openFlags = SCE_FIOS_O_READ;
+    if (openParams == nullptr) params.openFlags = SCE_FIOS_O_READ;
+    else if (!Fios::CopyIn(&params, openParams, sizeof(params)) && invalid == SCE_FIOS_OK) invalid = SCE_FIOS_ERROR_BAD_PTR;
     const std::string target = info.path;
     return Fios::Submit(attr, std::move(info), [=](Fios::Completion& completion) {
         if (invalid != SCE_FIOS_OK) {
@@ -193,14 +196,11 @@ SceFiosOp StartSync(const SceFiosOpAttr* attr, SceFiosFH handle) {
 }
 
 int StatusSync(SceFiosOp op) {
-    Fios::Completion completion;
-    return Fios::SyncWait(op, completion) ? completion.error : SCE_FIOS_ERROR_BAD_OP;
+    return Fios::SyncStatus(op);
 }
 
 std::int64_t CountSync(SceFiosOp op) {
-    Fios::Completion completion;
-    if (!Fios::SyncWait(op, completion)) return SCE_FIOS_ERROR_BAD_OP;
-    return completion.error != SCE_FIOS_OK ? completion.error : completion.result;
+    return Fios::SyncCount(op);
 }
 
 }

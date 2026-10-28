@@ -42,7 +42,7 @@ SceFiosDate APS5_VABI sceFiosDateGetCurrent() {
 SceFiosDate APS5_VABI sceFiosDateFromComponents(const SceFiosTm* components) {
     if (components == nullptr) return 0;
     SceFiosTm tm{};
-    std::memcpy(&tm, components, sizeof(tm));
+    if (!Fios::CopyIn(&tm, components, sizeof(tm))) return 0;
     std::int64_t year = static_cast<std::int64_t>(tm.tm_year) + 1900;
     std::int64_t month = tm.tm_mon;
     year += month / 12;

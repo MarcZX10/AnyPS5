@@ -28,8 +28,7 @@ SceFiosOp QueryExists(const SceFiosOpAttr* attr, const char* path, bool* outExis
 }
 
 bool ExistsSync(SceFiosOp op) {
-    Fios::Completion completion;
-    return Fios::SyncWait(op, completion) && completion.error == SCE_FIOS_OK && completion.result != 0;
+    return op >= 0 && Fios::SyncCount(op) == 1;
 }
 
 }
@@ -81,9 +80,7 @@ SceFiosOp APS5_VABI sceFiosFileGetSize(const SceFiosOpAttr* attr, const char* pa
 }
 
 SceFiosSize APS5_VABI sceFiosFileGetSizeSync(const SceFiosOpAttr* attr, const char* path) {
-    Fios::Completion completion;
-    if (!Fios::SyncWait(QuerySize(attr, path), completion)) return SCE_FIOS_ERROR_BAD_OP;
-    return completion.error != SCE_FIOS_OK ? completion.error : completion.result;
+    return Fios::SyncCount(QuerySize(attr, path));
 }
 
 static SceFiosOp QueryStat(const SceFiosOpAttr* attr, const char* path, SceFiosStat* outStatus) {
@@ -105,9 +102,7 @@ SceFiosOp APS5_VABI sceFiosStat(const SceFiosOpAttr* attr, const char* path, Sce
 }
 
 int APS5_VABI sceFiosStatSync(const SceFiosOpAttr* attr, const char* path, SceFiosStat* outStatus) {
-    Fios::Completion completion;
-    if (!Fios::SyncWait(QueryStat(attr, path, outStatus), completion)) return SCE_FIOS_ERROR_BAD_OP;
-    return completion.error;
+    return Fios::SyncStatus(QueryStat(attr, path, outStatus));
 }
 
 }

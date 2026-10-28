@@ -41,6 +41,9 @@ struct DirectoryHandle {
 std::int32_t FromKernelError(std::int64_t kernelResult);
 std::int32_t CopyPath(const char* source, std::string& destination);
 bool CopyOut(void* destination, const void* source, std::size_t bytes);
+bool CopyIn(void* destination, const void* source, std::size_t bytes);
+std::int32_t SyncStatus(SceFiosOp op);
+std::int64_t SyncCount(SceFiosOp op);
 std::uint64_t TimespecToDate(std::int64_t seconds, std::int64_t nanoseconds);
 
 SceFiosOp Submit(const SceFiosOpAttr* attr, OpInfo info, Work work);
@@ -72,8 +75,8 @@ std::uint32_t ListDirectories(SceFiosDH* out, std::uint32_t capacity);
 
 bool IsValidHandle(SceFiosHandle handle);
 
-void Initialize(const void* params);
-void UpdateParameters(const void* params);
+bool Initialize(const void* params);
+bool UpdateParameters(const void* params);
 void Terminate();
 bool IsInitialized(void* out);
 void Suspend();
@@ -81,9 +84,9 @@ void Resume();
 std::uint32_t SuspendCount();
 bool IsIdle();
 
-void SetGlobalAttr(const SceFiosOpAttr* attr);
+bool SetGlobalAttr(const SceFiosOpAttr* attr);
 bool GlobalAttr(SceFiosOpAttr& attr);
-void SetThreadAttr(const SceFiosOpAttr* attr);
+bool SetThreadAttr(const SceFiosOpAttr* attr);
 bool ThreadAttr(SceFiosOpAttr& attr);
 
 std::int64_t ReadFully(int descriptor, void* buffer, std::uint64_t length, std::int64_t offset, bool positioned);

@@ -8,8 +8,7 @@
 extern "C" {
 
 int APS5_VABI sceFiosInitialize(const SceFiosParams* params) {
-    Fios::Initialize(params);
-    return SCE_FIOS_OK;
+    return Fios::Initialize(params) ? SCE_FIOS_OK : SCE_FIOS_ERROR_BAD_PTR;
 }
 
 void APS5_VABI sceFiosTerminate() {

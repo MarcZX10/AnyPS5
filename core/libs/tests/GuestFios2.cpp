@@ -506,6 +506,39 @@ static void CheckDates() {
     REQUIRE(sceFiosTimeIntervalFromNanoseconds(-5) == -5 && sceFiosTimeIntervalToNanoseconds(123456789012) == 123456789012);
 }
 
+static void CheckBadPointers(const std::string& file) {
+    const auto badAttr = reinterpret_cast<const SceFiosOpAttr*>(0x10);
+    REQUIRE(sceFiosFileGetSizeSync(badAttr, file.c_str()) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFileGetSize(badAttr, file.c_str()) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(!sceFiosFileExistsSync(badAttr, file.c_str()));
+    REQUIRE(sceFiosStatSync(badAttr, file.c_str(), nullptr) == SCE_FIOS_ERROR_BAD_PTR);
+    sceFiosSetGlobalDefaultOpAttr(badAttr);
+    SceFiosOpAttr stored{};
+    REQUIRE(!sceFiosGetGlobalDefaultOpAttr(&stored));
+    sceFiosSetThreadDefaultOpAttr(badAttr);
+    REQUIRE(!sceFiosGetThreadDefaultOpAttr(&stored));
+
+    const auto badParams = reinterpret_cast<const SceFiosOpenParams*>(0x10);
+    SceFiosFH fh = 0;
+    REQUIRE(sceFiosFHOpenSync(nullptr, &fh, file.c_str(), badParams) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFHOpenWithModeSync(nullptr, &fh, file.c_str(), badParams, -1) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(fh == 0 && sceFiosGetAllFHs(nullptr, 0) == 0);
+
+    SceFiosOpenParams reader{};
+    reader.openFlags = SCE_FIOS_O_READ;
+    REQUIRE(sceFiosFHOpenSync(nullptr, &fh, file.c_str(), &reader) == SCE_FIOS_OK);
+    const auto badVectors = reinterpret_cast<const SceFiosBuffer*>(0x10);
+    REQUIRE(sceFiosFHReadvSync(nullptr, fh, badVectors, 2) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFHPreadvSync(nullptr, fh, badVectors, 2, 0) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFHWritevSync(nullptr, fh, badVectors, 2) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(sceFiosFHCloseSync(nullptr, fh) == SCE_FIOS_OK);
+
+    REQUIRE(sceFiosDateFromComponents(reinterpret_cast<const SceFiosTm*>(0x10)) == 0);
+    REQUIRE(sceFiosInitialize(reinterpret_cast<const SceFiosParams*>(0x10)) == SCE_FIOS_ERROR_BAD_PTR);
+    REQUIRE(!sceFiosIsInitialized(nullptr));
+    sceFiosUpdateParameters(reinterpret_cast<const SceFiosParams*>(0x10));
+}
+
 int main() {
     const std::filesystem::path directory = "fios2_probe";
     std::filesystem::remove_all(directory);
@@ -524,6 +557,7 @@ int main() {
     CheckFileHandles(directory.generic_string());
     CheckDirectories(directory.generic_string());
     CheckDates();
+    CheckBadPointers(file);
     sceFiosTerminate();
     REQUIRE(!sceFiosIsInitialized(nullptr));
     std::filesystem::remove_all(directory);
