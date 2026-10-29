@@ -262,6 +262,33 @@ void RequirePosixSource() {
     Require(Posix({{"LC_ALL", "C"}, {"LANG", "de_DE"}}) == Locales{"C"}, "LC_ALL=C overrides LANG");
 }
 
+int Resolve(const std::vector<std::string>& locales, std::vector<std::string>& notices) {
+    return SystemServiceLocale::ResolveHostLanguage([&locales] { return locales; }, [&notices](const std::string& line) { notices.push_back(line); });
+}
+
+void RequireHostResolution() {
+    using namespace SystemServiceLocale;
+    std::vector<std::string> notices;
+    Require(Resolve({"de_DE.UTF-8"}, notices) == German && notices.empty(), "one recognised locale");
+    Require(Resolve({"pt_BR"}, notices) == PortugueseBrazil && notices.empty(), "pt_BR");
+    Require(Resolve({"lt", "uk", "fr"}, notices) == Ukrainian && notices.empty(), "first recognised entry wins");
+    Require(Resolve({"es", "fr", "de_DE.UTF-8"}, notices) == Spanish && notices.empty(), "LANGUAGE order");
+    Require(Resolve({"en-GB", "fr"}, notices) == EnglishUk && notices.empty(), "first entry before later ones");
+    Require(Resolve({"zh-Hant-TW"}, notices) == ChineseTraditional && notices.empty(), "zh-Hant-TW");
+    Require(Resolve({"lt_LT.UTF-8"}, notices) == EnglishUs && notices.size() == 1, "unlisted language");
+    Require(notices[0] == "ANYPS5_LANGUAGE=auto: the host locale \"lt_LT.UTF-8\" has no console language, using English (United States), language number 1", notices[0]);
+    notices.clear();
+    Require(Resolve({"C"}, notices) == EnglishUs && notices.size() == 1, "C");
+    Require(notices[0].find("\"C\"") != std::string::npos && notices[0].find("English (United States)") != std::string::npos, notices[0]);
+    notices.clear();
+    Require(Resolve({"lt", "lv"}, notices) == EnglishUs && notices.size() == 1 && notices[0].find("\"lt\"") != std::string::npos, "first unrecognised entry is named");
+    notices.clear();
+    Require(Resolve({}, notices) == EnglishUs && notices.size() == 1, "no locale");
+    Require(notices[0] == "ANYPS5_LANGUAGE=auto: the host reports no locale, using English (United States), language number 1", notices[0]);
+    notices.clear();
+    Require(Resolve({"garbage!", "ja_JP"}, notices) == Japanese && notices.empty(), "malformed entry is skipped");
+}
+
 }
 
 int main() {
@@ -276,4 +303,5 @@ int main() {
     RequireOtherRows();
     RequireFallbackRules();
     RequirePosixSource();
+    RequireHostResolution();
 }
