@@ -131,9 +131,24 @@ inline constexpr Row IberianRows[] = {
     {"pt", "", "MO", PortuguesePortugal},
 };
 
+inline constexpr Row ChineseRows[] = {
+    {"zh", "", "", ChineseSimplified},
+    {"zh", "Hans", "", ChineseSimplified},
+    {"zh", "Hant", "", ChineseTraditional},
+    {"zh", "", "TW", ChineseTraditional},
+    {"zh", "", "HK", ChineseTraditional},
+    {"zh", "", "MO", ChineseTraditional},
+    {"cmn", "", "", ChineseSimplified},
+    {"cmn", "Hant", "", ChineseTraditional},
+    {"cmn", "", "TW", ChineseTraditional},
+    {"yue", "", "", ChineseTraditional},
+    {"yue", "Hans", "", ChineseSimplified},
+};
+
 inline constexpr std::span<const Row> RowGroups[] = {
     LatinEuropeanRows,
     IberianRows,
+    ChineseRows,
 };
 
 }
