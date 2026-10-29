@@ -5,6 +5,7 @@ add_library(libSceVideoOut SHARED EXCLUDE_FROM_ALL
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Output.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/VideoOutDriver.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/DisplayWindow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/HostFullscreen.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/PadInput.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Telemetry.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/MouseInput.cpp
