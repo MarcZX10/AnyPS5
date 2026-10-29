@@ -171,7 +171,7 @@ if(BUILD_TESTING)
 endif()
 
 if(BUILD_TESTING)
-    add_test_executable(video_out_host_pause_tests tests/HostPause.cpp src/HostPauseSettings.cpp)
+    add_test_executable(video_out_host_pause_tests tests/HostPause.cpp src/HostPauseSettings.cpp src/HostPause.cpp)
     target_include_directories(video_out_host_pause_tests PRIVATE ${LIBS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/3rdparty/SDL2/include)
     target_link_libraries(video_out_host_pause_tests PRIVATE SDL2-static)
     if(MINGW)
