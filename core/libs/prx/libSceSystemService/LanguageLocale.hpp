@@ -98,6 +98,11 @@ inline std::string NormalizePosixLocale(std::string_view text) {
     return name;
 }
 
+inline bool ParseLocale(std::string_view text, Tag& tag) {
+    const std::string normalised = NormalizePosixLocale(text);
+    return !normalised.empty() && ParseTag(normalised, tag);
+}
+
 }
 
 #endif
