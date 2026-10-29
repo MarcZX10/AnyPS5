@@ -349,6 +349,16 @@ inline std::vector<std::string> MacHostLocales() {
 }
 #endif
 
+inline std::vector<std::string> HostLocales() {
+#if defined(_WIN32)
+    return WindowsHostLocales();
+#elif defined(__APPLE__)
+    return MacHostLocales();
+#else
+    return PosixHostLocales([](const char* name) { return std::getenv(name); });
+#endif
+}
+
 }
 
 #endif
