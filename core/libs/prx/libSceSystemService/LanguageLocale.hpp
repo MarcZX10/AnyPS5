@@ -30,6 +30,14 @@ constexpr bool AllOf(std::string_view text, bool (*predicate)(char)) {
 
 constexpr bool IsAlphanumeric(char c) { return IsAlpha(c) || IsDigit(c); }
 
+constexpr bool EqualsIgnoringCase(std::string_view left, std::string_view right) {
+    if (left.size() != right.size()) return false;
+    for (std::size_t i = 0; i < left.size(); ++i) {
+        if (Lower(left[i]) != Lower(right[i])) return false;
+    }
+    return true;
+}
+
 }
 
 inline bool ParseTag(std::string_view text, Tag& tag) {
@@ -66,6 +74,28 @@ inline bool ParseTag(std::string_view text, Tag& tag) {
     }
     tag = std::move(parsed);
     return true;
+}
+
+inline std::string NormalizePosixLocale(std::string_view text) {
+    std::string_view modifier;
+    if (const std::size_t at = text.find('@'); at != std::string_view::npos) {
+        modifier = text.substr(at + 1);
+        text = text.substr(0, at);
+    }
+    text = text.substr(0, text.find('.'));
+    std::string name;
+    for (char c : text) name += c == '_' ? '-' : c;
+    if (name.empty() || Detail::EqualsIgnoringCase(name, "C") || Detail::EqualsIgnoringCase(name, "POSIX")) return {};
+    std::string_view script;
+    if (Detail::EqualsIgnoringCase(modifier, "latin")) script = "Latn";
+    if (Detail::EqualsIgnoringCase(modifier, "cyrillic")) script = "Cyrl";
+    if (!script.empty()) {
+        const std::size_t dash = name.find('-');
+        const std::string_view second = dash == std::string::npos ? std::string_view{} : std::string_view(name).substr(dash + 1, 4);
+        const bool hasScript = second.size() == 4 && Detail::AllOf(second, Detail::IsAlpha) && (dash + 5 == name.size() || name[dash + 5] == '-');
+        if (!hasScript) name.insert(dash == std::string::npos ? name.size() : dash, std::string("-") + std::string(script));
+    }
+    return name;
 }
 
 }
