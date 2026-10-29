@@ -2,6 +2,7 @@
 #define CORE_LIBS_PRX_LIBSCESYSTEMSERVICE_LANGUAGELOCALE_HPP
 
 #include <cstddef>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -12,6 +13,49 @@ struct Tag {
     std::string language;
     std::string script;
     std::string region;
+};
+
+enum ConsoleLanguage : int {
+    Japanese = 0,
+    EnglishUs = 1,
+    French = 2,
+    Spanish = 3,
+    German = 4,
+    Italian = 5,
+    Dutch = 6,
+    PortuguesePortugal = 7,
+    Russian = 8,
+    Korean = 9,
+    ChineseTraditional = 10,
+    ChineseSimplified = 11,
+    Finnish = 12,
+    Swedish = 13,
+    Danish = 14,
+    Norwegian = 15,
+    Polish = 16,
+    PortugueseBrazil = 17,
+    EnglishUk = 18,
+    Turkish = 19,
+    SpanishLatinAmerica = 20,
+    Arabic = 21,
+    FrenchCanada = 22,
+    Czech = 23,
+    Hungarian = 24,
+    Greek = 25,
+    Romanian = 26,
+    Thai = 27,
+    Vietnamese = 28,
+    Indonesian = 29,
+    Ukrainian = 30,
+};
+
+constexpr int NoConsoleLanguage = -1;
+
+struct Row {
+    std::string_view language;
+    std::string_view script;
+    std::string_view region;
+    int id;
 };
 
 namespace Detail {
@@ -37,6 +81,25 @@ constexpr bool EqualsIgnoringCase(std::string_view left, std::string_view right)
     }
     return true;
 }
+
+inline constexpr Row LatinEuropeanRows[] = {
+    {"en", "", "", EnglishUs},
+    {"en", "", "GB", EnglishUk},
+    {"en", "", "IE", EnglishUk},
+    {"en", "", "AU", EnglishUk},
+    {"en", "", "NZ", EnglishUk},
+    {"fr", "", "", French},
+    {"fr", "", "CA", FrenchCanada},
+    {"de", "", "", German},
+    {"it", "", "", Italian},
+    {"nl", "", "", Dutch},
+    {"ro", "", "", Romanian},
+    {"mo", "", "", Romanian},
+};
+
+inline constexpr std::span<const Row> RowGroups[] = {
+    LatinEuropeanRows,
+};
 
 }
 
@@ -101,6 +164,24 @@ inline std::string NormalizePosixLocale(std::string_view text) {
 inline bool ParseLocale(std::string_view text, Tag& tag) {
     const std::string normalised = NormalizePosixLocale(text);
     return !normalised.empty() && ParseTag(normalised, tag);
+}
+
+inline int ConsoleLanguageForTag(const Tag& tag) {
+    int best = NoConsoleLanguage;
+    int bestScore = -1;
+    for (const std::span<const Row> group : Detail::RowGroups) {
+        for (const Row& row : group) {
+            if (row.language != tag.language) continue;
+            if (!row.script.empty() && row.script != tag.script) continue;
+            if (!row.region.empty() && row.region != tag.region) continue;
+            const int score = (row.script.empty() ? 0 : 2) + (row.region.empty() ? 0 : 1);
+            if (score > bestScore) {
+                best = row.id;
+                bestScore = score;
+            }
+        }
+    }
+    return best;
 }
 
 }
