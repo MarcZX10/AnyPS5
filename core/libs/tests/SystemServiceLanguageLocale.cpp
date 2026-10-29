@@ -1,9 +1,11 @@
 #include "prx/libSceSystemService/LanguageLocale.hpp"
 #include <cstdio>
 #include <cstdlib>
+#include <map>
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -233,6 +235,33 @@ void RequireFallbackRules() {
     Require(MatchLocale("de-Cyrl-RU").recognised && MatchLocale("de-Cyrl-RU").id == German, "de-Cyrl-RU");
 }
 
+std::vector<std::string> Posix(const std::map<std::string, std::string>& variables) {
+    return SystemServiceLocale::PosixHostLocales([&variables](const char* name) -> const char* {
+        const auto found = variables.find(name);
+        return found == variables.end() ? nullptr : found->second.c_str();
+    });
+}
+
+void RequirePosixSource() {
+    using Locales = std::vector<std::string>;
+    Require(Posix({}).empty(), "nothing set");
+    Require(Posix({{"LANG", ""}, {"LC_ALL", ""}}).empty(), "all empty");
+    Require(Posix({{"LANG", "de_DE.UTF-8"}}) == Locales{"de_DE.UTF-8"}, "LANG alone");
+    Require(Posix({{"LC_MESSAGES", "fr_FR.UTF-8"}, {"LANG", "de_DE.UTF-8"}}) == Locales{"fr_FR.UTF-8"}, "LC_MESSAGES over LANG");
+    Require(Posix({{"LC_ALL", "it_IT.UTF-8"}, {"LC_MESSAGES", "fr_FR.UTF-8"}, {"LANG", "de_DE.UTF-8"}}) == Locales{"it_IT.UTF-8"}, "LC_ALL over the rest");
+    Require(Posix({{"LC_ALL", ""}, {"LC_MESSAGES", ""}, {"LANG", "nl_NL"}}) == Locales{"nl_NL"}, "empty values are skipped");
+    Require(Posix({{"LC_ALL", ""}, {"LC_MESSAGES", "es_ES"}, {"LANG", "nl_NL"}}) == Locales{"es_ES"}, "empty LC_ALL is skipped");
+    Require(Posix({{"LC_CTYPE", "ja_JP.UTF-8"}, {"LC_TIME", "ko_KR"}}).empty(), "other categories are not read");
+    Require(Posix({{"LANG", "de_DE.UTF-8"}, {"LANGUAGE", "es:fr"}}) == Locales{"es", "fr", "de_DE.UTF-8"}, "LANGUAGE precedes a real locale");
+    Require(Posix({{"LANG", "de_DE.UTF-8"}, {"LANGUAGE", ":pt_BR::en:"}}) == Locales{"pt_BR", "en", "de_DE.UTF-8"}, "empty LANGUAGE entries are skipped");
+    Require(Posix({{"LANG", "de_DE.UTF-8"}, {"LANGUAGE", ""}}) == Locales{"de_DE.UTF-8"}, "empty LANGUAGE");
+    Require(Posix({{"LANG", "C"}, {"LANGUAGE", "es"}}) == Locales{"C"}, "LANGUAGE is ignored under C");
+    Require(Posix({{"LC_ALL", "POSIX"}, {"LANG", "de_DE"}, {"LANGUAGE", "es"}}) == Locales{"POSIX"}, "LANGUAGE is ignored under POSIX");
+    Require(Posix({{"LANG", "C.UTF-8"}, {"LANGUAGE", "es"}}) == Locales{"C.UTF-8"}, "LANGUAGE is ignored under C.UTF-8");
+    Require(Posix({{"LANGUAGE", "es"}}).empty(), "LANGUAGE alone is ignored");
+    Require(Posix({{"LC_ALL", "C"}, {"LANG", "de_DE"}}) == Locales{"C"}, "LC_ALL=C overrides LANG");
+}
+
 }
 
 int main() {
@@ -246,4 +275,5 @@ int main() {
     RequireSlavicNordicRows();
     RequireOtherRows();
     RequireFallbackRules();
+    RequirePosixSource();
 }
