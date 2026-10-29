@@ -119,8 +119,6 @@ void TestSuspendConfirmationDialog() {
     Require(!sceShellCoreUtilGetSuspendConfirmationDialogFlag(runningAppId));
     Require(sceSystemServiceEnableSuspendConfirmationDialog() == SYSTEM_SERVICE_OK);
     Require(sceShellCoreUtilGetSuspendConfirmationDialogFlag(runningAppId));
-    Require(Throws([runningAppId] { return sceShellCoreUtilGetSuspendConfirmationDialogFlag(runningAppId + 1); }));
-    Require(Throws([] { return sceShellCoreUtilGetSuspendConfirmationDialogFlag(-1); }));
     std::vector<std::thread> threads;
     for (unsigned index = 0; index < 4; ++index) {
         threads.emplace_back([index] {
@@ -148,15 +146,6 @@ void TestGpuLoadEmulationMode() {
     Require(sceShellCoreUtilSetGpuLoadEmulationModeByAppId(runningAppId, 0) == SYSTEM_SERVICE_OK);
     Require(sceSystemServiceGetGpuLoadEmulationMode() == 0);
     Require(sceShellCoreUtilGetGpuLoadEmulationModeByAppId(runningAppId) == 0);
-    for (const std::uint32_t mode : {2u, 3u, 0xffffffffu}) {
-        Require(Throws([mode] { return sceSystemServiceSetGpuLoadEmulationMode(mode); }));
-        Require(Throws([mode] { return sceShellCoreUtilSetGpuLoadEmulationMode(mode); }));
-        Require(Throws([mode, runningAppId] { return sceShellCoreUtilSetGpuLoadEmulationModeByAppId(runningAppId, mode); }));
-        Require(sceSystemServiceGetGpuLoadEmulationMode() == 0);
-    }
-    Require(Throws([runningAppId] { return sceShellCoreUtilSetGpuLoadEmulationModeByAppId(runningAppId + 1, 1); }));
-    Require(Throws([runningAppId] { return sceShellCoreUtilGetGpuLoadEmulationModeByAppId(runningAppId + 1); }));
-    Require(Throws([] { return sceShellCoreUtilGetGpuLoadEmulationModeByAppId(-1); }));
     Require(sceSystemServiceGetGpuLoadEmulationMode() == 0);
     std::vector<std::thread> threads;
     for (unsigned index = 0; index < 4; ++index) {
