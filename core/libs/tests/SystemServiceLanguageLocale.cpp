@@ -198,6 +198,20 @@ void RequireSlavicNordicRows() {
     }
 }
 
+void RequireOtherRows() {
+    using namespace SystemServiceLocale;
+    constexpr LocaleLanguage entries[] = {
+        {"ar", Arabic}, {"ar-AE", Arabic}, {"ar-SA", Arabic}, {"ar_EG.UTF-8", Arabic}, {"ar-MA", Arabic}, {"ar-001", Arabic},
+        {"th", Thai}, {"th-TH", Thai}, {"th_TH.UTF-8", Thai},
+        {"vi", Vietnamese}, {"vi-VN", Vietnamese}, {"vi_VN.utf8", Vietnamese},
+        {"id", Indonesian}, {"id-ID", Indonesian}, {"id_ID.UTF-8", Indonesian}, {"in", Indonesian}, {"in_ID", Indonesian},
+        {"tr", Turkish}, {"tr-TR", Turkish}, {"tr_TR.UTF-8", Turkish}, {"tr-CY", Turkish},
+        {"el", Greek}, {"el-GR", Greek}, {"el_GR.UTF-8", Greek}, {"el-CY", Greek},
+        {"hu", Hungarian}, {"hu-HU", Hungarian}, {"hu_HU.UTF-8", Hungarian},
+    };
+    RequireLanguages(entries);
+}
+
 }
 
 int main() {
@@ -209,4 +223,5 @@ int main() {
     RequireChineseRows();
     RequireJapaneseKoreanRows();
     RequireSlavicNordicRows();
+    RequireOtherRows();
 }
