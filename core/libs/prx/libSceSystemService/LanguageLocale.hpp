@@ -359,6 +359,20 @@ inline std::vector<std::string> HostLocales() {
 #endif
 }
 
+using HostLocaleSource = std::function<std::vector<std::string>()>;
+using HostLocaleNotice = std::function<void(const std::string&)>;
+
+inline int ResolveHostLanguage(const HostLocaleSource& source, const HostLocaleNotice& notice) {
+    const std::vector<std::string> locales = source();
+    for (const std::string& locale : locales) {
+        const Match match = MatchLocale(locale);
+        if (match.recognised) return match.id;
+    }
+    const std::string detected = locales.empty() ? "the host reports no locale" : "the host locale \"" + locales.front() + "\" has no console language";
+    notice("ANYPS5_LANGUAGE=auto: " + detected + ", using English (United States), language number " + std::to_string(EnglishUs));
+    return EnglishUs;
+}
+
 }
 
 #endif
