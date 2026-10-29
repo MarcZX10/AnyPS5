@@ -60,7 +60,7 @@ inline int SystemServiceConsoleLanguage(std::string_view caller) {
     if (error != std::errc{} || end != text.data() + text.size() || language < SYSTEM_SERVICE_PARAM_LANG_JAPANESE || language > SYSTEM_SERVICE_PARAM_LANG_UKRAINIAN) {
         throw std::runtime_error(std::string(caller) + ": ANYPS5_LANGUAGE must be a console language number from " +
             std::to_string(SYSTEM_SERVICE_PARAM_LANG_JAPANESE) + " to " + std::to_string(SYSTEM_SERVICE_PARAM_LANG_UKRAINIAN) +
-            ", not \"" + std::string(text) + "\"");
+            " or auto, not \"" + std::string(text) + "\"");
     }
     return language;
 }
