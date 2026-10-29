@@ -157,6 +157,20 @@ void RequireIberianRows() {
     for (const char* region : latinAmerica) Require(LanguageOf(std::string("es-") + region) == SpanishLatinAmerica, region);
 }
 
+void RequireChineseRows() {
+    using namespace SystemServiceLocale;
+    constexpr LocaleLanguage entries[] = {
+        {"zh", ChineseSimplified}, {"zh-CN", ChineseSimplified}, {"zh_CN.UTF-8", ChineseSimplified}, {"zh-SG", ChineseSimplified}, {"zh_SG.utf8", ChineseSimplified},
+        {"zh-Hans", ChineseSimplified}, {"zh-Hans-CN", ChineseSimplified}, {"zh-hans-sg", ChineseSimplified}, {"zh-Latn", ChineseSimplified}, {"zh-MY", ChineseSimplified},
+        {"zh-Hant", ChineseTraditional}, {"zh-Hant-TW", ChineseTraditional}, {"zh_Hant_TW.UTF-8", ChineseTraditional}, {"zh-TW", ChineseTraditional}, {"zh_TW.UTF-8", ChineseTraditional},
+        {"zh-HK", ChineseTraditional}, {"zh_HK.UTF-8", ChineseTraditional}, {"zh-MO", ChineseTraditional}, {"zh-Hant-HK", ChineseTraditional}, {"zh-Hant-MO", ChineseTraditional},
+        {"zh-Hans-TW", ChineseSimplified}, {"zh-Hans-HK", ChineseSimplified}, {"zh-Hant-CN", ChineseTraditional},
+        {"cmn", ChineseSimplified}, {"cmn-Hans-CN", ChineseSimplified}, {"cmn-Hant", ChineseTraditional}, {"cmn-TW", ChineseTraditional},
+        {"yue", ChineseTraditional}, {"yue-HK", ChineseTraditional}, {"yue-Hans-CN", ChineseSimplified},
+    };
+    RequireLanguages(entries);
+}
+
 }
 
 int main() {
@@ -165,4 +179,5 @@ int main() {
     RequireEitherForm();
     RequireLatinEuropeanRows();
     RequireIberianRows();
+    RequireChineseRows();
 }
