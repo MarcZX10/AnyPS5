@@ -2,10 +2,13 @@
 #define CORE_LIBS_PRX_LIBSCESYSTEMSERVICE_LANGUAGELOCALE_HPP
 
 #include <cstddef>
+#include <cstdlib>
+#include <functional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace SystemServiceLocale {
 
@@ -276,6 +279,32 @@ inline Match MatchLocale(std::string_view locale) {
     const int id = ParseLocale(locale, tag) ? ConsoleLanguageForTag(tag) : NoConsoleLanguage;
     if (id == NoConsoleLanguage) return {EnglishUs, false};
     return {id, true};
+}
+
+using Environment = std::function<const char*(const char*)>;
+
+inline std::vector<std::string> PosixHostLocales(const Environment& environment) {
+    const auto read = [&environment](const char* name) {
+        const char* value = environment(name);
+        return std::string_view(value != nullptr ? value : "");
+    };
+    std::string_view effective;
+    for (const char* name : {"LC_ALL", "LC_MESSAGES", "LANG"}) {
+        effective = read(name);
+        if (!effective.empty()) break;
+    }
+    std::vector<std::string> locales;
+    if (!NormalizePosixLocale(effective).empty()) {
+        std::string_view preferred = read("LANGUAGE");
+        while (!preferred.empty()) {
+            const std::size_t colon = preferred.find(':');
+            const std::string_view entry = preferred.substr(0, colon);
+            if (!entry.empty()) locales.emplace_back(entry);
+            preferred = colon == std::string_view::npos ? std::string_view{} : preferred.substr(colon + 1);
+        }
+    }
+    if (!effective.empty()) locales.emplace_back(effective);
+    return locales;
 }
 
 }
