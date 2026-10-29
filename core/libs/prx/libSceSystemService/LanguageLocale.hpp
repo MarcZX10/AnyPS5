@@ -97,8 +97,43 @@ inline constexpr Row LatinEuropeanRows[] = {
     {"mo", "", "", Romanian},
 };
 
+inline constexpr Row IberianRows[] = {
+    {"es", "", "", Spanish},
+    {"es", "", "419", SpanishLatinAmerica},
+    {"es", "", "MX", SpanishLatinAmerica},
+    {"es", "", "AR", SpanishLatinAmerica},
+    {"es", "", "BO", SpanishLatinAmerica},
+    {"es", "", "CL", SpanishLatinAmerica},
+    {"es", "", "CO", SpanishLatinAmerica},
+    {"es", "", "CR", SpanishLatinAmerica},
+    {"es", "", "CU", SpanishLatinAmerica},
+    {"es", "", "DO", SpanishLatinAmerica},
+    {"es", "", "EC", SpanishLatinAmerica},
+    {"es", "", "GT", SpanishLatinAmerica},
+    {"es", "", "HN", SpanishLatinAmerica},
+    {"es", "", "NI", SpanishLatinAmerica},
+    {"es", "", "PA", SpanishLatinAmerica},
+    {"es", "", "PE", SpanishLatinAmerica},
+    {"es", "", "PR", SpanishLatinAmerica},
+    {"es", "", "PY", SpanishLatinAmerica},
+    {"es", "", "SV", SpanishLatinAmerica},
+    {"es", "", "US", SpanishLatinAmerica},
+    {"es", "", "UY", SpanishLatinAmerica},
+    {"es", "", "VE", SpanishLatinAmerica},
+    {"pt", "", "", PortugueseBrazil},
+    {"pt", "", "PT", PortuguesePortugal},
+    {"pt", "", "AO", PortuguesePortugal},
+    {"pt", "", "MZ", PortuguesePortugal},
+    {"pt", "", "CV", PortuguesePortugal},
+    {"pt", "", "GW", PortuguesePortugal},
+    {"pt", "", "ST", PortuguesePortugal},
+    {"pt", "", "TL", PortuguesePortugal},
+    {"pt", "", "MO", PortuguesePortugal},
+};
+
 inline constexpr std::span<const Row> RowGroups[] = {
     LatinEuropeanRows,
+    IberianRows,
 };
 
 }
