@@ -163,12 +163,24 @@ inline constexpr Row SlavicNordicRows[] = {
     {"nn", "", "", Norwegian},
 };
 
+inline constexpr Row OtherRows[] = {
+    {"ar", "", "", Arabic},
+    {"th", "", "", Thai},
+    {"vi", "", "", Vietnamese},
+    {"id", "", "", Indonesian},
+    {"in", "", "", Indonesian},
+    {"tr", "", "", Turkish},
+    {"el", "", "", Greek},
+    {"hu", "", "", Hungarian},
+};
+
 inline constexpr std::span<const Row> RowGroups[] = {
     LatinEuropeanRows,
     IberianRows,
     ChineseRows,
     JapaneseKoreanRows,
     SlavicNordicRows,
+    OtherRows,
 };
 
 }
