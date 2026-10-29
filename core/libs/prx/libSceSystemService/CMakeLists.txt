@@ -2,6 +2,9 @@ add_library(libSceSystemService SHARED EXCLUDE_FROM_ALL Export.cpp PendingExport
 target_include_directories(libSceSystemService PRIVATE ${LIBS_INCLUDE_DIR})
 target_link_libraries(libSceSystemService PRIVATE libSceAgcDriver libSceUsbStorage)
 configure_windows_unwind(libSceSystemService)
+if(APPLE)
+    target_link_libraries(libSceSystemService PRIVATE "-framework CoreFoundation")
+endif()
 
 if(BUILD_TESTING)
     if(WIN32)
