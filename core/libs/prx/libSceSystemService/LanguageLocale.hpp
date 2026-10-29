@@ -145,10 +145,16 @@ inline constexpr Row ChineseRows[] = {
     {"yue", "Hans", "", ChineseSimplified},
 };
 
+inline constexpr Row JapaneseKoreanRows[] = {
+    {"ja", "", "", Japanese},
+    {"ko", "", "", Korean},
+};
+
 inline constexpr std::span<const Row> RowGroups[] = {
     LatinEuropeanRows,
     IberianRows,
     ChineseRows,
+    JapaneseKoreanRows,
 };
 
 }
