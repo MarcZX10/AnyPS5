@@ -18,6 +18,8 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
+#elif defined(__APPLE__)
+#include <CoreFoundation/CoreFoundation.h>
 #endif
 
 namespace SystemServiceLocale {
@@ -328,6 +330,22 @@ inline std::vector<std::string> WindowsHostLocales() {
         locale += static_cast<char>(name[i]);
     }
     return {locale};
+}
+#endif
+
+#if defined(__APPLE__)
+inline std::vector<std::string> MacHostLocales() {
+    std::vector<std::string> locales;
+    CFArrayRef languages = CFLocaleCopyPreferredLanguages();
+    if (languages == nullptr) return locales;
+    const CFIndex count = CFArrayGetCount(languages);
+    for (CFIndex i = 0; i < count; ++i) {
+        const auto name = static_cast<CFStringRef>(CFArrayGetValueAtIndex(languages, i));
+        char buffer[128];
+        if (CFStringGetCString(name, buffer, sizeof buffer, kCFStringEncodingUTF8)) locales.emplace_back(buffer);
+    }
+    CFRelease(languages);
+    return locales;
 }
 #endif
 
