@@ -141,6 +141,22 @@ void RequireLatinEuropeanRows() {
     RequireLanguages(entries);
 }
 
+void RequireIberianRows() {
+    using namespace SystemServiceLocale;
+    constexpr LocaleLanguage entries[] = {
+        {"es", Spanish}, {"es-ES", Spanish}, {"es_ES.UTF-8@euro", Spanish}, {"ES-es", Spanish}, {"es-GQ", Spanish}, {"es-Latn-ES", Spanish},
+        {"es-419", SpanishLatinAmerica}, {"es_MX.UTF-8", SpanishLatinAmerica}, {"es-AR", SpanishLatinAmerica}, {"es-CO", SpanishLatinAmerica},
+        {"es_CL", SpanishLatinAmerica}, {"es-PE", SpanishLatinAmerica}, {"es-VE", SpanishLatinAmerica}, {"es-US", SpanishLatinAmerica},
+        {"es_UY.utf8", SpanishLatinAmerica}, {"es-PR", SpanishLatinAmerica}, {"es-CU", SpanishLatinAmerica}, {"es-DO", SpanishLatinAmerica},
+        {"pt", PortugueseBrazil}, {"pt-BR", PortugueseBrazil}, {"pt_BR.UTF-8", PortugueseBrazil}, {"PT-br", PortugueseBrazil},
+        {"pt-PT", PortuguesePortugal}, {"pt_PT.UTF-8", PortuguesePortugal}, {"pt-AO", PortuguesePortugal}, {"pt-MZ", PortuguesePortugal},
+        {"pt-CV", PortuguesePortugal}, {"pt-TL", PortuguesePortugal},
+    };
+    RequireLanguages(entries);
+    constexpr const char* latinAmerica[] = {"MX", "AR", "BO", "CL", "CO", "CR", "CU", "DO", "EC", "GT", "HN", "NI", "PA", "PE", "PR", "PY", "SV", "US", "UY", "VE", "419"};
+    for (const char* region : latinAmerica) Require(LanguageOf(std::string("es-") + region) == SpanishLatinAmerica, region);
+}
+
 }
 
 int main() {
@@ -148,4 +164,5 @@ int main() {
     RequirePosixNormalisation();
     RequireEitherForm();
     RequireLatinEuropeanRows();
+    RequireIberianRows();
 }
