@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace {
 
@@ -52,8 +53,40 @@ void RequireBcp47Parsing() {
     }
 }
 
+void RequirePosixNormalisation() {
+    constexpr std::pair<std::string_view, std::string_view> names[] = {
+        {"en_US.UTF-8", "en-US"},
+        {"en_GB.UTF-8@euro", "en-GB"},
+        {"de_DE.ISO-8859-15@euro", "de-DE"},
+        {"pt_BR", "pt-BR"},
+        {"zh_TW", "zh-TW"},
+        {"zh_Hant_TW", "zh-Hant-TW"},
+        {"ca_ES@valencia", "ca-ES"},
+        {"sr_RS@latin", "sr-Latn-RS"},
+        {"sr@latin", "sr-Latn"},
+        {"sr_Latn_RS@latin", "sr-Latn-RS"},
+        {"uz_UZ@Cyrillic", "uz-Cyrl-UZ"},
+        {"fr", "fr"},
+        {"en-US", "en-US"},
+        {"EN_us.utf8", "EN-us"},
+        {"C", ""},
+        {"POSIX", ""},
+        {"c", ""},
+        {"posix", ""},
+        {"C.UTF-8", ""},
+        {"C.utf8@euro", ""},
+        {"", ""},
+        {"@latin", ""},
+        {".UTF-8", ""},
+    };
+    for (const auto& [name, expected] : names) {
+        Require(SystemServiceLocale::NormalizePosixLocale(name) == expected, name);
+    }
+}
+
 }
 
 int main() {
     RequireBcp47Parsing();
+    RequirePosixNormalisation();
 }
