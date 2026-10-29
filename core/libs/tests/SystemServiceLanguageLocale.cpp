@@ -180,6 +180,24 @@ void RequireJapaneseKoreanRows() {
     RequireLanguages(entries);
 }
 
+void RequireSlavicNordicRows() {
+    using namespace SystemServiceLocale;
+    constexpr LocaleLanguage entries[] = {
+        {"ru", Russian}, {"ru-RU", Russian}, {"ru_RU.UTF-8", Russian}, {"ru-UA", Russian}, {"ru-BY", Russian},
+        {"uk", Ukrainian}, {"uk-UA", Ukrainian}, {"uk_UA.UTF-8", Ukrainian},
+        {"pl", Polish}, {"pl-PL", Polish}, {"pl_PL.UTF-8", Polish},
+        {"cs", Czech}, {"cs-CZ", Czech}, {"cs_CZ.UTF-8", Czech},
+        {"fi", Finnish}, {"fi-FI", Finnish}, {"fi_FI.UTF-8@euro", Finnish},
+        {"sv", Swedish}, {"sv-SE", Swedish}, {"sv_FI.UTF-8", Swedish},
+        {"da", Danish}, {"da-DK", Danish}, {"da_DK.UTF-8", Danish},
+        {"no", Norwegian}, {"no-NO", Norwegian}, {"nb", Norwegian}, {"nb-NO", Norwegian}, {"nb_NO.UTF-8", Norwegian}, {"nn", Norwegian}, {"nn-NO", Norwegian}, {"nn_NO.UTF-8", Norwegian},
+    };
+    RequireLanguages(entries);
+    for (std::string_view unmapped : {"lt-LT", "lv-LV", "et-EE", "sk-SK", "sl-SI", "bg-BG", "sr-RS", "sr_RS@latin", "hr-HR", "be-BY", "is-IS"}) {
+        Require(LanguageOf(unmapped) == NoConsoleLanguage, unmapped);
+    }
+}
+
 }
 
 int main() {
@@ -190,4 +208,5 @@ int main() {
     RequireIberianRows();
     RequireChineseRows();
     RequireJapaneseKoreanRows();
+    RequireSlavicNordicRows();
 }
