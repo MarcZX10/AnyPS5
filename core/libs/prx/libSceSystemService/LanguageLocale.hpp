@@ -10,6 +10,16 @@
 #include <utility>
 #include <vector>
 
+#if defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 namespace SystemServiceLocale {
 
 struct Tag {
@@ -306,6 +316,20 @@ inline std::vector<std::string> PosixHostLocales(const Environment& environment)
     if (!effective.empty()) locales.emplace_back(effective);
     return locales;
 }
+
+#if defined(_WIN32)
+inline std::vector<std::string> WindowsHostLocales() {
+    wchar_t name[LOCALE_NAME_MAX_LENGTH];
+    const int length = GetUserDefaultLocaleName(name, LOCALE_NAME_MAX_LENGTH);
+    if (length <= 1) return {};
+    std::string locale;
+    for (int i = 0; i < length - 1; ++i) {
+        if (name[i] <= 0 || name[i] > 127) return {};
+        locale += static_cast<char>(name[i]);
+    }
+    return {locale};
+}
+#endif
 
 }
 
