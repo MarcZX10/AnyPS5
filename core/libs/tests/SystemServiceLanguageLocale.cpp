@@ -84,9 +84,33 @@ void RequirePosixNormalisation() {
     }
 }
 
+void RequireEitherForm() {
+    constexpr ParsedTag locales[] = {
+        {"en_US.UTF-8", "en", "", "US"},
+        {"en-US", "en", "", "US"},
+        {"zh_Hant_TW.UTF-8", "zh", "Hant", "TW"},
+        {"zh-Hans-CN", "zh", "Hans", "CN"},
+        {"sr_RS@latin", "sr", "Latn", "RS"},
+        {"pt_BR.utf8", "pt", "", "BR"},
+        {"es_419", "es", "", "419"},
+        {"fr", "fr", "", ""},
+    };
+    for (const auto& expected : locales) {
+        SystemServiceLocale::Tag tag;
+        Require(SystemServiceLocale::ParseLocale(expected.text, tag), expected.text);
+        Require(tag.language == expected.language && tag.script == expected.script && tag.region == expected.region, expected.text);
+    }
+    for (std::string_view none : {"", "C", "POSIX", "C.UTF-8", "@latin", "garbage!", "english", "e", "en__US", "_US", "123"}) {
+        SystemServiceLocale::Tag tag{"keep", "keep", "keep"};
+        Require(!SystemServiceLocale::ParseLocale(none, tag), none);
+        Require(tag.language == "keep" && tag.script == "keep" && tag.region == "keep", none);
+    }
+}
+
 }
 
 int main() {
     RequireBcp47Parsing();
     RequirePosixNormalisation();
+    RequireEitherForm();
 }
