@@ -212,6 +212,27 @@ void RequireOtherRows() {
     RequireLanguages(entries);
 }
 
+void RequireFallbackRules() {
+    using namespace SystemServiceLocale;
+    constexpr const char* perLanguage[31] = {
+        "ja-JP", "en-US", "fr-FR", "es-ES", "de-DE", "it-IT", "nl-NL", "pt-PT", "ru-RU", "ko-KR", "zh-Hant", "zh-Hans", "fi-FI", "sv-SE", "da-DK", "no-NO",
+        "pl-PL", "pt-BR", "en-GB", "tr-TR", "es-419", "ar-AE", "fr-CA", "cs-CZ", "hu-HU", "el-GR", "ro-RO", "th-TH", "vi-VN", "id-ID", "uk-UA"};
+    for (int id = 0; id <= 30; ++id) {
+        const Match match = MatchLocale(perLanguage[id]);
+        Require(match.recognised && match.id == id, perLanguage[id]);
+    }
+    for (std::string_view unrecognised : {"", "C", "POSIX", "C.UTF-8", "c", "garbage", "xx", "xx-YY", "x-foo", "en_", "_US", "lt-LT", "sw-KE", "he-IL", "hi-IN", "sr-Latn-RS", "ca-ES", "eu", "gl-ES", "qaa", "en--US", "12345", "\t"}) {
+        const Match match = MatchLocale(unrecognised);
+        Require(!match.recognised && match.id == EnglishUs, unrecognised);
+    }
+    Require(MatchLocale("en-US").recognised && MatchLocale("en-ZZ").recognised && MatchLocale("en-ZZ").id == EnglishUs, "en-ZZ");
+    Require(MatchLocale("fr-ZZ").recognised && MatchLocale("fr-ZZ").id == French, "fr-ZZ");
+    Require(MatchLocale("zh-ZZ").recognised && MatchLocale("zh-ZZ").id == ChineseSimplified, "zh-ZZ");
+    Require(MatchLocale("pt-ZZ").recognised && MatchLocale("pt-ZZ").id == PortugueseBrazil, "pt-ZZ");
+    Require(MatchLocale("es-ZZ").recognised && MatchLocale("es-ZZ").id == Spanish, "es-ZZ");
+    Require(MatchLocale("de-Cyrl-RU").recognised && MatchLocale("de-Cyrl-RU").id == German, "de-Cyrl-RU");
+}
+
 }
 
 int main() {
@@ -224,4 +245,5 @@ int main() {
     RequireJapaneseKoreanRows();
     RequireSlavicNordicRows();
     RequireOtherRows();
+    RequireFallbackRules();
 }
