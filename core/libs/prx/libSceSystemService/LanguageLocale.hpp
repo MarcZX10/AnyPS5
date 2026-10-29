@@ -266,6 +266,18 @@ inline int ConsoleLanguageForTag(const Tag& tag) {
     return best;
 }
 
+struct Match {
+    int id;
+    bool recognised;
+};
+
+inline Match MatchLocale(std::string_view locale) {
+    Tag tag;
+    const int id = ParseLocale(locale, tag) ? ConsoleLanguageForTag(tag) : NoConsoleLanguage;
+    if (id == NoConsoleLanguage) return {EnglishUs, false};
+    return {id, true};
+}
+
 }
 
 #endif
