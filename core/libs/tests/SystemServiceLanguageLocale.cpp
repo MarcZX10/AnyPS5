@@ -171,6 +171,15 @@ void RequireChineseRows() {
     RequireLanguages(entries);
 }
 
+void RequireJapaneseKoreanRows() {
+    using namespace SystemServiceLocale;
+    constexpr LocaleLanguage entries[] = {
+        {"ja", Japanese}, {"ja-JP", Japanese}, {"ja_JP.UTF-8", Japanese}, {"JA-jp", Japanese}, {"ja-Jpan-JP", Japanese}, {"ja_JP.eucJP", Japanese},
+        {"ko", Korean}, {"ko-KR", Korean}, {"ko_KR.UTF-8", Korean}, {"ko-KP", Korean}, {"ko-Kore-KR", Korean},
+    };
+    RequireLanguages(entries);
+}
+
 }
 
 int main() {
@@ -180,4 +189,5 @@ int main() {
     RequireLatinEuropeanRows();
     RequireIberianRows();
     RequireChineseRows();
+    RequireJapaneseKoreanRows();
 }
