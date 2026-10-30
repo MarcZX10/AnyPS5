@@ -2,10 +2,13 @@
 #define CORE_LIBS_PRX_LIBSCEPAD_PADIDENTIFY_HPP
 
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
+
+#include "prx/libScePad/include/PadRumbleIntensity.hpp"
 
 namespace Pad {
 
@@ -50,6 +53,73 @@ constexpr IdentifyPattern MakeIdentifyPattern(unsigned player) {
     }
     return pattern;
 }
+
+constexpr std::chrono::milliseconds kIdentifyQuiet{500};
+constexpr std::chrono::seconds kIdentifyRepeat{30};
+
+class IdentifyScheduler {
+public:
+    using TimePoint = std::chrono::steady_clock::time_point;
+
+    void Bind(TimePoint now, unsigned player, IdentifyMode identifyMode) {
+        pattern = MakeIdentifyPattern(player);
+        mode = identifyMode;
+        armed = pattern.count > 0 && mode != IdentifyMode::Off;
+        quietSince = now;
+        lastEnd = now;
+        running = false;
+        finished = false;
+        nextPulse = 0;
+    }
+
+    template <class Sink>
+    bool Tick(TimePoint now, bool titleActive, unsigned percent, Sink&& sink) {
+        if (!armed) return false;
+        if (titleActive) {
+            quietSince = now;
+            if (running) {
+                running = false;
+                finished = true;
+                lastEnd = now;
+            }
+            return false;
+        }
+        if (percent == 0) return false;
+        if (!running) {
+            if (!Due(now)) return false;
+            running = true;
+            patternStart = now;
+            nextPulse = 0;
+        }
+        const IdentifyPulse& pulse = pattern.pulses[nextPulse];
+        if (now - patternStart < std::chrono::milliseconds(pulse.startMs)) return false;
+        ++nextPulse;
+        const bool sent = SendRumble(sink, pulse.strength, pulse.strength, percent, pulse.durationMs);
+        if (nextPulse == pattern.count) {
+            running = false;
+            finished = true;
+            lastEnd = now;
+        }
+        return sent;
+    }
+
+private:
+    bool Due(TimePoint now) const {
+        if (now - quietSince < kIdentifyQuiet) return false;
+        if (!finished) return true;
+        return mode == IdentifyMode::Always && now - lastEnd >= kIdentifyRepeat;
+    }
+
+    IdentifyPattern pattern{};
+    IdentifyMode mode = IdentifyMode::Off;
+    bool armed = false;
+    bool running = false;
+    bool finished = false;
+    unsigned nextPulse = 0;
+    TimePoint quietSince{};
+    TimePoint patternStart{};
+    TimePoint lastEnd{};
+};
 
 }
 
