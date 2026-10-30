@@ -417,5 +417,12 @@ class EnvReferenceTests(unittest.TestCase):
         self.assertEqual(err.errors, "backslashreplace")
 
 
+class LiteralReaderRegression(unittest.TestCase):
+    def test_a_reader_passing_its_name_through_a_constant_is_seen_by_its_literal_form(self):
+        repo = Path(__file__).resolve().parents[2]
+        found = env_reference.reads((repo / "core" / "libs" / "prx" / "libSceAudioOut" / "src",))
+        self.assertIn("APS5_PAD_SPEAKER_FALLBACK_DB", found)
+
+
 if __name__ == "__main__":
     unittest.main()
