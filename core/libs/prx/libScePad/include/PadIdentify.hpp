@@ -3,8 +3,27 @@
 
 #include <array>
 #include <cstdint>
+#include <cstdlib>
+#include <stdexcept>
+#include <string>
 
 namespace Pad {
+
+enum class IdentifyMode : std::uint8_t { Off, Connect, Always };
+
+inline IdentifyMode ParseIdentifyMode(const char* text) {
+    if (text == nullptr) return IdentifyMode::Off;
+    const std::string value(text);
+    if (value == "off") return IdentifyMode::Off;
+    if (value == "connect") return IdentifyMode::Connect;
+    if (value == "always") return IdentifyMode::Always;
+    throw std::runtime_error("ANYPS5_PAD_IDENTIFY must be off, connect or always, got '" + value + "'");
+}
+
+inline IdentifyMode IdentifyModeFromEnvironment() {
+    static const IdentifyMode mode = ParseIdentifyMode(std::getenv("ANYPS5_PAD_IDENTIFY"));
+    return mode;
+}
 
 constexpr unsigned kIdentifyMaxPlayer = 4;
 constexpr std::uint32_t kIdentifyPulseMs = 150;
