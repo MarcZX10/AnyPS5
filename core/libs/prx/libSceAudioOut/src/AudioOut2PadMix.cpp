@@ -44,7 +44,7 @@ float AudioPadSpeakerFallbackGainFrom(const char* dbText) {
 }
 
 float AudioPadSpeakerFallbackGain() {
-    return AudioPadSpeakerFallbackGainFrom(std::getenv(AUDIO_PAD_SPEAKER_FALLBACK_ENV));
+    return AudioPadSpeakerFallbackGainFrom(std::getenv("APS5_PAD_SPEAKER_FALLBACK_DB"));
 }
 
 AudioOut2Route AudioOut2RouteForPort(std::uint16_t type, std::uint32_t channels) {
