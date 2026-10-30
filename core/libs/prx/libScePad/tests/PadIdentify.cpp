@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <stdexcept>
+#include <string>
 
 namespace {
 
@@ -32,10 +34,30 @@ void OutOfRangePlayersGetNoPattern() {
     }
 }
 
+bool RefusesMode(const char* text) {
+    try {
+        Pad::ParseIdentifyMode(text);
+    } catch (const std::runtime_error& error) {
+        const std::string message = error.what();
+        return message.find("ANYPS5_PAD_IDENTIFY") != std::string::npos && message.find(text) != std::string::npos;
+    }
+    return false;
+}
+
+void ModeParserAcceptsOnlyTheThreeNames() {
+    Require(Pad::ParseIdentifyMode(nullptr) == Pad::IdentifyMode::Off, "an unset variable keeps identify off");
+    Require(Pad::ParseIdentifyMode("off") == Pad::IdentifyMode::Off, "off is accepted");
+    Require(Pad::ParseIdentifyMode("connect") == Pad::IdentifyMode::Connect, "connect is accepted");
+    Require(Pad::ParseIdentifyMode("always") == Pad::IdentifyMode::Always, "always is accepted");
+    const char* refused[] = {"", "on", "1", "0", "Connect", "ALWAYS", " connect", "connect ", "always\n", "all", "off,connect"};
+    for (const char* text : refused) Require(RefusesMode(text), "an invalid value is refused with an error naming the variable and the value");
+}
+
 }
 
 int main() {
     PatternHasOnePulsePerPlayer();
     OutOfRangePlayersGetNoPattern();
+    ModeParserAcceptsOnlyTheThreeNames();
     return 0;
 }
