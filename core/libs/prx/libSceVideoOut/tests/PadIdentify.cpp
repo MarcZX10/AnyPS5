@@ -26,6 +26,14 @@ void Require(bool condition, const char* message) {
     std::exit(1);
 }
 
+void SetIdentifyMode(const char* value) {
+#ifdef _WIN32
+    _putenv_s("ANYPS5_PAD_IDENTIFY", value);
+#else
+    setenv("ANYPS5_PAD_IDENTIFY", value, 1);
+#endif
+}
+
 std::vector<Clock::time_point> pulseEdges;
 std::vector<Clock::time_point> titleEdges;
 bool motorOn = false;
@@ -68,7 +76,7 @@ int Run(const char* mode) {
     Require(device >= 0 && SDL_IsGameController(device), "a virtual controller with a rumble callback attaches");
 
     if (std::strcmp(mode, "invalid") == 0) {
-        setenv("ANYPS5_PAD_IDENTIFY", "bogus", 1);
+        SetIdentifyMode("bogus");
         try {
             PadInput refused;
         } catch (const std::runtime_error& error) {
@@ -82,8 +90,8 @@ int Run(const char* mode) {
         Require(false, "an invalid mode must not start the pad input");
     }
 
-    if (std::strcmp(mode, "off") == 0) setenv("ANYPS5_PAD_IDENTIFY", "off", 1);
-    else if (std::strcmp(mode, "connect") == 0 || std::strcmp(mode, "rumble") == 0) setenv("ANYPS5_PAD_IDENTIFY", "connect", 1);
+    if (std::strcmp(mode, "off") == 0) SetIdentifyMode("off");
+    else if (std::strcmp(mode, "connect") == 0 || std::strcmp(mode, "rumble") == 0) SetIdentifyMode("connect");
     else return 2;
 
     if (std::strcmp(mode, "rumble") == 0) Pad::SetVibration(0, 200, 200);
