@@ -5,6 +5,8 @@ on:
     paths:
       - 'core/libs/prx/**'
       - 'tools/progress.py'
+      - 'tools/nid_names.py'
+      - 'docs/dev/observed/**'
       - '.github/workflows/progress-report.yml'
 
 permissions:
