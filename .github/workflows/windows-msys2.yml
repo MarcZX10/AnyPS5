@@ -68,6 +68,13 @@ jobs:
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-ninja
+      - name: Pin the MinGW runtime to r532 (experiment)
+        shell: msys2 {0}
+        run: |
+          base=https://repo.msys2.org/mingw/ucrt64
+          v=14.0.0.r532.gdbbc8e99d-1
+          pacman -U --noconfirm $base/mingw-w64-ucrt-x86_64-headers-$v-any.pkg.tar.zst $base/mingw-w64-ucrt-x86_64-crt-$v-any.pkg.tar.zst $base/mingw-w64-ucrt-x86_64-winpthreads-$v-any.pkg.tar.zst $base/mingw-w64-ucrt-x86_64-libwinpthread-$v-any.pkg.tar.zst
+          pacman -Q mingw-w64-ucrt-x86_64-crt mingw-w64-ucrt-x86_64-winpthreads
       - shell: pwsh
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
