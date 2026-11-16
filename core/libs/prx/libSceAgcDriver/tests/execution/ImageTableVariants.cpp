@@ -438,6 +438,7 @@ void HeapStageWithOtherWords(AgcDriver::VulkanDevice& device, const GuestBlock& 
     AgcDriver::GuestMemory::BumpCollectEpoch();
     const auto before = AgcDriver::Graphics::ImageTableReuses();
     {
+        std::lock_guard gpu(AgcDriver::GuestMemory::GpuMutex());
         AgcDriver::Graphics::ShaderResources resources(device.graphicsContext(), stage);
     }
     Expect(before, substituted, substituted, 0, what);

@@ -197,6 +197,7 @@ void requireSameResult(const RecompileResult& left, const RecompileResult& right
     require(left.workgroupMemoryDwords == right.workgroupMemoryDwords, prefix + "workgroup memory stride differs");
     require(left.poisonedSrtReads == right.poisonedSrtReads, prefix + "poisoned SRT read counts differ");
     require(left.shaderDataUserWords == right.shaderDataUserWords, prefix + "shader-data user words differ");
+    require(left.heapUserWords == right.heapUserWords, prefix + "heap user words differ");
     require(left.imageTableRanges == right.imageTableRanges && left.imageTableShader == right.imageTableShader && left.imageTableFaults == right.imageTableFaults && left.imageTablePoison.size() == right.imageTablePoison.size(), prefix + "image table invocation data differs");
     require(left.imageTableReadRanges == right.imageTableReadRanges, prefix + "image table read ranges differ");
     require(left.userDataRegisterReads == right.userDataRegisterReads, prefix + "user data register read mask differs");
@@ -297,6 +298,7 @@ RecompileResult sampleResult() {
     result.stencilReferenceDword = 23u;
     result.poisonedSrtReads = 3;
     result.shaderDataUserWords = {2u, 0xffffffffu, 9u};
+    result.heapUserWords = {1u, 7u, 31u};
     result.barycentricEmulation = {true, false, true};
     result.meshBarycentrics = MeshBarycentricLayout{{true, true, false}, {FragmentParameter{0, 2, false, true}, FragmentParameter{3, 3, false, false}}};
     result.variantId = 99;
@@ -1600,6 +1602,11 @@ void verifyBindingPlanSelection() {
     try { static_cast<void>(builder.Select(plan, std::array{UINT32_MAX})); }
     catch (const std::runtime_error&) { rejected = true; }
     require(rejected, "module selection accepted an unknown binding");
+    auto addressed = plan;
+    addressed.addressedData = true;
+    const auto userDataBinding = NativeBinding(IrShaderStage::Compute, DescriptorBindingKind::UserData);
+    const auto addressedSelected = builder.Select(addressed, std::array{userDataBinding});
+    require(std::ranges::any_of(addressedSelected.bindings, [](const auto& binding) { return binding.descriptor.role == DescriptorRole::ShaderData; }), "live auxiliary user data lost its shader data plan entry");
     snapshot.buffers[0].dwordCount = 3u;
     rejected = false;
     try { builder.Populate(populated, compiled, selected, 0u, snapshot, {}); }

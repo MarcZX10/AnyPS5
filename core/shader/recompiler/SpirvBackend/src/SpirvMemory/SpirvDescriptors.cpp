@@ -213,7 +213,7 @@ std::uint32_t StorageElementPointer(SpirvEmitterState& state, std::uint32_t poin
     if (variable == 0) ExitDescriptorBindingFailure(state, kind, resource, "storage image heap array was not emitted");
     RequireDynamicIndexing(state, spv::CapabilityStorageImageArrayDynamicIndexing, kind, resource, "the storage image heap needs storage image array dynamic indexing, which the device lacks");
     const auto pointer = state.module.AllocateId();
-    state.module.AddFunction(spv::OpAccessChain, pointerType, pointer, variable, state.registrationModules ? HeapImageSlot(state, kind, resource) : HeapImageSlotWord(state, kind, resource, arrayIndex));
+    state.module.AddFunction(spv::OpAccessChain, pointerType, pointer, variable, HeapImageSlotWord(state, kind, resource, arrayIndex));
     return pointer;
 }
 

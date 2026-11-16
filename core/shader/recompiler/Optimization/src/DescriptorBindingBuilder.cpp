@@ -566,7 +566,7 @@ DescriptorBindingPlan DescriptorBindingBuilder::Prepare(const IrBindingLayout& l
     for (const auto& logical : layout.descriptors) {
         const bool imageHeap = ImageBindingResourceClass(logical.kind) != ImageResourceClass::None;
         const bool samplerHeap = logical.kind == DescriptorBindingKind::Samplers;
-        const bool sampledSlots = slotWords && layout.HeapImageKind(logical.kind);
+        const bool sampledSlots = layout.gpuResolvedImages && layout.HeapImageKind(logical.kind);
         IrDescriptorBinding compact{logical.kind, {}};
         std::vector<std::uint32_t> originals;
         std::vector<bool> inactive;
@@ -589,7 +589,7 @@ DescriptorBindingPlan DescriptorBindingBuilder::Prepare(const IrBindingLayout& l
                 active = (samplerModes.at(resource) & (1u << (element & 1u))) != 0u;
             }
             if ((imageHeap || samplerHeap) && !registrationModules) plan.specialization.push_back({PipelineSpecialization::DescriptorIndex(static_cast<std::uint32_t>(logical.kind), element), active ? static_cast<std::uint32_t>(compact.resources.size()) : 0u});
-            if (active && sampledSlots) plan.heapSlotWords.push_back({imageSlotBase + element, static_cast<std::uint32_t>(logical.kind), static_cast<std::uint32_t>(compact.resources.size())});
+            if ((active || registrationModules) && sampledSlots) plan.heapSlotWords.push_back({imageSlotBase + element, static_cast<std::uint32_t>(logical.kind), static_cast<std::uint32_t>(compact.resources.size())});
             const bool embeddedSampler = samplerHeap && layout.gpuResolvedImages && info.samplers.at(resource).constant;
             if (active && slotWords && samplerHeap && !embeddedSampler) plan.heapSlotWords.push_back({layout.SamplerSlotDword() + element, static_cast<std::uint32_t>(logical.kind), static_cast<std::uint32_t>(compact.resources.size())});
             if (active || ((imageHeap || samplerHeap) && registrationModules)) {
@@ -740,6 +740,10 @@ DescriptorBindingPlan DescriptorBindingBuilder::Select(const DescriptorBindingPl
         selected.bindings.push_back(binding);
     }
     if (plan.addressedData) {
+        for (const auto& binding : plan.bindings) {
+            if (binding.descriptor.role != DescriptorRole::ShaderData) continue;
+            remaining.erase(binding.descriptor.binding - static_cast<std::uint32_t>(DescriptorBindingKind::ShaderData) + static_cast<std::uint32_t>(DescriptorBindingKind::UserData));
+        }
         for (const auto kind : {RuntimeAbi::FirstImageBinding, RuntimeAbi::FirstStorageImageBinding, RuntimeAbi::FirstAtomicImageBinding, RuntimeAbi::FirstAtomic64ImageBinding, static_cast<std::uint32_t>(DescriptorBindingKind::Samplers)}) {
             remaining.erase(NativeBinding(IrShaderStage::Pixel, static_cast<DescriptorBindingKind>(kind)));
         }

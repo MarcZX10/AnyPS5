@@ -2027,6 +2027,7 @@ void EncodeResult(const RecompileResult& result, std::vector<std::byte>& out) {
     encodeInvocation(writer, result);
     writer.Value(result.workgroupMemoryDwords);
     writer.Values(std::span<const std::uint32_t>(result.shaderDataUserWords));
+    writer.Values(std::span<const std::uint32_t>(result.heapUserWords));
 }
 
 bool DecodeResult(std::span<const std::byte> bytes, RecompileResult& result, std::shared_ptr<const void> owner) {
@@ -2035,6 +2036,7 @@ bool DecodeResult(std::span<const std::byte> bytes, RecompileResult& result, std
     decodeInvocation(reader, result);
     reader.Value(result.workgroupMemoryDwords);
     reader.Values(result.shaderDataUserWords);
+    reader.Values(result.heapUserWords);
     result.cacheHit = false;
     return reader.Done() && result.runtimeAbiVersion == RuntimeAbi::Version;
 }

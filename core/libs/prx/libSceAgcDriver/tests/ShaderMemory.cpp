@@ -446,7 +446,7 @@ void verifySpecializedModuleRelease() {
     require(shared.spirv.data() == again.spirv.data(), "specialized module release: a second result of a live module copied its words");
 }
 
-void verifyRebuiltModuleKeepsWords() {
+void verifyRebuiltModuleReleasesWords() {
     using namespace ShaderRecompiler;
     const std::array<std::uint32_t, 1> color{0x3f800000u};
     const std::vector<std::uint32_t> code{0xbf800003u, 0x7e000200u, 0xf800180fu, 0u, 0xbf810000u};
@@ -464,15 +464,15 @@ void verifyRebuiltModuleKeepsWords() {
         require(built.specializationId != 0u, "rebuilt module: the pixel fixture was not specialized");
     }
     SharedSpirv::Weak rebuilt;
-    const std::uint32_t* words = nullptr;
+    SpirvContentHash hash;
     {
         const auto again = Recompile(pixel);
         rebuilt = again.spirv.Weaken();
-        words = again.spirv.data();
+        hash = again.spirv.ContentHash();
     }
-    require(!rebuilt.Expired(), "rebuilt module: a module needed again after its release dropped its words a second time");
+    require(rebuilt.Expired(), "rebuilt module: released specialization words remain strongly retained");
     const auto third = Recompile(pixel);
-    require(third.spirv.data() == words, "rebuilt module: a kept module was specialized again");
+    require(third.spirv.ContentHash() == hash, "rebuilt module: released specialization words rebuilt differently");
 }
 
 void verifyLayerSpecializationRelease() {
@@ -13112,7 +13112,7 @@ int main(int argc, char** argv) {
         verifyImageTables();
         verifyImageTableKeyBounds();
         verifySpecializedModuleRelease();
-        verifyRebuiltModuleKeepsWords();
+        verifyRebuiltModuleReleasesWords();
         verifyLayerSpecializationRelease();
         verifyImageTableRegistration();
         verifyScalarAddressRule();

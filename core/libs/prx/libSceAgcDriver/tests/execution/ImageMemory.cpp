@@ -349,7 +349,7 @@ GuestTextureResource Resource(std::uint64_t address) {
     return resource;
 }
 
-bool SampledImages(const Context& context, TextureDetiler& detiler, Hooks& native, bool sharing) {
+bool SampledImages(const Context& context, TextureDetiler& detiler, Hooks& native, bool sharing, bool timelineSemaphores) {
     const auto resource = Resource(0x100000);
     const auto geometry = DescribeSurface(resource);
     std::vector<std::byte> snapshot(static_cast<std::size_t>(geometry.guestBytes), std::byte{0x35});
@@ -359,7 +359,7 @@ bool SampledImages(const Context& context, TextureDetiler& detiler, Hooks& nativ
     std::vector<std::unique_ptr<Texture>> textures;
     bool covered = true;
     {
-        Recorder recorder(context, true);
+        Recorder recorder(context, timelineSemaphores);
         recorder.Activate();
         for (std::size_t i = 0; i < ImageCount; ++i) {
             auto texture = std::make_unique<Texture>(context, detiler, resource, identity, snapshot);
@@ -648,7 +648,7 @@ int RunImages(std::optional<Hooks>& lifetime, bool sharing, bool lifetimesOnly, 
     TextureDetiler detiler(context);
     context.detiler = &detiler;
     native.PreferDedicated(dedicatedImages);
-    covered = SampledImages(context, detiler, native, sharing);
+    covered = SampledImages(context, detiler, native, sharing, device->CanWaitUnlocked());
     if (!lifetimesOnly) covered = StorageImages(context, detiler, native, sharing) && covered;
     native.PreferDedicated(dedicatedPressure);
     if (sharing) covered = CachePressure(context, native) && covered;

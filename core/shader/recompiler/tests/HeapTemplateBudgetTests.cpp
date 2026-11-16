@@ -59,6 +59,12 @@ void ChargesOwnedArrays() {
     result.bindings.resize(8);
     for (auto& binding : result.bindings) binding.guestDescriptor.resize(4096);
     Require(ShaderRecompiler::OwnedBytes(result) >= withRanges + arrays + 8u * 4096u * sizeof(std::uint32_t), "the guest descriptor words of a template's bindings were not charged");
+    const auto beforeEmbedded = ShaderRecompiler::OwnedBytes(result);
+    auto& binding = result.bindings.front();
+    binding.samplerEmbedded.resize(1024);
+    binding.samplerEmbeddedWords.resize(1024);
+    const auto embeddedBytes = ShaderRecompiler::OwnedBytes(binding.samplerEmbedded) + ShaderRecompiler::OwnedBytes(binding.samplerEmbeddedWords);
+    Require(ShaderRecompiler::OwnedBytes(result) == beforeEmbedded + embeddedBytes, "embedded sampler allocations were not charged to the template");
 }
 
 }

@@ -28,7 +28,7 @@ template<typename TValue>
     return OwnedBytes(binding.guestDescriptor) + OwnedBytes(binding.samplerDepthCompare) + OwnedBytes(binding.imageWritten) + OwnedBytes(binding.imageDepthCompare) + OwnedBytes(binding.imageAtomic) + OwnedBytes(binding.imageAtomic64) +
            OwnedBytes(binding.imageShapes) + OwnedBytes(binding.bufferAtomic) + OwnedBytes(binding.bufferWritten) + OwnedBytes(binding.samplerUnnormalized) + OwnedBytes(binding.samplerIntegerBorder) +
            OwnedBytes(binding.samplerCoordinatesIgnored) + OwnedBytes(binding.imageUnnormalized) + OwnedBytes(binding.imageUnnormalizedBaseLevel) + OwnedBytes(binding.imageSamplers) + OwnedBytes(binding.bufferRead) +
-           OwnedBytes(binding.bufferExtent);
+           OwnedBytes(binding.bufferExtent) + OwnedBytes(binding.samplerEmbedded) + OwnedBytes(binding.samplerEmbeddedWords);
 }
 
 [[nodiscard]] inline std::uint64_t OwnedBytes(const RecompileResult& result) {

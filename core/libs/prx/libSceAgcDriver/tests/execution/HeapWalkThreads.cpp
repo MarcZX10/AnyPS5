@@ -73,6 +73,7 @@ std::vector<std::unique_ptr<Variant>> Prepare(AgcDriver::VulkanDevice& device) {
 }
 
 struct Inbox {
+    std::atomic<bool> finished{false};
     std::mutex mutex;
     std::deque<AgcDriver::DriverDetail::HeapStageMaterialized> stages;
 };
@@ -109,6 +110,16 @@ void Work(const std::vector<std::unique_ptr<Variant>>& variants, std::size_t fir
                 while (held.size() > Held) held.pop_front();
                 if (failed.load(std::memory_order_relaxed)) return;
             }
+        }
+        own.finished.store(true, std::memory_order_release);
+        while (!peer.finished.load(std::memory_order_acquire)) {
+            if (failed.load(std::memory_order_relaxed)) return;
+            std::this_thread::yield();
+        }
+        {
+            std::lock_guard lock(own.mutex);
+            for (const auto& item : own.stages) touched += Touch(item);
+            own.stages.clear();
         }
         Require(touched != 0, "a heap walk thread received no stage from the other thread");
     } catch (const std::exception& caught) {

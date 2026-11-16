@@ -564,7 +564,7 @@ struct HeapTemplateFront {
         std::uint64_t source = 0;
         std::uint64_t key = 0;
         std::uint64_t touched = 0;
-        std::shared_ptr<const HeapTemplate> found;
+        std::weak_ptr<const HeapTemplate> found;
     };
     std::array<Entry, HeapTemplateFrontEntries> entries{};
     std::uint64_t lookups = 0;
@@ -1161,7 +1161,6 @@ struct SpecializedModule {
     SpirvContentHash hash;
     mutable std::mutex mutex;
     mutable SharedSpirv::Weak spirv;
-    mutable SharedSpirv kept;
 };
 
 struct SpecializedSpirv {
@@ -1315,7 +1314,6 @@ SharedSpirv specializedWords(const SpecializedModule& module, const CompiledShad
     auto spirv = InternSpirv(specializeWords(artifact, classes, constants, target));
     if (spirv.ContentHash() != module.hash) throw std::runtime_error("ShaderRecompiler: a specialized module built again from its key differs from its first build");
     module.spirv = spirv.Weaken();
-    module.kept = spirv;
     return spirv;
 }
 
@@ -1348,7 +1346,6 @@ struct RegistrationModuleEntry {
 
 SharedSpirv lockedWords(const SpecializedModule& module) {
     std::lock_guard lock(module.mutex);
-    if (!module.kept.empty()) return module.kept;
     return module.spirv.Lock();
 }
 
@@ -2792,9 +2789,8 @@ std::shared_ptr<const RecompileResult> PreparedShaderInvocation::MaterializeHeap
     ++front.lookups;
     std::shared_ptr<const HeapTemplate> hit;
     const bool templates = HeapCacheEnabled(HeapCache::Templates);
-    if (templates && HeapCacheEnabled(HeapCache::TemplateFront) && entry.found != nullptr && entry.source == source.id && entry.key == key) {
-        hit = entry.found;
-    } else if (templates) {
+    if (templates && HeapCacheEnabled(HeapCache::TemplateFront) && entry.source == source.id && entry.key == key) hit = entry.found.lock();
+    if (templates && hit == nullptr) {
         {
             std::lock_guard lock(source.mutex);
             const auto found = source.heapTemplates.find(key);
@@ -2850,9 +2846,10 @@ std::shared_ptr<const RecompileResult> PreparedShaderInvocation::Materialize(con
     return Sealed(std::move(result));
 }
 
-const std::shared_ptr<const IrResourcePlan>& PreparedShaderInvocation::Plan() const {
-    static const std::shared_ptr<const IrResourcePlan> none;
-    return handle != nullptr && handle->source != nullptr ? handle->source->plan : none;
+std::shared_ptr<const IrResourcePlan> PreparedShaderInvocation::Plan() const {
+    if (handle == nullptr || handle->source == nullptr) return nullptr;
+    std::lock_guard lock(handle->source->mutex);
+    return handle->source->plan;
 }
 
 std::shared_ptr<const IrResourcePlan> PreparedShaderInvocation::LoadPlan() const {
@@ -2861,7 +2858,7 @@ std::shared_ptr<const IrResourcePlan> PreparedShaderInvocation::LoadPlan() const
 }
 
 std::shared_ptr<const IrResourcePlan> PreparedShaderInvocation::PlanOrLoad() const {
-    const auto& plan = Plan();
+    const auto plan = Plan();
     return plan != nullptr ? plan : LoadPlan();
 }
 

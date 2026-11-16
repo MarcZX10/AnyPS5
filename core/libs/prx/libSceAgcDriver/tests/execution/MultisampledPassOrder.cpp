@@ -125,11 +125,15 @@ int main() {
             std::puts("skipped, barrier elision is off");
             return VulkanTestSkipped;
         }
+        if (!device->CanWaitUnlocked()) {
+            std::puts("skipped, timeline semaphores are disabled");
+            return VulkanTestSkipped;
+        }
         const auto shaders = Compile(*device);
         device->WaitIdle();
         std::lock_guard gpu(AgcDriver::GuestMemory::GpuMutex());
         const auto captured = Capture::Install(base);
-        Recorder recorder(captured, true);
+        Recorder recorder(captured, device->CanWaitUnlocked());
         recorder.Activate();
         const auto depthA = reinterpret_cast<std::uintptr_t>(DepthA.data());
         const auto depthB = reinterpret_cast<std::uintptr_t>(DepthB.data());

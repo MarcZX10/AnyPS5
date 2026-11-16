@@ -173,7 +173,7 @@ BindingAllocationResult BindingAllocator::Allocate(IrProgram& program, const Bin
     }
 
     next.heapStorageImages = gpuResolvedImages && descriptorMemory;
-    if (gpuResolvedImages && !registrationModules) {
+    if (gpuResolvedImages) {
         for (const auto& descriptor : next.descriptors) {
             if (next.HeapImageKind(descriptor.kind)) next.imageSlotDwords += static_cast<std::uint32_t>(descriptor.resources.size());
         }
