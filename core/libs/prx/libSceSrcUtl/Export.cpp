@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <cstdint>
 #include <cstddef>
+#include <cstring>
 #include <iterator>
 #include "SceTypes.hpp"
 #include "prx/libc/include/General.hpp"
@@ -104,7 +105,6 @@ int APS5_VABI sceSrcUtilityGetAjmContext(const void* handle, std::uint32_t* cont
         errno = savedErrno;
         return SRC_UTILITY_ERROR_INVALID_POINTER;
     }
-    errno = savedErrno;
     return 0;
 }
 
@@ -122,13 +122,12 @@ int APS5_VABI sceSrcUtilityGetPriority(const void* handle, std::uint32_t* priori
     if (handle == nullptr || !HandleIsInitialized(handle)) return SRC_UTILITY_ERROR_INVALID_HANDLE;
     if (priority == nullptr) return SRC_UTILITY_ERROR_INVALID_POINTER;
     std::uint32_t value = 0;
-    if (!ReadHandleWord(handle, SRC_UTILITY_PRIORITY_OFFSET, value)) return SRC_UTILITY_ERROR_INVALID_HANDLE;
+    std::memcpy(&value, static_cast<const std::byte*>(handle) + SRC_UTILITY_PRIORITY_OFFSET, sizeof(value));
     const int savedErrno = errno;
     if (!GuestCopyOut_nid_no_patch(priority, &value, sizeof(value))) {
         errno = savedErrno;
         return SRC_UTILITY_ERROR_INVALID_POINTER;
     }
-    errno = savedErrno;
     return 0;
 }
 

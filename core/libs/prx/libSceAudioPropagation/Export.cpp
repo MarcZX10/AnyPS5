@@ -249,17 +249,13 @@ std::int32_t APS5_VABI sceAudioPropagationSystemQueryMemory(const SystemOptions*
 }
 
 std::int32_t APS5_VABI sceAudioPropagationSystemCreate(const SystemOptions* options, const AudioPropagationSystemMemory* memory, AudioPropagationHandle* outSystem) {
-    require(options != nullptr && memory != nullptr && outSystem != nullptr, __func__);
-    SystemOptions localOptions{};
-    if (!copyGuestIn(localOptions, options)) return ErrorNullPointer;
-    AudioPropagationSystemMemory localMemory{};
-    if (!copyGuestIn(localMemory, memory)) return ErrorNullPointer;
-    requireDescriptor(&localMemory.desc, SystemMemoryId, SystemMemorySize, __func__);
-    auto requiredMemory = localMemory;
-    const auto result = sceAudioPropagationSystemQueryMemory(&localOptions, &requiredMemory);
+    require(options != nullptr && outSystem != nullptr, __func__);
+    requireDescriptor(memory != nullptr ? &memory->desc : nullptr, SystemMemoryId, SystemMemorySize, __func__);
+    auto requiredMemory = *memory;
+    const auto result = sceAudioPropagationSystemQueryMemory(options, &requiredMemory);
     if (result != 0) return result;
-    const auto address = reinterpret_cast<std::uintptr_t>(localMemory.p_cpu_mem);
-    require(address != 0 && address % alignof(SystemState) == 0 && localMemory.size_cpu_mem >= requiredMemory.size_cpu_mem && localMemory.size_gpu_mem == 0, __func__);
+    const auto address = reinterpret_cast<std::uintptr_t>(memory->p_cpu_mem);
+    require(address != 0 && address % alignof(SystemState) == 0 && memory->size_cpu_mem >= requiredMemory.size_cpu_mem && memory->size_gpu_mem == 0, __func__);
     auto& state = registry();
     std::lock_guard lock(state.mutex);
     require(!state.systems.contains(address), __func__);
@@ -267,17 +263,17 @@ std::int32_t APS5_VABI sceAudioPropagationSystemCreate(const SystemOptions* opti
     if (freeIndex == state.systemIndices.end()) return static_cast<std::int32_t>(0x8A700006);
     const auto index = static_cast<std::uint32_t>(freeIndex - state.systemIndices.begin());
     if (!copyGuestOut(outSystem, static_cast<AudioPropagationHandle>(address))) return ErrorNullPointer;
-    if (!copyGuestOut(static_cast<SystemState*>(localMemory.p_cpu_mem), SystemState{
+    *static_cast<SystemState*>(memory->p_cpu_mem) = SystemState{
         SystemMagic,
-        localMemory.p_cpu_mem,
-        localMemory.size_cpu_mem,
+        memory->p_cpu_mem,
+        memory->size_cpu_mem,
         index,
-        localOptions.frameSamples,
-        localOptions.maxSources,
-        localOptions.maxMaterials,
-        localOptions.reflectionOrder == 1 ? 6u : 36u,
-        localOptions.propagationSpeed,
-    })) return ErrorNullPointer;
+        options->frameSamples,
+        options->maxSources,
+        options->maxMaterials,
+        options->reflectionOrder == 1 ? 6u : 36u,
+        options->propagationSpeed,
+    };
     state.systems.insert(address);
     state.systemOrder.push_back(address);
     state.systemIndices[index] = true;
@@ -373,13 +369,10 @@ std::int32_t APS5_VABI sceAudioPropagationRoomDestroy(AudioPropagationHandle sys
 }
 
 std::int32_t APS5_VABI sceAudioPropagationPortalCreate(AudioPropagationHandle system, const PortalParams* params, AudioPropagationHandle* outPortal) {
-    require(params != nullptr, __func__);
-    PortalParams localParams{};
-    if (!copyGuestIn(localParams, params)) return ErrorNullPointer;
-    requireDescriptor(&localParams.desc, PortalParamsId, PortalParamsSize, __func__);
+    requireDescriptor(params != nullptr ? &params->desc : nullptr, PortalParamsId, PortalParamsSize, __func__);
     auto& state = registry();
     std::lock_guard lock(state.mutex);
-    for (const auto room : localParams.rooms) require(requireObject(state, room, Kind::Room, __func__).system == system, __func__);
+    for (const auto room : params->rooms) require(requireObject(state, room, Kind::Room, __func__).system == system, __func__);
     return createObjectLocked(state, system, Kind::Portal, outPortal, __func__) != 0 ? 0 : ErrorNullPointer;
 }
 
@@ -522,8 +515,7 @@ std::int32_t APS5_VABI sceAudioPropagationSourceRender(AudioPropagationHandle sy
     const auto& configuration = *reinterpret_cast<const SystemState*>(system);
     require(count <= configuration.maxSources, __func__);
     for (std::uint32_t index = 0; index < count; ++index) {
-        RenderInfo info{};
-        if (!copyGuestIn(info, infos + index)) return ErrorNullPointer;
+        const auto& info = infos[index];
         requireDescriptor(&info.desc, RenderInfoId, RenderInfoSize, __func__);
         require(requireObject(state, info.source, Kind::Source, __func__).system == system, __func__);
         require(info.output != nullptr && info.outputSize != 0, __func__);
@@ -546,7 +538,7 @@ std::int32_t APS5_VABI sceAudioPropagationSourceRender(AudioPropagationHandle sy
         }
     }
     for (std::uint32_t index = 0; index < count; ++index) {
-        if (!copyGuestOut(&(infos + index)->channelCount, std::uint32_t{0})) return ErrorNullPointer;
+        infos[index].channelCount = 0;
     }
     return 0;
 }
@@ -757,7 +749,7 @@ int APS5_VABI sceAudioPropagationSystemEnumHandles(AudioPropagationHandle* handl
     if (handles) {
         const auto copied = std::min(capacity, total);
         for (std::uint32_t index = 0; index < copied; ++index) {
-            if (!copyGuestOut(handles + index, state.systemOrder[state.systemOrder.size() - index - 1])) return ErrorNullPointer;
+            handles[index] = state.systemOrder[state.systemOrder.size() - index - 1];
         }
     }
     return static_cast<int>(total);

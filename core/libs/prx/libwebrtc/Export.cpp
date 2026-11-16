@@ -1025,6 +1025,11 @@ int APS5_VABI _ZN6webrtc10AudioState6CreateERKNS0_6ConfigE_nid_postfix(void) {
     return 0;
 }
 
+int APS5_VABI _ZN6webrtc21EchoCanceller3FactoryC1ERKNS_20EchoCanceller3ConfigE_nid_postfix(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 int APS5_VABI _ZN6webrtc14AudioMixerImpl6CreateEv_nid_postfix(void) {
     NotImplemented_nid_no_patch(__func__);
     return 0;
