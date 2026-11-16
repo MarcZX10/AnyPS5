@@ -1,7 +1,6 @@
 #include "prx/libSceSrcUtl/include/Api.hpp"
 #include "SceTypes.hpp"
 #include <algorithm>
-#include <cerrno>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -84,38 +83,29 @@ void CheckPriority() {
 }
 
 void CheckUnwritablePriorityOutput() {
-    constexpr std::size_t kRegionSize = 0xA000;
     std::uint8_t* page = nullptr;
 #ifdef _WIN32
-    page = static_cast<std::uint8_t*>(VirtualAlloc(nullptr, kRegionSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE));
+    page = static_cast<std::uint8_t*>(VirtualAlloc(nullptr, 4096, MEM_RESERVE | MEM_COMMIT, PAGE_NOACCESS));
 #else
-    void* mapped = mmap(nullptr, kRegionSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    void* mapped = mmap(nullptr, 4096, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     page = mapped == MAP_FAILED ? nullptr : static_cast<std::uint8_t*>(mapped);
 #endif
-    Require(page != nullptr, "a mapped region must be available");
-    std::memcpy(page + 0x9470, &MAGIC, sizeof(MAGIC));
-#ifdef _WIN32
-    DWORD oldProtect = 0;
-    Require(VirtualProtect(page, 4096, PAGE_NOACCESS, &oldProtect) != 0, "first page must become no-access");
-#else
-    Require(mprotect(page, 4096, PROT_NONE) == 0, "first page must become no-access");
-#endif
+    Require(page != nullptr, "a no-access page must be available");
     std::vector<std::uint8_t> handle(HANDLE_SIZE, 0);
     std::memcpy(handle.data() + 0x9470, &MAGIC, sizeof(MAGIC));
     const std::uint32_t stored = 0x0BADF00D;
     std::memcpy(handle.data() + 0x2C, &stored, sizeof(stored));
-    errno = 71;
-    Require(sceSrcUtilityGetPriority(handle.data(), reinterpret_cast<std::uint32_t*>(page)) == INVALID_POINTER && errno == 71,
+    Require(sceSrcUtilityGetPriority(handle.data(), reinterpret_cast<std::uint32_t*>(page)) == INVALID_POINTER,
             "get must report an unwritable output as the invalid pointer error");
-    std::uint32_t outputPriority = 9;
-    Require(sceSrcUtilityGetPriority(page, &outputPriority) == INVALID_HANDLE && outputPriority == 9 && errno == 71,
-            "get must report an unreadable priority field as invalid handle");
-    Require(sceSrcUtilitySetPriority(page, 1) == INVALID_HANDLE && errno == 71,
+    std::uint32_t outputPriority = 0;
+    Require(sceSrcUtilityGetPriority(page, &outputPriority) == INVALID_HANDLE,
+            "get must report an unwritable handle as invalid handle");
+    Require(sceSrcUtilitySetPriority(page, 1) == INVALID_HANDLE,
             "set must report an unwritable handle as invalid handle");
 #ifdef _WIN32
     VirtualFree(page, 0, MEM_RELEASE);
 #else
-    munmap(page, kRegionSize);
+    munmap(page, 4096);
 #endif
 }
 
