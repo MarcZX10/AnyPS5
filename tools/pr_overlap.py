@@ -806,8 +806,7 @@ def main_status(names, ref):
         aliases = {canonical(item) for item in defined}
         for name in wanted & (aliases | ({nids[nid]} if nid in nids else set())):
             declared[name].setdefault(library, set()).update(aliases | {name})
-    libraries = {library for exports in declared.values() for library in exports if library}
-    scanned = {library: library_status(ref, library) for library in sorted(libraries)}
+    scanned = {library: library_status(ref, library) for libraries in declared.values() for library in libraries if library}
     status = {}
     for name, libraries in declared.items():
         status[name] = {}
