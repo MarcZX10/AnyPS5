@@ -24,9 +24,14 @@ void TestKratosUnsupportedState() {
     }
     Require(threw);
 
-    int primaryUser = 0x5A5A5A5A;
-    Require(sceUserServiceGetKratosPrimaryUser(&primaryUser) == USER_SERVICE_ERROR_NOT_SUPPORTED);
-    Require(primaryUser == 0x5A5A5A5A);
+    threw = false;
+    try {
+        int userId = -1;
+        sceUserServiceGetKratosPrimaryUser(&userId);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    Require(threw);
 
     threw = false;
     try {
@@ -48,7 +53,13 @@ void TestKratosUnsupportedState() {
         0x30000000
     };
     for (int id : userIds) {
-        Require(!sceUserServiceIsKratosPrimaryUser(id));
+        threw = false;
+        try {
+            sceUserServiceIsKratosPrimaryUser(id);
+        } catch (const std::runtime_error&) {
+            threw = true;
+        }
+        Require(threw);
     }
 }
 

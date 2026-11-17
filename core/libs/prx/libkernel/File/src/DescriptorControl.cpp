@@ -24,7 +24,6 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 #ifdef _WIN32
 #include <fcntl.h>
@@ -97,9 +96,6 @@ constexpr std::int16_t FromEnd = 2;
 constexpr std::uint32_t CloseOnExecRequest = 0x20006601;
 constexpr std::uint32_t KeepOnExecRequest = 0x20006602;
 constexpr std::uint32_t NonblockingRequest = 0x8004667e;
-constexpr std::uint32_t AsynchronousRequest = 0x8004667d;
-constexpr std::uint32_t SetOwnerRequest = 0x8004667c;
-constexpr std::uint32_t GetOwnerRequest = 0x4004667b;
 constexpr std::uint32_t ReadableRequest = 0x4004667f;
 constexpr std::uint32_t RequestIn = 0x80000000u;
 constexpr std::uint32_t RequestOut = 0x40000000u;
@@ -577,8 +573,7 @@ int Ioctl(int fd, std::uint64_t request, void* argument) {
     if (File::IsVirtualDirectoryDescriptor(fd)) return Fail(GuestEinval);
     const auto command = static_cast<std::uint32_t>(request);
     const std::uint32_t length = (command >> 16) & 0x1fff;
-    const std::uint32_t copied = (command & RequestVoid) != 0 ? 0 : length;
-    if ((command & RequestIn) && copied != 0 && argument == nullptr) return Fail(GuestEfault);
+    if ((command & RequestIn) && length != 0 && argument == nullptr) return Fail(GuestEfault);
     const auto kind = Classify(fd, "ioctl");
     if (!kind) return Fail(GuestEbadf);
     if (command == CloseOnExecRequest || command == KeepOnExecRequest) {
@@ -586,11 +581,10 @@ int Ioctl(int fd, std::uint64_t request, void* argument) {
         return 0;
     }
     if (IsKqueueDescriptor_nid_no_patch(fd)) return Fail(GuestEnotty);
-    if (command == NonblockingRequest || command == AsynchronousRequest) {
+    if (command == NonblockingRequest) {
         int enable = 0;
         if (!GuestCopyIn_nid_no_patch(&enable, argument, sizeof(enable))) return Fail(GuestEfault);
-        const int flag = command == NonblockingRequest ? Nonblocking : Asynchronous;
-        return ChangeStatus(fd, *kind, flag, enable != 0 ? flag : 0, "ioctl");
+        return ChangeStatus(fd, *kind, Nonblocking, enable != 0 ? Nonblocking : 0, "ioctl");
     }
     if (command == ReadableRequest) {
         if (*kind == Kind::RandomDevice) return Fail(GuestEnotty);
@@ -601,13 +595,6 @@ int Ioctl(int fd, std::uint64_t request, void* argument) {
         return 0;
     }
     if (((command >> 8) & 0xff) == TerminalGroup) return Fail(GuestEnotty);
-    if (*kind == Kind::Pipe && fd > 2 && command != SetOwnerRequest && command != GetOwnerRequest) {
-        if ((command & RequestIn) && copied != 0) {
-            std::vector<unsigned char> payload(copied);
-            if (!GuestCopyIn_nid_no_patch(payload.data(), argument, copied)) return Fail(GuestEfault);
-        }
-        return Fail(GuestEnotty);
-    }
     char hex[11];
     std::snprintf(hex, sizeof(hex), "0x%08X", command);
     Unsupported("ioctl", std::string("request ") + hex, *kind, fd);
