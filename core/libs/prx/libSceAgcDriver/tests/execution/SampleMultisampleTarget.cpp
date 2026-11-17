@@ -737,10 +737,6 @@ bool FormatlessMultisampleWrites(const AgcDriver::Graphics::Context& context) {
     return context.storageImageMultisample && context.storageImageWriteWithoutFormat;
 }
 
-bool InitialColorUploadSupported(const AgcDriver::Graphics::Context& context) {
-    return FormatlessMultisampleWrites(context) || context.sampleRateShading;
-}
-
 void CheckOverwrittenTarget(AgcDriver::VulkanDevice& device) {
     Block reused(4u * BlockBytes, true);
     if (!AgcDriver::GuestMemory::Watched(reused.Address(), reused.bytes)) {
@@ -766,7 +762,7 @@ void CheckOverwrittenTarget(AgcDriver::VulkanDevice& device) {
     AgcDriver::Graphics::RequireNoMultisampleTarget(written, 256u, "a read of target memory the title wrote over");
     AgcDriver::Graphics::RequireNoMultisampleTarget(reused.Address(), 64u, "a read of the rest of a target the title wrote over");
     const std::vector<std::uint8_t> guest(reused.data, reused.data + reused.bytes);
-    if (InitialColorUploadSupported(AgcDriver::VulkanDeviceTestAccess::ContextOf(device))) {
+    if (FormatlessMultisampleWrites(AgcDriver::VulkanDeviceTestAccess::ContextOf(device))) {
         Draw(device, state);
         device.WaitIdle();
         Require(std::equal(guest.begin(), guest.end(), reused.data), "a fresh draw after a partial guest overwrite changed guest color memory");
@@ -774,7 +770,7 @@ void CheckOverwrittenTarget(AgcDriver::VulkanDevice& device) {
         refusal.clear();
         try { Draw(device, state); }
         catch (const std::runtime_error& error) { refusal = error.what(); }
-        Require(refusal.find("requires storage writes or sample rate shading") != std::string::npos, "a fresh draw after a partial guest overwrite did not refuse initial samples the device cannot upload");
+        Require(refusal.find("require enabled formatless") != std::string::npos, "a fresh draw after a partial guest overwrite did not refuse initial samples the device cannot upload");
         Require(std::equal(guest.begin(), guest.end(), reused.data), "a refused draw after a partial guest overwrite changed guest color memory");
         std::memset(reused.data, 0, static_cast<std::size_t>(colorBytes));
         Draw(device, state);
@@ -1002,8 +998,8 @@ std::vector<std::array<float, 4>> StoreInitial(const Block& block, std::uint32_t
 int NonuniformInitialContents(AgcDriver::VulkanDevice& device) {
     using namespace AgcDriver::Graphics;
     const auto context = AgcDriver::VulkanDeviceTestAccess::ContextOf(device);
-    if (!InitialColorUploadSupported(context)) {
-        std::puts("nonuniform initial contents skipped, the device lacks multisampled storage writes and sample rate shading");
+    if (!FormatlessMultisampleWrites(context)) {
+        std::puts("nonuniform initial contents skipped, the device does not enable multisampled formatless storage writes");
         return VulkanTestSkipped;
     }
     std::uint32_t exercised = 0u;
@@ -1061,7 +1057,7 @@ int NonuniformInitialLifetime(AgcDriver::VulkanDevice& device) {
     auto* previous = Recorder::Active();
     Require(previous != nullptr && previous->Device() == context.device, "initial lifetime fixture has no device recorder to restore");
     struct Restore { Recorder* previous; ~Restore() { previous->Activate(); } } restore{previous};
-    const bool uploads = InitialColorUploadSupported(context);
+    const bool uploads = FormatlessMultisampleWrites(context);
     for (const bool uniform : {false, true}) {
         if (!uniform && !uploads) continue;
         Block block(BlockBytes);
@@ -1154,14 +1150,13 @@ int NonuniformInitialCapabilities(AgcDriver::VulkanDevice& device) {
         if (missing == 0u) unavailable.storageImageMultisample = false;
         if (missing == 1u) unavailable.storageImageWriteWithoutFormat = false;
         if (missing == 2u) unavailable.detiler = nullptr;
-        unavailable.sampleRateShading = false;
-        refused(unavailable, "requires storage writes or sample rate shading");
+        refused(unavailable, "require enabled formatless");
     }
     color.tileMode = ColorTileMode::Z64KBX;
     refused(context, "nonuniform initial multisample color tiling");
     color.tileMode = ColorTileMode::RenderTarget;
-    if (!InitialColorUploadSupported(context)) {
-        std::puts("nonuniform initial upload: missing capabilities and an unsupported tiling refuse without ownership or byte changes; chunked upload checks skipped, the device lacks multisampled storage writes and sample rate shading");
+    if (!FormatlessMultisampleWrites(context)) {
+        std::puts("nonuniform initial upload: missing capabilities and an unsupported tiling refuse without ownership or byte changes; storage range, image format and chunked upload checks skipped, the device does not enable multisampled formatless storage writes");
         return VulkanTestSkipped;
     }
     auto unavailable = context;
@@ -1172,7 +1167,6 @@ int NonuniformInitialCapabilities(AgcDriver::VulkanDevice& device) {
     refused(unavailable, "vkGetPhysicalDeviceImageFormatProperties multisampled target");
     auto chunked = context;
     chunked.limits.maxStorageBufferRange = 256u;
-    if (chunked.sampleRateShading) chunked.storageImageMultisample = false;
     {
         std::lock_guard gpu(AgcDriver::GuestMemory::GpuMutex());
         PrepareMultisampleTargetForDraw_nid_no_patch(chunked, color);
@@ -1194,8 +1188,8 @@ int NonuniformInitialCapabilities(AgcDriver::VulkanDevice& device) {
 int NonuniformInitialHook(AgcDriver::VulkanDevice& device) {
     using namespace AgcDriver::Graphics;
     const auto context = AgcDriver::VulkanDeviceTestAccess::ContextOf(device);
-    if (!InitialColorUploadSupported(context)) {
-        std::puts("nonuniform initial capture skipped, the device lacks multisampled storage writes and sample rate shading");
+    if (!FormatlessMultisampleWrites(context)) {
+        std::puts("nonuniform initial capture skipped, the device does not enable multisampled formatless storage writes");
         return VulkanTestSkipped;
     }
     Block block(4u * BlockBytes);
@@ -1657,8 +1651,7 @@ void UniformInitialRefusals(AgcDriver::VulkanDevice& device) {
     const std::vector<std::uint8_t> varying(block.data, block.data + block.bytes);
     auto unavailable = context;
     unavailable.storageImageMultisample = false;
-    unavailable.sampleRateShading = false;
-    refuses(color, "requires storage writes or sample rate shading", &unavailable);
+    refuses(color, "require enabled formatless", &unavailable);
     Require(std::equal(varying.begin(), varying.end(), block.data), "a refused initial import changed guest contents");
     Require(!MultisampleColorTargetOver(color.address, static_cast<std::size_t>(MultisampledColorBytes(color))), "a refused initial import left a resident owner");
     StoreWords(block, block.bytes, FillOnes);

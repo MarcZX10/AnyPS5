@@ -215,10 +215,7 @@ int NativeSignal(int guest) {
 void ResetToDefault(int guest) {
     handlerReset[guest].store(true);
     handlers[guest].store(nullptr);
-    if (const int native = NativeSignal(guest)) {
-        std::signal(native, SIG_DFL);
-        if (native == SIGSEGV) GuestFaultCopyReinstall_nid_no_patch();
-    }
+    if (const int native = NativeSignal(guest)) std::signal(native, SIG_DFL);
 }
 void RunHandler(int guest, GuestHandler handler) {
     auto& self = CurrentSignals();
@@ -282,7 +279,6 @@ bool Install(int guest, const GuestSigaction& action) {
         handlers[guest].store(previous);
         return false;
     }
-    if (native == SIGSEGV) GuestFaultCopyReinstall_nid_no_patch();
     return true;
 }
 }
