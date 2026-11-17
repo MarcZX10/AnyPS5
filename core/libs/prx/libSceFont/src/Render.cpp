@@ -564,8 +564,7 @@ int APS5_VABI sceFontGlyphGetAttribute(FontGlyph glyph, int attribute, int* nowA
     if (!nowAttribute) return SCE_FONT_ERROR_INVALID_PARAMETER;
     auto* generated = TryGetGeneratedGlyph(glyph);
     if (!generated) return SCE_FONT_ERROR_INVALID_GLYPH;
-    const int attr = (glyph->flags & 2) ? 0x11 : 0x10;
-    if (!CopyOutGuest(nowAttribute, attr)) return SCE_FONT_ERROR_INVALID_PARAMETER;
+    *nowAttribute = (glyph->flags & 2) ? 0x11 : 0x10;
     return SCE_FONT_OK;
 }
 

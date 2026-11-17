@@ -13,23 +13,18 @@ std::int32_t FormatInteger(char* buffer, TValue value, std::uint32_t radix) {
     using TUnsigned = std::make_unsigned_t<TValue>;
     auto magnitude = static_cast<TUnsigned>(value);
     const bool negative = value < 0 && radix == 10;
-    char local[70] = {};
     std::int32_t length = 0;
     if (negative) {
         magnitude = TUnsigned{0} - magnitude;
-        local[length++] = '-';
+        buffer[length++] = '-';
     }
     const std::int32_t firstDigit = length;
     do {
-        local[length++] = "0123456789ABCDEF"[magnitude % radix];
+        buffer[length++] = "0123456789ABCDEF"[magnitude % radix];
         magnitude /= radix;
     } while (magnitude);
-    std::reverse(local + firstDigit, local + length);
-    local[length] = 0;
-    const int savedErrno = errno;
-    const bool copied = GuestCopyOut_nid_no_patch(buffer, local, static_cast<std::size_t>(length + 1));
-    errno = savedErrno;
-    if (!copied) APS5_INVALID_ARG_EX;
+    std::reverse(buffer + firstDigit, buffer + length);
+    buffer[length] = 0;
     return length;
 }
 
