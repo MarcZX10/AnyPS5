@@ -17,7 +17,6 @@
 namespace TimedWait {
 
 bool Coarse();
-std::uint64_t TimerLateNanos();
 void BindThreadWaitState(std::atomic<int>* state);
 std::uint64_t NowNanos();
 std::uint64_t DeadlineNanos(std::uint64_t microseconds);
