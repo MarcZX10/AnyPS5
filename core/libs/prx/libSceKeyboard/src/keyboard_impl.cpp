@@ -219,11 +219,7 @@ int GetConnection(std::int32_t handle, bool* isConnected) {
     if (!initialized) return KEYBOARD_ERROR_NOT_INITIALIZED;
     if (!openSecondPort(handle) && (handle != KEYBOARD_HANDLE || !opened)) return KEYBOARD_ERROR_INVALID_HANDLE;
     if (isConnected == nullptr) return KEYBOARD_ERROR_INVALID_ARG;
-    const bool state = handle == KEYBOARD_HANDLE && connected;
-    const int savedErrno = errno;
-    const bool copied = GuestCopyOut_nid_no_patch(isConnected, &state, sizeof(state));
-    errno = savedErrno;
-    if (!copied) return KEYBOARD_ERROR_INVALID_ARG;
+    *isConnected = handle == KEYBOARD_HANDLE && connected;
     return KEYBOARD_OK;
 }
 
@@ -231,19 +227,9 @@ int DebugGetDeviceId(std::int32_t handle, std::int32_t* deviceId) {
     std::lock_guard lock(keyboardMutex);
     if (!initialized) return KEYBOARD_ERROR_NOT_INITIALIZED;
     if (deviceId == nullptr) return KEYBOARD_ERROR_INVALID_ARG;
-    std::int32_t id = -1;
-    if (handle != KEYBOARD_HANDLE || !opened || !connected) {
-        const int savedErrno = errno;
-        const bool copied = GuestCopyOut_nid_no_patch(deviceId, &id, sizeof(id));
-        errno = savedErrno;
-        if (!copied) return KEYBOARD_ERROR_INVALID_ARG;
-        return KEYBOARD_ERROR_INVALID_HANDLE;
-    }
-    id = KEYBOARD_DEVICE_ID;
-    const int savedErrno = errno;
-    const bool copied = GuestCopyOut_nid_no_patch(deviceId, &id, sizeof(id));
-    errno = savedErrno;
-    if (!copied) return KEYBOARD_ERROR_INVALID_ARG;
+    *deviceId = -1;
+    if (handle != KEYBOARD_HANDLE || !opened || !connected) return KEYBOARD_ERROR_INVALID_HANDLE;
+    *deviceId = KEYBOARD_DEVICE_ID;
     return KEYBOARD_OK;
 }
 
@@ -264,15 +250,11 @@ int GetKey2Char(std::int32_t handle, std::int32_t arrange, std::uint32_t ledStat
     }
     if (charData == nullptr) return KEYBOARD_ERROR_INVALID_ARG;
     if (arrange != KEYBOARD_ARRANGEMENT_101 && arrange != KEYBOARD_ARRANGEMENT_106) return KEYBOARD_ERROR_INVALID_ARG;
-    KeyboardCharData localData{};
+    *charData = {};
     const std::uint16_t converted = character(arrange == KEYBOARD_ARRANGEMENT_106, ledState, modifierKey, keyCode);
-    localData.char_code = converted != 0 ? converted : keyCode;
-    localData.processed = converted != 0;
-    localData.length = localData.processed ? 1 : 0;
-    const int savedErrno = errno;
-    const bool copied = GuestCopyOut_nid_no_patch(charData, &localData, sizeof(localData));
-    errno = savedErrno;
-    if (!copied) return KEYBOARD_ERROR_INVALID_ARG;
+    charData->char_code = converted != 0 ? converted : keyCode;
+    charData->processed = converted != 0;
+    charData->length = charData->processed ? 1 : 0;
     return KEYBOARD_OK;
 }
 

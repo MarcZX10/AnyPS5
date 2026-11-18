@@ -1,10 +1,7 @@
 #include "prx/libSceAgc/Misc/include/StaticBuffer.hpp"
 
-#include <array>
-#include <cerrno>
 #include <cstdint>
 #include <cstring>
-#include "prx/libc/include/General.hpp"
 #include "SceTypes.hpp"
 #include "prx/libSceAgcDriver/Execution/include/Driver.hpp"
 
@@ -26,28 +23,13 @@ extern "C" {
 
 int APS5_VABI sceAgcSetStaticBuffer(std::uint32_t index, const void* buffer) {
     if (index >= StaticBufferCount) return GRAPHICS5_ERROR_INVALID_STATIC_BUFFER;
-    std::array<std::uint8_t, StaticBufferBytes> words{};
-    const int savedErrno = errno;
-    const bool copied = GuestCopyIn_nid_no_patch(words.data(), buffer, words.size());
-    if (!copied) {
-        errno = savedErrno;
-        return GRAPHICS5_ERROR_INVALID_STATIC_BUFFER;
-    }
-    std::memcpy(StaticTable() + std::size_t{index} * StaticBufferBytes, words.data(), words.size());
-    errno = savedErrno;
+    std::memcpy(StaticTable() + std::size_t{index} * StaticBufferBytes, buffer, StaticBufferBytes);
     return 0;
 }
 
 int APS5_VABI sceAgcGetStaticBuffer(std::uint32_t index, void* buffer) {
     if (index >= StaticBufferCount) return GRAPHICS5_ERROR_INVALID_STATIC_BUFFER;
-    std::array<std::uint8_t, StaticBufferBytes> words{};
-    std::memcpy(words.data(), StaticTable() + std::size_t{index} * StaticBufferBytes, words.size());
-    const int savedErrno = errno;
-    if (!GuestCopyOut_nid_no_patch(buffer, words.data(), words.size())) {
-        errno = savedErrno;
-        return GRAPHICS5_ERROR_INVALID_STATIC_BUFFER;
-    }
-    errno = savedErrno;
+    std::memcpy(buffer, StaticTable() + std::size_t{index} * StaticBufferBytes, StaticBufferBytes);
     return 0;
 }
 
@@ -59,14 +41,7 @@ int APS5_VABI sceAgcSetStaticQword(std::uint32_t index, std::uint64_t value) {
 
 int APS5_VABI sceAgcGetStaticQword(std::uint32_t index, std::uint64_t* value) {
     if (index >= StaticQwordCount) return GRAPHICS5_ERROR_INVALID_STATIC_BUFFER;
-    std::uint64_t word = 0;
-    std::memcpy(&word, StaticTable() + StaticQwordOffset + std::size_t{index} * sizeof(word), sizeof(word));
-    const int savedErrno = errno;
-    if (!GuestCopyOut_nid_no_patch(value, &word, sizeof(word))) {
-        errno = savedErrno;
-        return GRAPHICS5_ERROR_INVALID_STATIC_BUFFER;
-    }
-    errno = savedErrno;
+    std::memcpy(value, StaticTable() + StaticQwordOffset + std::size_t{index} * sizeof(*value), sizeof(*value));
     return 0;
 }
 

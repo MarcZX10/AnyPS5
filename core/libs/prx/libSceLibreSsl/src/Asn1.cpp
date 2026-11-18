@@ -2,7 +2,6 @@
 #include "prx/libc/include/Api.hpp"
 #include "prx/libc/include/General.hpp"
 #include "prx/libSceLibreSsl/include/Error.hpp"
-#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -12,7 +11,6 @@
 #include <span>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 namespace {
 
@@ -27,53 +25,6 @@ constexpr int IllegalCharacters = 124;
 constexpr int InvalidBmpStringLength = 129;
 constexpr int InvalidUniversalStringLength = 133;
 constexpr int InvalidUtf8String = 134;
-
-constexpr std::uintptr_t GuestChunkBytes = 4096;
-
-template <typename T>
-T CopyGuestInPreservingErrno(const T* source, const char* function) {
-    T destination{};
-    const int savedErrno = errno;
-    const bool ok = GuestCopyIn_nid_no_patch(&destination, source, sizeof(T));
-    errno = savedErrno;
-    if (!ok) NotImplementedAt_nid_no_patch(function, __FILE__, __LINE__);
-    return destination;
-}
-
-std::vector<unsigned char> CopyGuestBytesInPreservingErrno(const unsigned char* source, int length, const char* function) {
-    std::vector<unsigned char> bytes(length > 0 ? static_cast<std::size_t>(length) : 0);
-    const int savedErrno = errno;
-    const bool ok = GuestCopyIn_nid_no_patch(bytes.data(), source, bytes.size());
-    errno = savedErrno;
-    if (!ok) NotImplementedAt_nid_no_patch(function, __FILE__, __LINE__);
-    return bytes;
-}
-
-std::vector<unsigned char> CopyGuestTerminatedInPreservingErrno(const unsigned char* source, std::size_t limit, const char* function) {
-    std::vector<unsigned char> bytes;
-    unsigned char chunk[GuestChunkBytes];
-    auto address = reinterpret_cast<std::uintptr_t>(source);
-    for (;;) {
-        const std::size_t count = GuestChunkBytes - address % GuestChunkBytes;
-        const int savedErrno = errno;
-        const bool ok = GuestCopyIn_nid_no_patch(chunk, reinterpret_cast<const void*>(address), count);
-        errno = savedErrno;
-        if (!ok) NotImplementedAt_nid_no_patch(function, __FILE__, __LINE__);
-        const auto* end = static_cast<const unsigned char*>(std::memchr(chunk, 0, count));
-        bytes.insert(bytes.end(), static_cast<const unsigned char*>(chunk), end ? end : chunk + count);
-        if (end || bytes.size() > limit) return bytes;
-        address += count;
-    }
-}
-
-Asn1String CopyGuestStringPreservingErrno(const Asn1String* value, std::vector<unsigned char>& bytes, const char* function) {
-    Asn1String copy = CopyGuestInPreservingErrno(value, function);
-    if (copy.length > 0 && copy.data) {
-        bytes = CopyGuestBytesInPreservingErrno(copy.data, copy.length, function);
-        copy.data = bytes.data();
-    }
-    return copy;
-}
 
 int Asn1Error(int reason) {
     LibreSslPutError_nid_no_patch(Asn1Library, AnyFunction, reason);
@@ -182,24 +133,20 @@ int PrintTime(LibreSsl::Bio* bio, const Asn1String& time) {
 extern "C" {
 
 int APS5_VABI ASN1_TIME_print_nid_postfix(LibreSsl::Bio* bio, const Asn1String* time) {
-    if (!time) APS5_INVALID_ARG_EX;
-    std::vector<unsigned char> bytes;
-    const Asn1String copy = CopyGuestStringPreservingErrno(time, bytes, __func__);
-    if (copy.length > 0 && !copy.data) APS5_INVALID_ARG_EX;
-    if (PrintTime(bio, copy) == 1) return 1;
+    if (!time || (time->length > 0 && !time->data)) APS5_INVALID_ARG_EX;
+    if (PrintTime(bio, *time) == 1) return 1;
     LibreSslBioWrite_nid_no_patch(bio, "Bad time value", 14);
     return 0;
 }
 
 std::int64_t APS5_VABI ASN1_INTEGER_get_nid_postfix(const Asn1String* value) {
     if (!value) return 0;
-    const Asn1String integer = CopyGuestInPreservingErrno(value, __func__);
+    const auto& integer = *value;
     if (integer.type != 2 && integer.type != 0x102) return -1;
     if (integer.length > 8) return -1;
     if (integer.length <= 0 || !integer.data) return 0;
-    const std::vector<unsigned char> bytes = CopyGuestBytesInPreservingErrno(integer.data, integer.length, __func__);
     std::uint64_t magnitude = 0;
-    for (int index = 0; index < integer.length; ++index) magnitude = (magnitude << 8) | bytes[static_cast<std::size_t>(index)];
+    for (int index = 0; index < integer.length; ++index) magnitude = (magnitude << 8) | integer.data[index];
     const bool negative = integer.type == 0x102;
     const auto limit = static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()) + negative;
     if (magnitude > limit)
@@ -210,23 +157,21 @@ std::int64_t APS5_VABI ASN1_INTEGER_get_nid_postfix(const Asn1String* value) {
 
 unsigned char* APS5_VABI ASN1_STRING_data_nid_postfix(Asn1String* value) {
     if (!value) APS5_INVALID_ARG_EX;
-    return CopyGuestInPreservingErrno(value, __func__).data;
+    return value->data;
 }
 
 int APS5_VABI ASN1_STRING_length_nid_postfix(const Asn1String* value) {
     if (!value) APS5_INVALID_ARG_EX;
-    return CopyGuestInPreservingErrno(value, __func__).length;
+    return value->length;
 }
 
 int APS5_VABI ASN1_STRING_print_nid_postfix(LibreSsl::Bio* bio, const Asn1String* value) {
     if (!value) return 0;
-    std::vector<unsigned char> bytes;
-    const Asn1String copy = CopyGuestStringPreservingErrno(value, bytes, __func__);
-    if (copy.length > 0 && !copy.data) APS5_INVALID_ARG_EX;
+    if (value->length > 0 && !value->data) APS5_INVALID_ARG_EX;
     char buffer[80];
     int used = 0;
-    for (int index = 0; index < copy.length; ++index) {
-        const unsigned char character = copy.data[index];
+    for (int index = 0; index < value->length; ++index) {
+        const unsigned char character = value->data[index];
         const bool printable = (character >= ' ' && character <= '~') || character == '\n' || character == '\r';
         buffer[used++] = printable ? static_cast<char>(character) : '.';
         if (used == sizeof(buffer)) {
@@ -240,25 +185,22 @@ int APS5_VABI ASN1_STRING_print_nid_postfix(LibreSsl::Bio* bio, const Asn1String
 
 int APS5_VABI ASN1_STRING_type_nid_postfix(Asn1String* value) {
     if (!value) APS5_INVALID_ARG_EX;
-    return CopyGuestInPreservingErrno(value, __func__).type;
+    return value->type;
 }
 
 int APS5_VABI ASN1_STRING_to_UTF8_nid_postfix(unsigned char** output, Asn1String* value) {
     if (!value) return -1;
-    const Asn1String string = CopyGuestInPreservingErrno(value, __func__);
+    const auto& string = *value;
     const int width = CharacterWidth(string.type);
     if (width < 0) return -1;
     if (!string.data && string.length < 0) throw std::invalid_argument("ASN1_STRING_to_UTF8: null terminated-string data");
-    std::vector<unsigned char> bytes;
-    if (string.length < 0)
-        bytes = CopyGuestTerminatedInPreservingErrno(string.data, static_cast<std::size_t>(std::numeric_limits<int>::max()), __func__);
-    const std::size_t length = string.length < 0 ? bytes.size() : static_cast<std::size_t>(string.length);
+    const std::size_t length = string.length < 0 ? std::strlen(reinterpret_cast<const char*>(string.data))
+        : static_cast<std::size_t>(string.length);
     if (length > static_cast<std::size_t>(std::numeric_limits<int>::max())) throw std::length_error("ASN1_STRING_to_UTF8: input length overflow");
     if (width == 2 && length % 2 != 0) return Asn1Error(InvalidBmpStringLength);
     if (width == 4 && length % 4 != 0) return Asn1Error(InvalidUniversalStringLength);
     if (!string.data && length != 0) throw std::invalid_argument("ASN1_STRING_to_UTF8: null nonempty string data");
-    if (string.length > 0) bytes = CopyGuestBytesInPreservingErrno(string.data, string.length, __func__);
-    const std::span<const unsigned char> characters(bytes.data(), length);
+    const std::span<const unsigned char> characters(string.data, length);
     std::size_t size = 0;
     for (auto input = characters; !input.empty();) {
         std::uint32_t character;
@@ -279,16 +221,12 @@ int APS5_VABI ASN1_STRING_to_UTF8_nid_postfix(unsigned char** output, Asn1String
         WriteCharacter(cursor, character);
     }
     *cursor = 0;
-    const int outputErrno = errno;
-    const bool written = GuestCopyOut_nid_no_patch(output, &result, sizeof(result));
-    if (!written) free_nid_postfix(result);
-    errno = outputErrno;
-    if (!written) NotImplementedAt_nid_no_patch(__func__, __FILE__, __LINE__);
+    *output = result;
     return static_cast<int>(size);
 }
 
 int APS5_VABI i2a_ASN1_OBJECT_nid_postfix(LibreSsl::Bio* bio, const LibreSslAsn1Object* object) {
-    if (!object || !CopyGuestInPreservingErrno(object, __func__).data) return LibreSslBioWrite_nid_no_patch(bio, "NULL", 4);
+    if (!object || !object->data) return LibreSslBioWrite_nid_no_patch(bio, "NULL", 4);
     int capacity = 256;
     const auto release = [&capacity](char* buffer) {
         std::memset(buffer, 0, capacity);

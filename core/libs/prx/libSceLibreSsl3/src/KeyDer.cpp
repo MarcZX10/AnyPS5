@@ -355,13 +355,11 @@
 #include "prx/libc/include/General.hpp"
 #include <algorithm>
 #include <array>
-#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <limits>
 #include <span>
-#include <stdexcept>
 #include <vector>
 
 namespace {
@@ -1354,26 +1352,6 @@ template<typename T> void ReplaceOutput(T** output, T* decoded, void (APS5_VABI*
     *output = decoded;
 }
 
-bool CopyGuestIn(void* destination, const void* source, std::size_t bytes) {
-    const int savedErrno = errno;
-    const bool copied = GuestCopyIn_nid_no_patch(destination, source, bytes);
-    errno = savedErrno;
-    return copied;
-}
-
-bool CopyGuestOut(void* destination, const void* source, std::size_t bytes) {
-    const int savedErrno = errno;
-    const bool copied = GuestCopyOut_nid_no_patch(destination, source, bytes);
-    errno = savedErrno;
-    return copied;
-}
-
-void FreePreservingErrno(void* pointer) {
-    const int savedErrno = errno;
-    free_nid_postfix(pointer);
-    errno = savedErrno;
-}
-
 }
 
 LibreSsl3EvpPkey* DecodeTraditionalPrivateKey_nid_no_patch(int type, LibreSsl3EvpPkey** output,
@@ -1525,28 +1503,16 @@ int APS5_VABI i2d_PKCS8_PRIV_KEY_INFO_nid_postfix(
         return -1;
     }
     if (!output) return static_cast<int>(encoded.size());
-    unsigned char* target = nullptr;
-    if (!CopyGuestIn(&target, output, sizeof(target)))
-        throw std::invalid_argument("i2d_PKCS8_PRIV_KEY_INFO: unreadable output pointer");
-    unsigned char* next = nullptr;
-    unsigned char* allocated = nullptr;
-    if (target) {
-        if (!CopyGuestOut(target, encoded.data(), encoded.size()))
-            throw std::invalid_argument("i2d_PKCS8_PRIV_KEY_INFO: unwritable output buffer");
-        next = target + encoded.size();
-    } else {
-        allocated = static_cast<unsigned char*>(malloc_nid_postfix(encoded.size()));
-        if (!allocated) {
+    const bool advanceOutput = (*output != nullptr);
+    if (!*output) {
+        *output = static_cast<unsigned char*>(malloc_nid_postfix(encoded.size()));
+        if (!*output) {
             PutError(ErrLibAsn1, ErrRMallocFailure);
             return -1;
         }
-        std::memcpy(allocated, encoded.data(), encoded.size());
-        next = allocated;
     }
-    if (!CopyGuestOut(output, &next, sizeof(next))) {
-        if (allocated) FreePreservingErrno(allocated);
-        throw std::invalid_argument("i2d_PKCS8_PRIV_KEY_INFO: unwritable output pointer");
-    }
+    std::memcpy(*output, encoded.data(), encoded.size());
+    if (advanceOutput) *output += encoded.size();
     return static_cast<int>(encoded.size());
 }
 

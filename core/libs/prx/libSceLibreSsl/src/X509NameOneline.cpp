@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <stdexcept>
 
 namespace {
 
@@ -99,7 +98,7 @@ char* Fail(Buffer* buffer) {
 
 NameEntry* EntryAt(const Stack* entries, int index, const char* function) {
     if (!entries || index < 0 || index >= entries->num) return nullptr;
-    if (!entries->data) throw std::invalid_argument(function);
+    if (!entries->data) NotImplemented_nid_no_patch(function);
     return reinterpret_cast<NameEntry*>(entries->data[index]);
 }
 
@@ -141,7 +140,7 @@ char* APS5_VABI X509_NAME_oneline_nid_postfix(const void* name, char* buffer, in
     const int count = entries ? entries->num : -1;
     for (; index < count; ++index) {
         const NameEntry* entry = EntryAt(entries, index, __func__);
-        if (!entry || !entry->value) throw std::invalid_argument("X509_NAME_oneline: null name entry or value");
+        if (!entry || !entry->value) NotImplemented_nid_no_patch(__func__);
         const int nid = LibreSslObjectNid_nid_no_patch(entry->object);
         const char* shortName = nullptr;
         char text[80];
@@ -153,7 +152,7 @@ char* APS5_VABI X509_NAME_oneline_nid_postfix(const void* name, char* buffer, in
         const int type = entry->value->type;
         const int bytes = entry->value->length;
         const unsigned char* data = entry->value->data;
-        if (bytes > 0 && !data) throw std::invalid_argument("X509_NAME_oneline: null value data");
+        if (bytes > 0 && !data) NotImplemented_nid_no_patch(__func__);
         bool keep[4] = {true, true, true, true};
         if (type == GeneralString && bytes % 4 == 0) {
             bool nonzero[4] = {false, false, false, false};

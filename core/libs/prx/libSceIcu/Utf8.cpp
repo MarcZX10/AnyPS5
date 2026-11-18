@@ -119,7 +119,6 @@ std::int32_t APS5_VABI utf8_prevCharSafeBody_nid_postfix(const std::uint8_t* tex
 
 std::int32_t APS5_VABI utf8_appendCharSafeBody_nid_postfix(std::uint8_t* text, std::int32_t index, std::int32_t capacity, std::int32_t value, std::int8_t* isError) {
     if (index < 0) APS5_INVALID_ARG_EX;
-    if (isError && !GuestWritable_nid_no_patch(isError, sizeof(*isError))) APS5_INVALID_ARG_EX;
     const auto scalar = static_cast<std::uint32_t>(value);
     const int width = scalar <= 0x7ff ? 2 : scalar <= 0xffff ? 3 : 4;
     if (scalar <= 0x10ffff && index > std::numeric_limits<std::int32_t>::max() - (width - 1)) APS5_INVALID_ARG_EX;
@@ -129,8 +128,7 @@ std::int32_t APS5_VABI utf8_appendCharSafeBody_nid_postfix(std::uint8_t* text, s
         return index + width;
     }
     if (isError) {
-        const std::int8_t errVal = 1;
-        if (!GuestCopyOut_nid_no_patch(isError, &errVal, sizeof(errVal))) APS5_INVALID_ARG_EX;
+        *isError = 1;
     } else {
         if (available < std::numeric_limits<std::int32_t>::min()) APS5_INVALID_ARG_EX;
         if (available <= 0) return index;

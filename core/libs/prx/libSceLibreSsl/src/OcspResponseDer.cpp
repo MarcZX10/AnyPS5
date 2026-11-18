@@ -358,7 +358,6 @@
 #include <type_traits>
 #include <vector>
 #include "prx/libc/include/Api.hpp"
-#include "prx/libc/include/General.hpp"
 
 namespace {
 
@@ -810,19 +809,13 @@ extern "C" {
 
 LibreSslOcspResponse* APS5_VABI d2i_OCSP_RESPONSE_nid_postfix(LibreSslOcspResponse** response, const unsigned char** input, std::int64_t length) {
     if (!input) throw std::invalid_argument(std::string(__func__) + ": null input pointer");
-    const unsigned char* cursor = nullptr;
-    if (!GuestCopyIn_nid_no_patch(&cursor, input, sizeof(cursor))) NotImplemented_nid_no_patch(__func__);
-    if (!cursor && length) throw std::invalid_argument(std::string(__func__) + ": null input");
-    LibreSslOcspResponse* target = nullptr;
-    if (response && !GuestCopyIn_nid_no_patch(&target, response, sizeof(target))) NotImplemented_nid_no_patch(__func__);
-    const bool decodedOk = DecodeResponseFields(target, cursor, length);
-    if (!decodedOk) {
-        OCSP_RESPONSE_free_nid_postfix(target);
-        target = nullptr;
-    }
-    if (response && !GuestCopyOut_nid_no_patch(response, &target, sizeof(target))) NotImplemented_nid_no_patch(__func__);
-    if (decodedOk && !GuestCopyOut_nid_no_patch(input, &cursor, sizeof(cursor))) NotImplemented_nid_no_patch(__func__);
-    return target;
+    if (!*input && length) throw std::invalid_argument(std::string(__func__) + ": null input");
+    LibreSslOcspResponse* decoded = nullptr;
+    LibreSslOcspResponse*& target = response ? *response : decoded;
+    if (DecodeResponseFields(target, *input, length)) return target;
+    OCSP_RESPONSE_free_nid_postfix(target);
+    target = nullptr;
+    return nullptr;
 }
 
 }

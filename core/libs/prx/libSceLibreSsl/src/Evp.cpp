@@ -171,7 +171,6 @@
 #include "prx/libSceLibreSsl/include/Error.hpp"
 #include "prx/libSceLibreSsl/include/Evp.hpp"
 #include "prx/libSceLibreSsl/include/PkeyContext.hpp"
-#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -213,74 +212,44 @@ constexpr int BadKeyLength = 137;
 constexpr int NoDigestSet = 139;
 constexpr int TooLarge = 164;
 
-template <typename T>
-void CopyGuestInPreservingErrno(const void* guestAddress, T& hostValue, const char* caller) {
-    const int savedErrno = errno;
-    const bool ok = GuestCopyIn_nid_no_patch(&hostValue, guestAddress, sizeof(T));
-    errno = savedErrno;
-    if (!ok) NotImplementedAt_nid_no_patch(caller, __FILE__, __LINE__);
-}
-
-void RequireGuestWritablePreservingErrno(void* guestAddress, std::size_t bytes, const char* caller) {
-    const int savedErrno = errno;
-    const bool ok = GuestWritable_nid_no_patch(guestAddress, bytes);
-    errno = savedErrno;
-    if (!ok) NotImplementedAt_nid_no_patch(caller, __FILE__, __LINE__);
-}
-
-template <typename T>
-void CopyGuestOutPreservingErrno(void* guestAddress, const T& hostValue, const char* caller) {
-    const int savedErrno = errno;
-    const bool ok = GuestCopyOut_nid_no_patch(guestAddress, &hostValue, sizeof(T));
-    errno = savedErrno;
-    if (!ok) NotImplementedAt_nid_no_patch(caller, __FILE__, __LINE__);
-}
-
-template <typename TData>
-TData* DigestData(const EvpMdContext* context, const char* caller) {
-    void* data = nullptr;
-    CopyGuestInPreservingErrno(reinterpret_cast<const std::byte*>(context) + offsetof(EvpMdContext, mdData), data, caller);
-    return static_cast<TData*>(data);
-}
-
 int APS5_VABI Md5Init(EvpMdContext* context) {
-    return MD5_Init_nid_postfix(DigestData<Md5Context>(context, __func__));
+    return MD5_Init_nid_postfix(static_cast<Md5Context*>(context->mdData));
 }
 
 int APS5_VABI Md5Update(EvpMdContext* context, const void* data, std::size_t length) {
-    return MD5_Update_nid_postfix(DigestData<Md5Context>(context, __func__), data, length);
+    return MD5_Update_nid_postfix(static_cast<Md5Context*>(context->mdData), data, length);
 }
 
 int APS5_VABI Md5Final(EvpMdContext* context, unsigned char* digest) {
-    return MD5_Final_nid_postfix(digest, DigestData<Md5Context>(context, __func__));
+    return MD5_Final_nid_postfix(digest, static_cast<Md5Context*>(context->mdData));
 }
 
 int APS5_VABI Sha256Init(EvpMdContext* context) {
-    return SHA256_Init_nid_postfix(DigestData<Sha256Context>(context, __func__));
+    return SHA256_Init_nid_postfix(static_cast<Sha256Context*>(context->mdData));
 }
 
 int APS5_VABI Sha256Update(EvpMdContext* context, const void* data, std::size_t length) {
-    return SHA256_Update_nid_postfix(DigestData<Sha256Context>(context, __func__), data, length);
+    return SHA256_Update_nid_postfix(static_cast<Sha256Context*>(context->mdData), data, length);
 }
 
 int APS5_VABI Sha256Final(EvpMdContext* context, unsigned char* digest) {
-    return SHA256_Final_nid_postfix(digest, DigestData<Sha256Context>(context, __func__));
+    return SHA256_Final_nid_postfix(digest, static_cast<Sha256Context*>(context->mdData));
 }
 
 int APS5_VABI Sha384Init(EvpMdContext* context) {
-    return SHA384_Init_nid_postfix(DigestData<Sha512Context>(context, __func__));
+    return SHA384_Init_nid_postfix(static_cast<Sha512Context*>(context->mdData));
 }
 
 int APS5_VABI Sha512Init(EvpMdContext* context) {
-    return SHA512_Init_nid_postfix(DigestData<Sha512Context>(context, __func__));
+    return SHA512_Init_nid_postfix(static_cast<Sha512Context*>(context->mdData));
 }
 
 int APS5_VABI Sha512Update(EvpMdContext* context, const void* data, std::size_t length) {
-    return SHA512_Update_nid_postfix(DigestData<Sha512Context>(context, __func__), data, length);
+    return SHA512_Update_nid_postfix(static_cast<Sha512Context*>(context->mdData), data, length);
 }
 
 int APS5_VABI Sha512Final(EvpMdContext* context, unsigned char* digest) {
-    return SHA512_Final_nid_postfix(digest, DigestData<Sha512Context>(context, __func__));
+    return SHA512_Final_nid_postfix(digest, static_cast<Sha512Context*>(context->mdData));
 }
 
 constexpr EvpMd Md5 {
@@ -562,9 +531,7 @@ int APS5_VABI EVP_MD_size_nid_postfix(const EvpMd* md) {
         LibreSslPutError_nid_no_patch(EvpLibrary, AnyFunction, MessageDigestIsNull);
         return -1;
     }
-    std::int32_t size = 0;
-    CopyGuestInPreservingErrno(reinterpret_cast<const std::byte*>(md) + offsetof(EvpMd, mdSize), size, __func__);
-    return size;
+    return md->mdSize;
 }
 
 void APS5_VABI EVP_MD_CTX_init_nid_postfix(EvpMdContext* context) {
@@ -581,11 +548,7 @@ int APS5_VABI EVP_MD_CTX_cleanup_nid_postfix(EvpMdContext* context) {
 
 void APS5_VABI EVP_MD_CTX_destroy_nid_postfix(EvpMdContext* context) {
     if (!context) return;
-    EvpMdContext local {};
-    CopyGuestInPreservingErrno(context, local, __func__);
-    RequireGuestWritablePreservingErrno(context, sizeof(local), __func__);
-    CleanupContext(local, __func__);
-    CopyGuestOutPreservingErrno(context, local, __func__);
+    CleanupContext(*context, __func__);
     free_nid_postfix(context);
 }
 
