@@ -1,5 +1,4 @@
 #include "prx/libSceNpUniversalDataSystem/include/Api.hpp"
-#include <cerrno>
 #include <atomic>
 #include <cinttypes>
 #include <cstddef>
@@ -23,15 +22,10 @@ int APS5_VABI sceNpUniversalDataSystemInitialize(const NpUniversalDataSystemInit
     if (param == nullptr) {
         return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_ARGUMENT;
     }
-    NpUniversalDataSystemInitParam copy{};
-    const int savedErrno = errno;
-    const bool copied = GuestCopyIn_nid_no_patch(&copy, param, sizeof(copy));
-    errno = savedErrno;
-    if (!copied) return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_ARGUMENT;
-    if (copy.size != sizeof(NpUniversalDataSystemInitParam)) {
+    if (param->size != sizeof(NpUniversalDataSystemInitParam)) {
         return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_PARAM_SIZE;
     }
-    if (copy.pool_size == 0) {
+    if (param->pool_size == 0) {
         return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_ARGUMENT;
     }
     if (g_systemInitialized.exchange(true)) {
@@ -49,11 +43,7 @@ int APS5_VABI sceNpUniversalDataSystemGetMemoryStat(NpUniversalDataSystemMemoryS
     if (stat == nullptr) {
         APS5_INVALID_ARG_EX;
     }
-    const NpUniversalDataSystemMemoryStat value{};
-    const int savedErrno = errno;
-    const bool copied = GuestCopyOut_nid_no_patch(stat, &value, sizeof(value));
-    errno = savedErrno;
-    if (!copied) return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_ARGUMENT;
+    *stat = {};
     return SCE_NP_UNIVERSAL_DATA_SYSTEM_OK;
 }
 
@@ -61,11 +51,7 @@ int APS5_VABI sceNpUniversalDataSystemGetStorageStat(int context, NpUniversalDat
     if (stat == nullptr) {
         APS5_INVALID_ARG_EX;
     }
-    const NpUniversalDataSystemStorageStat value{};
-    const int savedErrno = errno;
-    const bool copied = GuestCopyOut_nid_no_patch(stat, &value, sizeof(value));
-    errno = savedErrno;
-    if (!copied) return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_ARGUMENT;
+    *stat = {};
     return SCE_NP_UNIVERSAL_DATA_SYSTEM_OK;
 }
 

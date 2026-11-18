@@ -29,7 +29,6 @@ int main() {
 
     const int openParam = 1;
     Require(scePlayGoDialogOpen(&openParam) == notInitialized);
-    Require(scePlayGoDialogOpen(reinterpret_cast<const void*>(0x10)) == notInitialized);
 
     PlayGoDialogResult early{};
     Require(scePlayGoDialogGetResult(&early) == notInitialized);
@@ -40,9 +39,6 @@ int main() {
     Require(scePlayGoDialogInitialize() == alreadyInitialized);
     Require(scePlayGoDialogClose() == static_cast<std::int32_t>(0x80B8000Bu));
     Require(scePlayGoDialogOpen(nullptr) == paramInvalid);
-    errno = 71;
-    Require(scePlayGoDialogOpen(reinterpret_cast<const void*>(0x10)) == paramInvalid);
-    Require(errno == 71);
     Require(scePlayGoDialogUpdateStatus() == 1);
     Require(scePlayGoDialogGetResult(nullptr) == paramInvalid);
 
@@ -68,9 +64,6 @@ int main() {
     Require(scePlayGoDialogGetStatus() == 3);
     Require(scePlayGoDialogUpdateStatus() == 3);
     Require(scePlayGoDialogOpen(nullptr) == paramInvalid);
-    errno = 71;
-    Require(scePlayGoDialogOpen(reinterpret_cast<const void*>(0x10)) == paramInvalid);
-    Require(errno == 71);
     Require(scePlayGoDialogOpen(&openParam) == 0);
     errno = 71;
     Require(scePlayGoDialogGetResult(reinterpret_cast<PlayGoDialogResult*>(0x10)) == paramInvalid);

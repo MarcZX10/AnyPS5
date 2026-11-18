@@ -1,5 +1,4 @@
 #include "prx/libSceNpUniversalDataSystem/include/Api.hpp"
-#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -22,14 +21,7 @@ extern "C" {
 
 int APS5_VABI sceNpUniversalDataSystemCreateEventPropertyArray(NpUniversalDataSystemEventPropertyArray** new_array) {
     if (new_array == nullptr) return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_ARGUMENT;
-    auto* created = arrays().Adopt(std::make_unique<NpUniversalDataSystemEventPropertyArray>());
-    const int savedErrno = errno;
-    const bool copied = GuestCopyOut_nid_no_patch(new_array, &created, sizeof(created));
-    errno = savedErrno;
-    if (!copied) {
-        arrays().Release(created);
-        return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_ARGUMENT;
-    }
+    *new_array = arrays().Adopt(std::make_unique<NpUniversalDataSystemEventPropertyArray>());
     return SCE_NP_UNIVERSAL_DATA_SYSTEM_OK;
 }
 
@@ -121,11 +113,7 @@ int APS5_VABI sceNpUniversalDataSystemEventPropertyArraySetObject(
     if (array == nullptr) return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_NULL_ARRAY;
     auto child = std::make_shared<NpUniversalDataSystemEventPropertyObject>(value != nullptr ? value->Clone() : NpUniversalDataSystemEventPropertyObject{});
     if (value_ptr != nullptr) {
-        auto* pointer = child.get();
-        const int savedErrno = errno;
-        const bool copied = GuestCopyOut_nid_no_patch(value_ptr, &pointer, sizeof(pointer));
-        errno = savedErrno;
-        if (!copied) return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_ARGUMENT;
+        *value_ptr = child.get();
     }
     array->Add(std::move(child));
     return SCE_NP_UNIVERSAL_DATA_SYSTEM_OK;
@@ -139,11 +127,7 @@ int APS5_VABI sceNpUniversalDataSystemEventPropertyArraySetArray(
     if (array == nullptr) return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_NULL_ARRAY;
     auto child = std::make_shared<NpUniversalDataSystemEventPropertyArray>(value != nullptr ? value->Clone() : NpUniversalDataSystemEventPropertyArray{});
     if (value_ptr != nullptr) {
-        auto* pointer = child.get();
-        const int savedErrno = errno;
-        const bool copied = GuestCopyOut_nid_no_patch(value_ptr, &pointer, sizeof(pointer));
-        errno = savedErrno;
-        if (!copied) return SCE_NP_UNIVERSAL_DATA_SYSTEM_ERROR_INVALID_ARGUMENT;
+        *value_ptr = child.get();
     }
     array->Add(std::move(child));
     return SCE_NP_UNIVERSAL_DATA_SYSTEM_OK;
