@@ -354,4 +354,8 @@ void APS5_VABI FT_ClassicKern_Validate_nid_postfix() {
     NotImplemented_nid_no_patch(__func__);
 }
 
+void APS5_VABI FT_FloorFix_nid_postfix() {
+    NotImplemented_nid_no_patch(__func__);
+}
+
 }
