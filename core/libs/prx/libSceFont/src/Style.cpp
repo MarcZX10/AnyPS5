@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <cerrno>
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
@@ -164,11 +163,7 @@ int APS5_VABI sceFontGetAttribute(FontHandle fontHandle, int attribute, int* now
     (void)attribute;
     if (!nowAttribute) return SCE_FONT_ERROR_INVALID_PARAMETER;
     return AccessFontSettings(fontHandle, [&](FontState& state) {
-        const int localAttr = state.attribute;
-        const int savedErrno = errno;
-        const bool copied = GuestCopyOut_nid_no_patch(nowAttribute, &localAttr, sizeof(localAttr));
-        errno = savedErrno;
-        if (!copied) return SCE_FONT_ERROR_INVALID_PARAMETER;
+        *nowAttribute = state.attribute;
         return SCE_FONT_OK;
     });
 }

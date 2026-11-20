@@ -9,7 +9,6 @@
 #include "SceTypes.hpp"
 #include "prx/libc/include/General.hpp"
 #include "prx/libSceHttp/src/Cookies.hpp"
-#include "prx/libSceHttp/src/GuestAccess.hpp"
 #include "prx/libSceHttp/src/HttpErrors.hpp"
 #include "prx/libSceHttp/src/Options.hpp"
 #include <atomic>
@@ -163,7 +162,7 @@ int APS5_VABI sceHttpGetMemoryPoolStats(int httpCtxId, HttpMemoryPoolStats* curr
     if (g_contexts.empty()) return ERROR_BEFORE_INIT;
     const auto pool = g_contextPoolSizes.find(httpCtxId);
     if (pool == g_contextPoolSizes.end()) return ERROR_INVALID_ID;
-    if (!HttpGuest::Store(currentStat, HttpMemoryPoolStats{static_cast<std::size_t>(pool->second), 0, 0})) return ERROR_INVALID_VALUE;
+    *currentStat = {static_cast<std::size_t>(pool->second), 0, 0};
     return 0;
 }
 
@@ -651,14 +650,16 @@ int APS5_VABI sceHttpAbortWaitRequest(HttpEpollHandle eh) {
 int APS5_VABI sceHttpsGetCaList(int http_ctx_id, HttpsCaList* ca_list) {
     (void)http_ctx_id;
     if (!ca_list) return ERROR_INVALID_VALUE;
-    if (!HttpGuest::Store(ca_list, HttpsCaList{nullptr, 0})) return ERROR_INVALID_VALUE;
+    ca_list->certs = nullptr;
+    ca_list->certsNum = 0;
     return 0;
 }
 
 int APS5_VABI sceHttpsFreeCaList(int http_ctx_id, HttpsCaList* ca_list) {
     (void)http_ctx_id;
     if (!ca_list) return ERROR_INVALID_VALUE;
-    if (!HttpGuest::Store(ca_list, HttpsCaList{nullptr, 0})) return ERROR_INVALID_VALUE;
+    ca_list->certs = nullptr;
+    ca_list->certsNum = 0;
     return 0;
 }
 
@@ -726,7 +727,7 @@ int APS5_VABI sceHttpGetAuthEnabled(int id, int* enable) {
     if (!enable) return ERROR_INVALID_VALUE;
     const auto options = FindHttpOptions(id);
     if (!options) return ERROR_INVALID_ID;
-    if (!HttpGuest::Store(enable, options->authEnabled ? 1 : 0)) return ERROR_INVALID_VALUE;
+    *enable = options->authEnabled ? 1 : 0;
     return 0;
 }
 
@@ -744,7 +745,7 @@ int APS5_VABI sceHttpGetCookieEnabled(int id, int* enable) {
     if (!enable) return HttpInitialised() ? ERROR_INVALID_VALUE : ERROR_BEFORE_INIT;
     const auto options = FindHttpOptions(id);
     if (!options) return ERROR_INVALID_ID;
-    if (!HttpGuest::Store(enable, options->cookieEnabled)) return ERROR_INVALID_VALUE;
+    *enable = options->cookieEnabled;
     return 0;
 }
 
@@ -804,8 +805,8 @@ int APS5_VABI sceHttpGetRegisteredCtxIds(int contextId, int* netPoolId, int* ssl
     if (g_contexts.empty()) return ERROR_BEFORE_INIT;
     const auto ids = g_contextRegisteredIds.find(contextId);
     if (ids == g_contextRegisteredIds.end()) return ERROR_INVALID_ID;
-    if (!HttpGuest::Store(netPoolId, static_cast<int>(ids->second.first))) return ERROR_INVALID_VALUE;
-    if (!HttpGuest::Store(sslContextId, static_cast<int>(ids->second.second))) return ERROR_INVALID_VALUE;
+    *netPoolId = ids->second.first;
+    *sslContextId = ids->second.second;
     return 0;
 }
 
@@ -815,7 +816,7 @@ int APS5_VABI sceHttpGetConnectionStat(std::int32_t connectionId, HttpConnection
     if (!stat) return ERROR_INVALID_VALUE;
     const auto options = FindHttpOptions(connectionId);
     if (!options) return ERROR_INVALID_ID;
-    if (!HttpGuest::Store(stat, HttpConnectionStat{})) return ERROR_INVALID_VALUE;
+    *stat = {};
     return 0;
 }
 
