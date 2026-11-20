@@ -1818,4 +1818,9 @@ int APS5_VABI sceFsPprSaveDataConvertToCoW() {
     return 0;
 }
 
+int APS5_VABI sceFsPprSaveDataGetBlkBitmap() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
