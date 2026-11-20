@@ -14,6 +14,16 @@
 #include <stdexcept>
 #include <vector>
 
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#else
+#include <sys/mman.h>
+#include <unistd.h>
+#endif
+
 namespace {
 
 }
@@ -38,6 +48,27 @@ void Require(bool condition, const char* message) {
         std::fprintf(stderr, "USBD: %s\n", message);
         std::abort();
     }
+}
+
+std::uint8_t* PageBeforeGuard() {
+#ifdef _WIN32
+    SYSTEM_INFO info{};
+    GetSystemInfo(&info);
+    const std::size_t pageSize = info.dwPageSize;
+    auto* memory = static_cast<std::uint8_t*>(VirtualAlloc(nullptr, pageSize * 2, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE));
+    Require(memory != nullptr, "the guarded page was not allocated");
+    DWORD previous;
+    Require(VirtualProtect(memory + pageSize, pageSize, PAGE_NOACCESS, &previous) != 0, "the guard page was not protected");
+#else
+    const long nativePageSize = sysconf(_SC_PAGESIZE);
+    Require(nativePageSize > 0, "the page size is unknown");
+    const std::size_t pageSize = static_cast<std::size_t>(nativePageSize);
+    void* allocation = mmap(nullptr, pageSize * 2, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    Require(allocation != MAP_FAILED, "the guarded page was not mapped");
+    auto* memory = static_cast<std::uint8_t*>(allocation);
+    Require(mprotect(memory + pageSize, pageSize, PROT_NONE) == 0, "the guard page was not protected");
+#endif
+    return memory;
 }
 
 template<typename TCall>
@@ -146,6 +177,9 @@ void EventLocks() {
     Require(sceUsbdTryLockEvents() == 0 && sceUsbdEventHandlingOk() == 1, "a free event lock was not taken");
     UsbdTimeval negative{-1, 0};
     Require(Throws([&] { sceUsbdHandleEventsLocked(&negative); }) && Throws([&] { sceUsbdWaitForEvent(&negative); }), "a negative timeout was accepted");
+    auto* unreadable = reinterpret_cast<UsbdTimeval*>(0x10);
+    Require(Throws([&] { sceUsbdHandleEventsLocked(unreadable); }) && Throws([&] { sceUsbdWaitForEvent(unreadable); }), "an unreadable timeout was accepted");
+    Require(sceUsbdEventHandlingOk() == 1, "an unreadable timeout released the event lock");
     const auto start = std::chrono::steady_clock::now();
     Require(sceUsbdHandleEventsLocked(&brief) == 0, "the handler failed to handle events");
     Require(std::chrono::steady_clock::now() - start >= std::chrono::milliseconds(15), "the handler returned before the timeout");
@@ -494,6 +528,11 @@ void EventTimeoutsWithoutContext() {
 
 int main(int argc, char** argv) {
     EventTimeoutsWithoutContext();
+    void** emptyList = nullptr;
+    Require(sceUsbdGetDeviceList(&emptyList) == 0 && emptyList != nullptr && emptyList[0] == nullptr, "device list without a context is not empty");
+    sceUsbdFreeDeviceList(emptyList, 1);
+    errno = 71;
+    Require(sceUsbdGetDeviceList(reinterpret_cast<void***>(0x10)) == invalidArgument && errno == 71, "unwritable device list output accepted without a context");
     Require(sceUsbdInit() == 0, "initialization failed");
     CheckTransferFillers();
     void** list = nullptr;
@@ -502,6 +541,8 @@ int main(int argc, char** argv) {
     for (std::int64_t index = 0; index < count; ++index) {
         std::uint8_t deviceDescriptor[18] = {};
         Require(sceUsbdGetDeviceDescriptor(list[index], deviceDescriptor) == 0 && deviceDescriptor[0] == 18 && deviceDescriptor[1] == 1, "listed device has no device descriptor");
+        errno = 71;
+        Require(sceUsbdGetDeviceDescriptor(list[index], reinterpret_cast<void*>(0x10)) == invalidArgument && errno == 71, "unwritable device descriptor output accepted");
         Require(sceUsbdRefDevice(list[index]) == list[index], "listed device was not referenced");
         sceUsbdUnrefDevice(list[index]);
 
@@ -511,6 +552,8 @@ int main(int argc, char** argv) {
     Require(Throws([&] { sceUsbdFreeDeviceList(list, 1); }), "a device list was freed twice");
     EventLocks();
     Require(sceUsbdGetDeviceList(nullptr) == invalidArgument, "null list accepted");
+    errno = 71;
+    Require(sceUsbdGetDeviceList(reinterpret_cast<void***>(0x10)) == invalidArgument && errno == 71, "unwritable device list output accepted");
     Require(sceUsbdHandleEventsTimeout(nullptr) == invalidArgument, "null timeout accepted");
     const UsbdTimeval invalid{0, 1000000};
     Require(sceUsbdHandleEventsTimeout(&invalid) == invalidArgument, "out-of-range microseconds accepted");
@@ -533,6 +576,15 @@ int main(int argc, char** argv) {
     Require(sceUsbdGetActiveConfigDescriptor(&foreign, reinterpret_cast<void**>(0x10)) == invalidArgument && errno == 71, "unwritable active config descriptor output accepted");
     Require(sceUsbdGetConfigDescriptor(&foreign, 0, reinterpret_cast<void**>(0x10)) == invalidArgument && errno == 71, "unwritable config descriptor output accepted");
     Require(sceUsbdGetConfigDescriptorByValue(&foreign, 1, reinterpret_cast<void**>(0x10)) == invalidArgument && errno == 71, "unwritable config descriptor by value output accepted");
+    static const std::uint8_t readOnly[8] = {};
+    auto* unwritable = const_cast<std::uint8_t*>(readOnly);
+    Require(sceUsbdControlTransfer(&foreign, 0x00, 0x09, 1, 0, reinterpret_cast<std::uint8_t*>(0x10), 8, 0) == invalidArgument && errno == 71, "unreadable host-to-device control data accepted");
+    Require(sceUsbdControlTransfer(&foreign, 0x80, 0x06, 0x0100, 0, unwritable, 8, 0) == invalidArgument && errno == 71, "unwritable device-to-host control data accepted");
+    Require(sceUsbdGetDescriptor(&foreign, 1, 0, reinterpret_cast<std::uint8_t*>(0x10), 18) == invalidArgument && errno == 71, "unreadable descriptor buffer accepted");
+    Require(sceUsbdGetDescriptor(&foreign, 1, 0, unwritable, sizeof(readOnly)) == invalidArgument && errno == 71, "read-only descriptor buffer accepted");
+    std::uint8_t* const descriptorPage = PageBeforeGuard();
+    Require(sceUsbdGetDescriptor(&foreign, 1, 0, descriptorPage, -1) == invalidArgument && errno == 71, "negative descriptor length accepted");
+    Require(sceUsbdGetDescriptor(&foreign, 1, 0, descriptorPage, 0x7fffffff) == invalidArgument && errno == 71, "descriptor length running past a mapping accepted");
     sceUsbdUnrefDevice(nullptr);
 
     Require(Throws([&] { sceUsbdRefDevice(&foreign); }), "referencing a device that was never listed did not throw");
@@ -562,6 +614,17 @@ int main(int argc, char** argv) {
     errno = 71;
     Require(sceUsbdBulkTransfer(&foreign, 0x81, descriptor, 18, reinterpret_cast<std::int32_t*>(0x10), 1000) == invalidArgument && errno == 71, "unwritable bulk transfer count accepted");
     Require(sceUsbdInterruptTransfer(&foreign, 0x81, descriptor, 18, reinterpret_cast<std::int32_t*>(0x10), 1000) == invalidArgument && errno == 71, "unwritable interrupt transfer count accepted");
+    static const std::uint8_t readOnlyData[18] = {};
+    auto* readOnlyBuffer = const_cast<std::uint8_t*>(readOnlyData);
+    Require(sceUsbdBulkTransfer(&foreign, 0x01, reinterpret_cast<std::uint8_t*>(0x10), 18, &transferred, 1000) == invalidArgument && errno == 71, "unreadable bulk OUT data accepted");
+    Require(sceUsbdBulkTransfer(&foreign, 0x81, readOnlyBuffer, sizeof(readOnlyData), &transferred, 1000) == invalidArgument && errno == 71, "read-only bulk IN data accepted");
+    Require(sceUsbdInterruptTransfer(&foreign, 0x01, reinterpret_cast<std::uint8_t*>(0x10), 18, &transferred, 1000) == invalidArgument && errno == 71, "unreadable interrupt OUT data accepted");
+    Require(sceUsbdInterruptTransfer(&foreign, 0x81, readOnlyBuffer, sizeof(readOnlyData), &transferred, 1000) == invalidArgument && errno == 71, "read-only interrupt IN data accepted");
+    std::uint8_t* const page = PageBeforeGuard();
+    for (const std::uint8_t endpoint : {std::uint8_t{0x01}, std::uint8_t{0x81}}) {
+        Require(sceUsbdBulkTransfer(&foreign, endpoint, page, 0x7fffffff, &transferred, 1000) == invalidArgument && errno == 71, "bulk data running past a mapping accepted");
+        Require(sceUsbdInterruptTransfer(&foreign, endpoint, page, 0x7fffffff, &transferred, 1000) == invalidArgument && errno == 71, "interrupt data running past a mapping accepted");
+    }
     Require(sceUsbdGetStringDescriptor(nullptr, 1, 0x409, descriptor, 18) == invalidArgument, "null handle string descriptor accepted");
     Require(sceUsbdGetStringDescriptor(&foreign, 1, 0x409, descriptor, 0) == invalidArgument, "empty string descriptor buffer accepted");
     descriptor[0] = 0x55;
@@ -578,7 +641,9 @@ int main(int argc, char** argv) {
     std::int32_t configuration = -1;
     Require(sceUsbdGetConfiguration(nullptr, &configuration) == invalidArgument && sceUsbdGetConfiguration(&foreign, nullptr) == invalidArgument, "null configuration query accepted");
     Require(configuration == -1, "a rejected configuration query wrote the output");
-    Require(Throws([&] { sceUsbdGetConfiguration(&foreign, &configuration); }), "configuration of a handle that was never opened did not throw");
+    Require(Throws([&] { sceUsbdGetConfiguration(&foreign, &configuration); }) && configuration == -1, "configuration of a handle that was never opened did not throw or changed the output");
+    errno = 71;
+    Require(sceUsbdGetConfiguration(&foreign, reinterpret_cast<std::int32_t*>(0x10)) == invalidArgument && errno == 71, "unwritable configuration output reached the handle lookup");
     Require(sceUsbdGetConfigDescriptorByValue(nullptr, 1, &config) == invalidArgument && sceUsbdGetConfigDescriptorByValue(&foreign, 1, nullptr) == invalidArgument, "null config by value argument accepted");
     Require(Throws([&] { sceUsbdGetConfigDescriptorByValue(&foreign, 1, &config); }), "config by value of a device that was never listed did not throw");
     Require(Throws([&] { sceUsbdClaimInterface(&foreign, 0); }), "claiming on a handle that was never opened did not throw");
