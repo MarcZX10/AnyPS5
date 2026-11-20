@@ -1893,4 +1893,9 @@ int APS5_VABI sceFsUfsUnmountForCronos() {
     return 0;
 }
 
+int APS5_VABI sceFsUpdatePackageMetadataFlexcont() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
