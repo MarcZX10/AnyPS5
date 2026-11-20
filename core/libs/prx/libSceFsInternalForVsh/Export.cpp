@@ -1748,4 +1748,9 @@ int APS5_VABI sceFsM2StorageLocalSandboxMount() {
     return 0;
 }
 
+int APS5_VABI sceFsM2StorageLocalSandboxUnmount() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
