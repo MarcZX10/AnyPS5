@@ -33,15 +33,6 @@ constexpr std::int32_t LastPSButtonEventType = 0x20000002;
 
 std::atomic<std::intptr_t> nextActivationHandle{0x1000};
 
-bool EmptyPrivacyDefinitionKey(const char* key) {
-    if (key == nullptr) return false;
-    char first = 1;
-    const int savedErrno = errno;
-    const bool copied = GuestCopyIn_nid_no_patch(&first, key, sizeof(first));
-    errno = savedErrno;
-    return copied && first == '\0';
-}
-
 }
 
 static_assert(sizeof(ShellCoreErrorDialogParam) == 24);
@@ -1719,8 +1710,8 @@ int APS5_VABI sceSystemServiceEnablePersonalEyeToEyeDistanceSetting() {
 }
 
 int APS5_VABI sceSystemServiceGetAppFocusedAppStatus(SystemServiceAppStatus* status) {
-    if (status == nullptr) NotImplemented_nid_no_patch(__func__);
-    return LNC_UTIL_ERROR_GAME_PROCESS;
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
 }
 
 int APS5_VABI sceSystemServiceGetAppStatus(SystemServiceAppStatus* status) {
@@ -1729,13 +1720,13 @@ int APS5_VABI sceSystemServiceGetAppStatus(SystemServiceAppStatus* status) {
 }
 
 int APS5_VABI sceSystemServiceGetAppType(std::int32_t appId, std::int32_t* type) {
-    if (type == nullptr || appId == SYSTEM_SERVICE_RUNNING_APP_ID) NotImplemented_nid_no_patch(__func__);
-    return LNC_UTIL_ERROR_GAME_PROCESS;
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
 }
 
-int APS5_VABI sceSystemServiceGetDbgExecutablePath(char* path, std::uint64_t) {
-    if (path == nullptr) NotImplemented_nid_no_patch(__func__);
-    return SystemServiceRejected;
+int APS5_VABI sceSystemServiceGetDbgExecutablePath(char* path, std::uint64_t selector) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
 }
 
 int APS5_VABI sceSystemServiceGetEventForDaemon(SystemServiceDaemonEvent* event) {
@@ -1787,13 +1778,13 @@ int APS5_VABI sceSystemServiceGetParentSocketForPsmKit() {
 }
 
 int APS5_VABI sceSystemServiceGetPlatformPrivacyDefinitionData(const char* key, SystemServicePrivacyDefinitionData* data) {
-    if (data == nullptr || !EmptyPrivacyDefinitionKey(key)) NotImplemented_nid_no_patch(__func__);
-    return SYSTEM_SERVICE_ERROR_INTERNAL;
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
 }
 
 int APS5_VABI sceSystemServiceGetPlatformPrivacyDefinitionVersion(const char* key, SystemServicePrivacyDefinitionVersion* version) {
-    if (version == nullptr || !EmptyPrivacyDefinitionKey(key)) NotImplemented_nid_no_patch(__func__);
-    return SYSTEM_SERVICE_ERROR_INTERNAL;
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
 }
 
 int APS5_VABI sceSystemServiceGetPlatformPrivacySetting(std::uint32_t* setting) {

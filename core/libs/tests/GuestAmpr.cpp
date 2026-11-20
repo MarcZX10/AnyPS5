@@ -755,7 +755,7 @@ void TestReadPastEndOfFileZeroFills() {
     std::filesystem::remove_all(directory);
 }
 
-void TestReadAtUnseekableOffsetFails() {
+void TestReadAtUnseekableOffsetThrows() {
     const char* path = "ampr_unseekable_offset.bin";
     { std::ofstream file(path, std::ios::binary); file << "data"; }
     std::uint32_t fileId = 0;
@@ -766,10 +766,14 @@ void TestReadAtUnseekableOffsetFails() {
     alignas(8) std::array<std::uint8_t, sizeof(command)> memory{};
     std::memcpy(memory.data(), &command, sizeof(command));
     Apr::CommandBufferObject buffer{Apr::BufferType::Generic, 0, sizeof(memory), 1, sizeof(memory), memory.data()};
-    std::uint32_t result = 0;
-    std::uint32_t id = 0;
-    Require(sceKernelAprSubmitCommandBufferAndGetResult(&buffer, 0, &result, &id) == 0);
-    Require(result == 0 && sceKernelAprWaitCommandBuffer(id) == static_cast<int>(0x80020005u));
+    bool rejected = false;
+    try {
+        sceKernelAprSubmitCommandBuffer(&buffer, 0);
+
+    } catch (const std::runtime_error& error) {
+        rejected = std::string(error.what()).find("returned 0 of 4 bytes") != std::string::npos;
+    }
+    Require(rejected);
     std::remove(path);
 }
 
@@ -2033,7 +2037,7 @@ int main() {
     TestConstructed();
     TestZeroFilledBuffer();
     TestReadPastEndOfFileZeroFills();
-    TestReadAtUnseekableOffsetFails();
+    TestReadAtUnseekableOffsetThrows();
     TestResolveFailures();
     TestResolveForEachVariants();
     TestPrefixedResolveWithoutSizes();

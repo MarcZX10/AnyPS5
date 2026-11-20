@@ -6,8 +6,6 @@
 
 #include "prx/libSceFreeType/include/Api.hpp"
 #include "prx/libSceFreeType/include/GuestFreeType.hpp"
-#include "prx/libc/include/GuestArena.hpp"
-#include "prx/libkernel/libkernel.hpp"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -192,12 +190,9 @@ APS5_VABI int CubicTo(const GuestVector* control1, const GuestVector* control2, 
 
 extern "C" int APS5_VABI FT_Outline_Get_BBox_nid_postfix(GuestOutline* outline, GuestBBox* boundingBox) {
     if (!boundingBox) return FT_Err_Invalid_Argument;
-    GuestArena::HostWrite write(boundingBox, sizeof(*boundingBox));
-    if (!write.Open() || !GuestWritable_nid_no_patch(boundingBox, sizeof(*boundingBox))) return FT_Err_Invalid_Argument;
     if (!outline) return FT_Err_Invalid_Outline;
     if (outline->n_points == 0 || outline->n_contours == 0) {
-        GuestBBox empty{};
-        if (!GuestCopyOut_nid_no_patch(boundingBox, &empty, sizeof(empty))) return FT_Err_Invalid_Argument;
+        *boundingBox = {};
         return 0;
     }
     if (!outline->points || !outline->tags)
@@ -208,17 +203,15 @@ extern "C" int APS5_VABI FT_Outline_Get_BBox_nid_postfix(GuestOutline* outline, 
         Include(outline->points[index], control);
         if ((outline->tags[index] & 3) == FT_CURVE_TAG_ON) Include(outline->points[index], on);
     }
-    GuestBBox result{};
     if (control.xMin < on.xMin || control.xMax > on.xMax || control.yMin < on.yMin || control.yMax > on.yMax) {
         if (!outline->contours) Undefined("null contour array in a nonempty outline");
         Walk walk{{}, on};
         const GuestOutlineFuncs functions{MoveTo, LineTo, ConicTo, CubicTo, 0, 0};
         const int error = FT_Outline_Decompose_nid_postfix(outline, &functions, &walk);
         if (error != 0) return error;
-        result = walk.box;
+        *boundingBox = walk.box;
     } else {
-        result = on;
+        *boundingBox = on;
     }
-    if (!GuestCopyOut_nid_no_patch(boundingBox, &result, sizeof(result))) return FT_Err_Invalid_Argument;
     return 0;
 }

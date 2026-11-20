@@ -1,6 +1,5 @@
 #include "prx/libSceFreeTypeOt/include/Outline.hpp"
 #include "prx/libSceFreeTypeOt/include/Memory.hpp"
-#include "prx/libc/include/General.hpp"
 
 #include <cstdint>
 
@@ -20,48 +19,29 @@ extern "C" {
 
 int APS5_VABI FT_Outline_Done_Internal_nid_postfix(FreeType::GuestMemoryRec* memory, FreeType::GuestOutline* outline) {
     if (!memory || !outline) return InvalidArgument;
-    FreeType::GuestOutline localOutline{};
-    if (!GuestCopyIn_nid_no_patch(&localOutline, outline, sizeof(localOutline)) ||
-        !GuestWritable_nid_no_patch(outline, sizeof(*outline))) {
-        return InvalidArgument;
+    if (outline->flags & OutlineOwner) {
+        ft_mem_free_nid_postfix(memory, outline->points);
+        ft_mem_free_nid_postfix(memory, outline->tags);
+        ft_mem_free_nid_postfix(memory, outline->contours);
     }
-    if (localOutline.flags & OutlineOwner) {
-        ft_mem_free_nid_postfix(memory, localOutline.points);
-        ft_mem_free_nid_postfix(memory, localOutline.tags);
-        ft_mem_free_nid_postfix(memory, localOutline.contours);
-    }
-    localOutline = {};
-    if (!GuestCopyOut_nid_no_patch(outline, &localOutline, sizeof(localOutline))) return InvalidArgument;
+    *outline = {};
     return 0;
 }
 
 int APS5_VABI FT_Outline_New_Internal_nid_postfix(FreeType::GuestMemoryRec* memory, std::uint32_t numPoints, std::int32_t numContours, FreeType::GuestOutline* anoutline) {
     if (!anoutline || !memory) return InvalidArgument;
-    if (!GuestWritable_nid_no_patch(anoutline, sizeof(*anoutline))) return InvalidArgument;
-    FreeType::GuestOutline localOutline{};
+    *anoutline = {};
     std::int32_t error = 0;
-    localOutline.points = NewArray<FreeType::GuestVector>(memory, numPoints, &error);
-    if (!error) localOutline.tags = NewArray<unsigned char>(memory, numPoints, &error);
-    if (!error) localOutline.contours = NewArray<std::uint16_t>(memory, numContours, &error);
-    localOutline.flags |= OutlineOwner;
+    anoutline->points = NewArray<FreeType::GuestVector>(memory, numPoints, &error);
+    if (!error) anoutline->tags = NewArray<unsigned char>(memory, numPoints, &error);
+    if (!error) anoutline->contours = NewArray<std::uint16_t>(memory, numContours, &error);
+    anoutline->flags |= OutlineOwner;
     if (error) {
-        if (localOutline.flags & OutlineOwner) {
-            ft_mem_free_nid_postfix(memory, localOutline.points);
-            ft_mem_free_nid_postfix(memory, localOutline.tags);
-            ft_mem_free_nid_postfix(memory, localOutline.contours);
-        }
-        localOutline = {};
-        GuestCopyOut_nid_no_patch(anoutline, &localOutline, sizeof(localOutline));
+        FT_Outline_Done_Internal_nid_postfix(memory, anoutline);
         return error;
     }
-    localOutline.n_points = static_cast<std::uint16_t>(numPoints);
-    localOutline.n_contours = static_cast<std::uint16_t>(numContours);
-    if (!GuestCopyOut_nid_no_patch(anoutline, &localOutline, sizeof(localOutline))) {
-        ft_mem_free_nid_postfix(memory, localOutline.points);
-        ft_mem_free_nid_postfix(memory, localOutline.tags);
-        ft_mem_free_nid_postfix(memory, localOutline.contours);
-        return InvalidArgument;
-    }
+    anoutline->n_points = static_cast<std::uint16_t>(numPoints);
+    anoutline->n_contours = static_cast<std::uint16_t>(numContours);
     return 0;
 }
 

@@ -573,8 +573,7 @@ static int PositionedArgumentError(int descriptor, bool write, bool nullBuffer, 
     if (!GuestSockets::IsOpen(descriptor) && !DescriptorIsOpen_nid_no_patch(descriptor)) return GUEST_EBADF;
     if (!IsSeekableDescriptor(descriptor)) return GUEST_ESPIPE;
     if (!File::GrantsAccess(descriptor, write)) return GUEST_EBADF;
-    if (offset < 0 && !File::IsRandomDevice(descriptor)) return GUEST_EINVAL;
-    return nullBuffer ? GUEST_EFAULT : 0;
+    return offset < 0 ? GUEST_EINVAL : GUEST_EFAULT;
 }
 
 static int TransferArgumentError(int descriptor, bool nullBuffer) {
@@ -1801,7 +1800,7 @@ static std::int64_t TransferIovecs(int d, const KernelIovec* guestIov, int iovcn
         if (iov[i].base == nullptr && iov[i].length != 0) return SceErrorFromErrno(GUEST_EFAULT);
         total += iov[i].length;
     }
-    if (offset != nullptr && *offset >= 0 && total > static_cast<std::size_t>(std::numeric_limits<std::int64_t>::max() - *offset)) return SceErrorFromErrno(GUEST_EINVAL);
+    if (offset != nullptr && total > static_cast<std::size_t>(std::numeric_limits<std::int64_t>::max() - *offset)) return SceErrorFromErrno(GUEST_EINVAL);
     if (offset != nullptr) {
         if (const auto error = PositionedGuestSocketError(d); error != 0) return error;
     }
