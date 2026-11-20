@@ -1658,4 +1658,9 @@ int APS5_VABI libSceFsInternalForVshUnknown_ydRWehw26Kk_nid_no_patch() {
 }
 APS5_EXPORT("ydRWehw26Kk", libSceFsInternalForVshUnknown_ydRWehw26Kk_nid_no_patch);
 
+int APS5_VABI sceFsBfsCopyFile() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
