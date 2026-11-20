@@ -37,6 +37,11 @@ int APS5_VABI sceOpusCeltDecCreate() {
     return 0;
 }
 
+int APS5_VABI sceOpusCeltDecGetAjmContext() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 int APS5_VABI sceOpusCeltDecCtl(void* state, int request, ...) {
 #ifdef _WIN32
     __builtin_sysv_va_list list;
