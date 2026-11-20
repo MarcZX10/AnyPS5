@@ -249,4 +249,9 @@ int APS5_VABI sceNgs2FftProcess(void* handle, const float* in, float* out, float
     return 0;
 }
 
+int APS5_VABI sceNgs2SystemSetLoudThreshold(void) {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
