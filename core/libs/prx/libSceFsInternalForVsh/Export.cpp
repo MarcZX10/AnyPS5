@@ -1803,4 +1803,9 @@ int APS5_VABI sceFsNTBRemoveDevice() {
     return 0;
 }
 
+int APS5_VABI sceFsNTBVerifyPartitionTable() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
