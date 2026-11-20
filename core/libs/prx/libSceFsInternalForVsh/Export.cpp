@@ -1828,4 +1828,9 @@ int APS5_VABI sceFsPs4SaveDataGetBlkBitmap() {
     return 0;
 }
 
+int APS5_VABI sceFsSaveDataDisableWriteThrottling() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
