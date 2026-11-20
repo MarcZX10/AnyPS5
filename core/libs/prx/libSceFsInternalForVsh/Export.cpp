@@ -1703,4 +1703,9 @@ int APS5_VABI sceFsDevpfsAllocateFile2() {
     return 0;
 }
 
+int APS5_VABI sceFsExfatfsMountForCronos() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
