@@ -1843,4 +1843,9 @@ int APS5_VABI sceFsSaveDataGetImageType() {
     return 0;
 }
 
+int APS5_VABI sceFsSaveDataTrimDeviceFile() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
