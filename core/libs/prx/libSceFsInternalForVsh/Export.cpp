@@ -1878,4 +1878,9 @@ int APS5_VABI sceFsTransactionSaveDataWriteParamEx2() {
     return 0;
 }
 
+int APS5_VABI sceFsUfsMkfsForCronos() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
