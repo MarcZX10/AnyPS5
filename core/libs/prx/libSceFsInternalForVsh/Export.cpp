@@ -1693,4 +1693,9 @@ int APS5_VABI sceFsBfsGetRwDeactivateStatusForShutdown() {
     return 0;
 }
 
+int APS5_VABI sceFsBfsUnmount() {
+    NotImplemented_nid_no_patch(__func__);
+    return 0;
+}
+
 }
