@@ -2,7 +2,6 @@
 #include "prx/libSceAgcDriver/Execution/include/Driver/Draw/DrawCache.hpp"
 #include <algorithm>
 #include <bit>
-#include <cassert>
 #include "prx/libSceAgcDriver/Execution/include/Driver/Synchronization/DeferredLabels.hpp"
 #include "prx/libSceAgcDriver/Execution/include/Driver/Memory/WriteEvidence.hpp"
 #include "prx/libSceAgcDriver/Execution/include/GuestMemory.hpp"
@@ -96,25 +95,12 @@ bool Driver::verifyDrawPushWord() {
 }
 
 void Driver::accountDrawVariant(const DispatchVariant& variant, bool added) {
-    auto bytes = variantBytes(variant);
-    if (const auto* result = variant.compiled.get(); result != nullptr) {
-        if (added) {
-            if (drawCacheResultReferences[result]++ == 0) bytes += ShaderRecompiler::MetadataBytes(*result);
-        } else {
-            const auto found = drawCacheResultReferences.find(result);
-            assert(found != drawCacheResultReferences.end());
-            if (--found->second == 0) {
-                bytes += ShaderRecompiler::MetadataBytes(*result);
-                drawCacheResultReferences.erase(found);
-            }
-        }
-    }
     if (added) {
         ++drawCacheVariants;
-        drawCacheVariantBytes += bytes;
+        drawCacheVariantBytes += variantBytes(variant);
     } else {
         --drawCacheVariants;
-        drawCacheVariantBytes -= bytes;
+        drawCacheVariantBytes -= variantBytes(variant);
     }
 }
 
@@ -209,19 +195,6 @@ bool Driver::admitDrawKey(std::uint64_t key, std::uint64_t shape) {
 
 void Driver::insertDrawEntry(std::uint64_t key, std::vector<std::shared_ptr<DispatchVariant>>& fresh, std::shared_ptr<const DrawDecode> decode, std::uint64_t shape, bool replaceShape) {
     std::lock_guard cacheLock(drawCacheMutex);
-    struct CacheUpdate {
-        Driver& driver;
-        bool committed = false;
-        ~CacheUpdate() {
-            if (committed) return;
-            driver.drawCacheResultReferences.clear();
-            driver.drawCache.clear();
-            driver.drawShapes.clear();
-            driver.drawOrder.clear();
-            driver.drawCacheVariants = 0;
-            driver.drawCacheVariantBytes = 0;
-        }
-    } update{*this};
     auto& counters = drawEntryCounters;
     if (replaceShape && shape != 0) {
         ++counters.shapeUpdates;
@@ -258,8 +231,8 @@ void Driver::insertDrawEntry(std::uint64_t key, std::vector<std::shared_ptr<Disp
             continue;
         }
         accountDrawVariant(*fresh[i], true);
-        ++counters.variantsInserted;
         variants.insert(variants.begin(), fresh[i]);
+        ++counters.variantsInserted;
         while (variants.size() > dispatchVariants()) {
             accountDrawVariant(*variants.back(), false);
             variants.pop_back();
@@ -273,11 +246,6 @@ void Driver::insertDrawEntry(std::uint64_t key, std::vector<std::shared_ptr<Disp
         replacement->order = drawOrder.begin();
         drawCache.emplace(key, std::move(replacement));
     } else {
-        if (found->second->stages.size() != replacement->stages.size()) {
-            for (const auto& variants : found->second->stages) {
-                for (const auto& variant : variants) accountDrawVariant(*variant, false);
-            }
-        }
         replacement->order = found->second->order;
         drawOrder.splice(drawOrder.begin(), drawOrder, replacement->order);
         found->second = std::move(replacement);
@@ -299,7 +267,6 @@ void Driver::insertDrawEntry(std::uint64_t key, std::vector<std::shared_ptr<Disp
             ++counters.byteEvictions;
         }
     }
-    update.committed = true;
 }
 
 void Driver::eraseDrawEntry(std::uint64_t key, const std::shared_ptr<DrawEntry>& expected) {
