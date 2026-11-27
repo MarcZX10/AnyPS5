@@ -403,6 +403,7 @@ private:
         append(key, value.float16HostNans);
         append(key, value.meshInlineFunctions);
         append(key, value.spannedShuffleThroughMemory);
+        append(key, value.meshAsCompute);
     }
 };
 
