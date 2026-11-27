@@ -133,11 +133,9 @@ def guard():
         raise
 
 
-def contain(pid, prepare=None):
+def contain(pid):
     job = new_job()
     try:
-        if prepare is not None:
-            prepare(job)
         process = win32("OpenProcess", PROCESS_SET_QUOTA_AND_TERMINATE, False, pid)
         try:
             win32("AssignProcessToJobObject", job, process)
